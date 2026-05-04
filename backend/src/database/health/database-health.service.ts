@@ -1,0 +1,19 @@
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+
+@Injectable()
+export class DatabaseHealthService implements OnModuleInit {
+  constructor(private dataSource: DataSource) {}
+
+  async onModuleInit() {
+    try {
+      await this.dataSource.query('SELECT 1');
+      console.log('🟢 DATABASE CONNECTED SUCCESSFULLY');
+    } catch (err) {
+      console.error(
+        '🔴 DATABASE CONNECTION FAILED:',
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+  }
+}

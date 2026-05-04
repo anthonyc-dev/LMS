@@ -1,0 +1,44 @@
+{
+  "base_url": "http://localhost:3000",
+  "endpoints": [
+    {
+      "name": "Register",
+      "method": "POST",
+      "url": "{{base_url}}/auth/register",
+      "body": {
+        "schoolId": "S12345",
+        "fullName": "John Doe",
+        "email": "john@example.com",
+        "password": "password123"
+      }
+    },
+    {
+      "name": "Login",
+      "method": "POST",
+      "url": "{{base_url}}/auth/login",
+      "body": {
+        "email": "john@example.com",
+        "password": "password123"
+      }
+    },
+    {
+      "name": "Refresh Token",
+      "method": "POST",
+      "url": "{{base_url}}/auth/refresh",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "refreshToken": "{{refreshToken}}"
+      }
+    },
+    {
+      "name": "Logout",
+      "method": "POST",
+      "url": "{{base_url}}/auth/logout",
+      "headers": {
+        "Authorization": "Bearer {{accessToken}}"
+      }
+    }
+  ]
+}

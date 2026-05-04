@@ -1,0 +1,158 @@
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
+import { User } from '../users/user.entity';
+import { RefreshToken } from './refresh-token.entity';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { jwtConstants } from './constants';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+    @InjectRepository(RefreshToken)
+    private refreshTokenRepository: Repository<RefreshToken>,
+  ) {}
+
+  async register(
+    schoolId: string,
+    fullName: string,
+    email: string,
+    password: string,
+  ) {
+    const existingUser = await this.usersService.findByEmail(email);
+    if (existingUser) {
+      throw new BadRequestException('Email already registered');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await this.usersService.create({
+      schoolId,
+      fullName,
+      email,
+      password: hashedPassword,
+    });
+
+    const tokens = await this.generateTokens(user);
+    await this.saveRefreshToken(user, tokens.refreshTokenHash);
+
+    return {
+      user: this.sanitizeUser(user),
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  async signIn(email: string, pass: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await bcrypt.compare(pass, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const tokens = await this.generateTokens(user);
+    await this.saveRefreshToken(user, tokens.refreshTokenHash);
+
+    return {
+      user: this.sanitizeUser(user),
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  async refreshTokens(refreshToken: string) {
+    const payload = await this.verifyRefreshToken(refreshToken);
+    const userId = payload.sub;
+
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const storedToken = await this.refreshTokenRepository.findOne({
+      where: { user: { id: userId }, token: refreshToken, isRevoked: false },
+    });
+    if (!storedToken) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+      throw new UnauthorizedException('Refresh token expired');
+    }
+
+    const tokens = await this.generateTokens(user);
+    await this.saveRefreshToken(user, tokens.refreshTokenHash);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  async logout(userId: number): Promise<void> {
+    await this.refreshTokenRepository.update(
+      { user: { id: userId }, isRevoked: false },
+      { isRevoked: true },
+    );
+  }
+
+  private async saveRefreshToken(user: User, token: string) {
+    await this.refreshTokenRepository.save({
+      token,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      user,
+    });
+  }
+
+  private async generateTokens(user: User) {
+    const payload = { sub: user.id, email: user.email };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload),
+      this.jwtService.signAsync(payload, {
+        secret: jwtConstants.refreshSecret,
+        expiresIn: jwtConstants.refreshExpiresIn,
+      }),
+    ]);
+
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+
+    return {
+      accessToken,
+      refreshToken,
+      refreshTokenHash,
+    };
+  }
+
+  private async verifyRefreshToken(token: string): Promise<{ sub: number }> {
+    try {
+      const payload = await this.jwtService.verifyAsync<{ sub: number }>(
+        token,
+        {
+          secret: jwtConstants.refreshSecret,
+        },
+      );
+      return payload;
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  private sanitizeUser(user: User) {
+    const sanitized = { ...user };
+    delete (sanitized as Record<string, unknown>).password;
+    return sanitized;
+  }
+}
