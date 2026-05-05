@@ -1,15 +1,17 @@
-import "./App.css";
-import { Button } from "./components/ui/button";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { LoginPage } from "./pages/LoginPage"
+import { RegisterPage } from "./pages/RegisterPage"
 
 function App() {
   return (
-    <>
-      <section id="center">
-        <h1 className="text-3xl font-bold underline">Hello world!</h1>
-        <Button>Click</Button>
-      </section>
-    </>
-  );
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
-export default App;
+export default App
