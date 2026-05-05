@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
+import type { Request } from 'express';
 
 export interface JwtPayload {
   sub: number;
@@ -39,6 +39,12 @@ export class AuthGuard implements CanActivate {
     const authHeader = request.headers['authorization'];
     const [type, token] =
       typeof authHeader === 'string' ? authHeader.split(' ') : [];
-    return type === 'Bearer' ? token : undefined;
+    const bearerToken = type === 'Bearer' ? token : undefined;
+
+    if (bearerToken) {
+      return bearerToken;
+    }
+
+    return request.cookies?.accessToken;
   }
 }

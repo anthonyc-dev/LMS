@@ -72,7 +72,9 @@ export class AuthService {
     };
   }
 
-  async refreshTokens(refreshToken: string) {
+  async refreshTokens(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const payload = await this.verifyRefreshToken(refreshToken);
     const userId = payload.sub;
 
@@ -81,16 +83,29 @@ export class AuthService {
       throw new UnauthorizedException('Access denied');
     }
 
+    // Find the stored refresh token (stored as hash in database)
     const storedToken = await this.refreshTokenRepository.findOne({
-      where: { user: { id: userId }, token: refreshToken, isRevoked: false },
+      where: { user: { id: userId }, isRevoked: false },
     });
     if (!storedToken) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    // Verify the raw refresh token matches the stored hash
+    const isValidToken = await bcrypt.compare(refreshToken, storedToken.token);
+    if (!isValidToken) {
       throw new UnauthorizedException('Access denied');
     }
 
     if (storedToken.expiresAt < new Date()) {
       throw new UnauthorizedException('Refresh token expired');
     }
+
+    // Revoke the old refresh token before issuing a new one
+    await this.refreshTokenRepository.update(
+      { id: storedToken.id },
+      { isRevoked: true },
+    );
 
     const tokens = await this.generateTokens(user);
     await this.saveRefreshToken(user, tokens.refreshTokenHash);
