@@ -14,6 +14,7 @@ export interface JwtPayload {
 
 export interface RequestWithUser extends Request {
   user: JwtPayload;
+  cookies: Record<string, string | undefined>;
 }
 
 @Injectable()
@@ -35,7 +36,7 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
+  private extractTokenFromHeader(request: RequestWithUser): string | undefined {
     const authHeader = request.headers['authorization'];
     const [type, token] =
       typeof authHeader === 'string' ? authHeader.split(' ') : [];

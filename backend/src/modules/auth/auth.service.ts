@@ -6,11 +6,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/user.entity';
 import { RefreshToken } from './refresh-token.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { jwtConstants } from './constants';
+import { TokenService } from 'src/common/services/token.service';
+import { RefreshTokenService } from 'src/common/services/refresh-token.service';
+import { sanitizeUser } from 'src/common/utils/user.util';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,8 @@ export class AuthService {
     private jwtService: JwtService,
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
+    private readonly tokenService: TokenService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   async register(
@@ -41,11 +44,14 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const tokens = await this.generateTokens(user);
-    await this.saveRefreshToken(user, tokens.refreshTokenHash);
+    const tokens = await this.tokenService.generateTokens(user);
+    await this.refreshTokenService.saveRefreshToken(
+      user,
+      tokens.refreshTokenHash,
+    );
 
     return {
-      user: this.sanitizeUser(user),
+      user: sanitizeUser(user),
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     };
@@ -62,11 +68,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const tokens = await this.generateTokens(user);
-    await this.saveRefreshToken(user, tokens.refreshTokenHash);
+    const tokens = await this.tokenService.generateTokens(user);
+    await this.refreshTokenService.saveRefreshToken(
+      user,
+      tokens.refreshTokenHash,
+    );
 
     return {
-      user: this.sanitizeUser(user),
+      user: sanitizeUser(user),
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     };
@@ -75,7 +84,7 @@ export class AuthService {
   async refreshTokens(
     refreshToken: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload = await this.verifyRefreshToken(refreshToken);
+    const payload = await this.tokenService.verifyRefreshToken(refreshToken);
     const userId = payload.sub;
 
     const user = await this.usersService.findById(userId);
@@ -107,8 +116,11 @@ export class AuthService {
       { isRevoked: true },
     );
 
-    const tokens = await this.generateTokens(user);
-    await this.saveRefreshToken(user, tokens.refreshTokenHash);
+    const tokens = await this.tokenService.generateTokens(user);
+    await this.refreshTokenService.saveRefreshToken(
+      user,
+      tokens.refreshTokenHash,
+    );
 
     return {
       accessToken: tokens.accessToken,
@@ -123,51 +135,51 @@ export class AuthService {
     );
   }
 
-  private async saveRefreshToken(user: User, token: string) {
-    await this.refreshTokenRepository.save({
-      token,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      user,
-    });
-  }
+  // private async saveRefreshToken(user: User, token: string) {
+  //   await this.refreshTokenRepository.save({
+  //     token,
+  //     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  //     user,
+  //   });
+  // }
 
-  private async generateTokens(user: User) {
-    const payload = { sub: user.id, email: user.email };
+  // private async generateTokens(user: User) {
+  //   const payload = { sub: user.id, email: user.email };
 
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload),
-      this.jwtService.signAsync(payload, {
-        secret: jwtConstants.refreshSecret,
-        expiresIn: jwtConstants.refreshExpiresIn,
-      }),
-    ]);
+  //   const [accessToken, refreshToken] = await Promise.all([
+  //     this.jwtService.signAsync(payload),
+  //     this.jwtService.signAsync(payload, {
+  //       secret: jwtConstants.refreshSecret,
+  //       expiresIn: jwtConstants.refreshExpiresIn,
+  //     }),
+  //   ]);
 
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+  //   const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
 
-    return {
-      accessToken,
-      refreshToken,
-      refreshTokenHash,
-    };
-  }
+  //   return {
+  //     accessToken,
+  //     refreshToken,
+  //     refreshTokenHash,
+  //   };
+  // }
 
-  private async verifyRefreshToken(token: string): Promise<{ sub: number }> {
-    try {
-      const payload = await this.jwtService.verifyAsync<{ sub: number }>(
-        token,
-        {
-          secret: jwtConstants.refreshSecret,
-        },
-      );
-      return payload;
-    } catch {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-  }
+  // private async verifyRefreshToken(token: string): Promise<{ sub: number }> {
+  //   try {
+  //     const payload = await this.jwtService.verifyAsync<{ sub: number }>(
+  //       token,
+  //       {
+  //         secret: jwtConstants.refreshSecret,
+  //       },
+  //     );
+  //     return payload;
+  //   } catch {
+  //     throw new UnauthorizedException('Invalid refresh token');
+  //   }
+  // }
 
-  private sanitizeUser(user: User) {
-    const sanitized = { ...user };
-    delete (sanitized as Record<string, unknown>).password;
-    return sanitized;
-  }
+  // private sanitizeUser(user: User) {
+  //   const sanitized = { ...user };
+  //   delete (sanitized as Record<string, unknown>).password;
+  //   return sanitized;
+  // }
 }

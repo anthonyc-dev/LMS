@@ -19,6 +19,7 @@ import { setAuthCookies } from 'src/common/utils/cookie.util';
 
 interface AuthRequest extends Request {
   user: { sub: number; email: string };
+  cookies: Record<string, string | undefined>;
 }
 
 @Controller('auth')
