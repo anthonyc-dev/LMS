@@ -19,8 +19,13 @@ export function RegisterPage() {
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="relative hidden bg-gradient-to-br from-primary/90 via-primary to-primary/80 lg:flex lg:flex-col items-center justify-center p-10">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30" />
+      <div className="relative hidden lg:flex lg:flex-col items-center justify-center p-10 overflow-hidden">
+        <img
+          src="/img/register.jpg"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
         <div className="relative z-10 flex flex-col items-center text-center max-w-md">
           <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
             <svg
@@ -132,7 +137,7 @@ export function RegisterPage() {
             </div>
             <h1 className="text-2xl font-bold">LMS Platform</h1>
           </div>
-          <div className="mb-6">
+          <div className="mb-6 md:text-center">
             <h1 className="text-2xl font-semibold tracking-tight lg:hidden">
               Create account
             </h1>
@@ -147,11 +152,36 @@ export function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First name</Label>
-                <Input id="firstName" type="text" placeholder="John" required />
+                <Input id="firstName" type="text" placeholder="Name" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last name</Label>
-                <Input id="lastName" type="text" placeholder="Doe" required />
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="Last name"
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="schoolId">School ID</Label>
+                <Input
+                  id="schoolId"
+                  type="text"
+                  placeholder="21-0000"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="09XXXXXXXXX"
+                  required
+                />
               </div>
             </div>
             <div className="space-y-2">
@@ -159,7 +189,7 @@ export function RegisterPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder="your@gmail.com"
                 required
               />
             </div>
@@ -209,9 +239,12 @@ export function RegisterPage() {
                 </button>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-2">
               <Checkbox id="terms" required />
-              <Label htmlFor="terms" className="text-sm font-normal">
+              <Label
+                htmlFor="terms"
+                className="text-sm font-normal leading-snug sm:leading-normal sm:flex-1"
+              >
                 I agree to the{" "}
                 <Link to="/terms" className="text-primary hover:underline">
                   Terms of Service
@@ -222,6 +255,7 @@ export function RegisterPage() {
                 </Link>
               </Label>
             </div>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>

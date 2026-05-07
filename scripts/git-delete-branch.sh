@@ -10,6 +10,7 @@ fi
 BRANCH_NAME=$1
 
 # Check if branch exists locally
+
 if ! git show-ref --verify --quiet refs/heads/$BRANCH_NAME; then
     echo "❌ Error: Local branch '$BRANCH_NAME' does not exist"
     exit 1

@@ -128,3 +128,8 @@
     @apply font-sans;
     }
 }
+
+
+body {
+  font-family: 'Outfit', sans-serif;
+}
