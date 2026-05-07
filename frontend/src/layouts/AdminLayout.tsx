@@ -56,33 +56,41 @@ function SidebarContentInner({
 
   return (
     <>
-      <SidebarHeader>
+      <SidebarHeader className="overflow-hidden bg-[#202940] px-2 py-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
               tooltip="NCMC Library"
               onClick={() => navigate("/admin/dashboard")}
-              className="hover:bg-blue-50 hover:text-blue-600"
+              className="hover:bg-white/10 hover:text-white transition-all duration-200 h-auto py-2"
             >
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500 text-white">
-                <BookOpenIcon className="size-4" />
-              </div>
-              {!isCollapsed && (
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold">NCMC Library</span>
-                  <span className="text-xs text-muted-foreground">
-                    Admin Panel
-                  </span>
+              <div className="flex items-center gap-3 w-full">
+                <div className="flex shrink-0 items-center justify-center rounded-lg overflow-hidden size-10">
+                  <img
+                    src="/img/logo.png"
+                    alt="NCMC Library"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
-              )}
+                {!isCollapsed && (
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm font-semibold text-white drop-shadow-sm leading-tight">
+                      NCMC Library
+                    </span>
+                    <span className="text-xs text-white/70 drop-shadow-sm leading-tight">
+                      Admin Panel
+                    </span>
+                  </div>
+                )}
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-[#202940] text-white">
         <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -91,7 +99,7 @@ function SidebarContentInner({
                     tooltip={item.label}
                     isActive={location.pathname === item.path}
                     onClick={() => navigate(item.path)}
-                    className="data-[active=true]:bg-blue-500 data-[active=true]:text-white hover:bg-blue-50 hover:text-blue-600 data-[active=true]:hover:bg-blue-600"
+                    className="data-[active=true]:bg-blue-600 data-[active=true]:text-white hover:bg-white/10 hover:text-white data-[active=true]:hover:bg-blue-700"
                   >
                     <item.icon />
                     <span>{item.label}</span>
@@ -102,14 +110,14 @@ function SidebarContentInner({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="bg-[#202940] text-white">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <SidebarMenuButton
                   size="lg"
-                  className="hover:bg-blue-50 hover:text-blue-600"
+                  className="hover:bg-white/10 hover:text-white"
                   tooltip="Admin"
                 >
                   <UserIcon />
@@ -149,7 +157,7 @@ export function AdminLayout() {
         <Sidebar
           collapsible="icon"
           variant="sidebar"
-          className="bg-white text-foreground"
+          className="bg-[#202940] text-white"
         >
           <SidebarContentInner navigate={navigate} location={location} />
         </Sidebar>
