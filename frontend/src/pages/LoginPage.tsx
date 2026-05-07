@@ -27,24 +27,16 @@ export function LoginPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
         <div className="relative z-10 flex flex-col items-center text-center max-w-md">
-          <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-8 text-white"
-            >
-              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-              <path d="m9 10 2 2 4-4" />
-            </svg>
+          <div className="flex shrink-0 items-center justify-center rounded-lg overflow-hidden size-28">
+            <img
+              src="/img/logo.png"
+              alt="NCMC Library"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h2 className="text-5xl font-bold text-white mb-3">
             Hybrid Library System for{" "}
-            <span className="text-green-400">NCMC</span>
+            <span className="text-secondary">NCMC</span>
           </h2>
           <p className="text-white/80 text-lg leading-relaxed">
             A modern solution designed to transform the institution&apos;s

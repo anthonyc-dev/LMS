@@ -27,22 +27,12 @@ export function RegisterPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
         <div className="relative z-10 flex flex-col items-center text-center max-w-md">
-          <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-8 text-white"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
+          <div className="flex shrink-0 items-center justify-center rounded-lg overflow-hidden size-28">
+            <img
+              src="/img/logo.png"
+              alt="NCMC Library"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h2 className="text-3xl font-bold text-white mb-3">
             Join Our Community
