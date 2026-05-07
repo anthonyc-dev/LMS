@@ -19,8 +19,13 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="relative hidden bg-gradient-to-br from-primary/90 via-primary to-primary/80 lg:flex lg:flex-col items-center justify-center p-10">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30" />
+      <div className="relative hidden lg:flex lg:flex-col items-center justify-center p-10 overflow-hidden">
+        <img
+          src="/img/login.jpg"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
         <div className="relative z-10 flex flex-col items-center text-center max-w-md">
           <div className="mb-6 flex size-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
             <svg
@@ -37,10 +42,13 @@ export function LoginPage() {
               <path d="m9 10 2 2 4-4" />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-3">Welcome to LMS</h2>
+          <h2 className="text-5xl font-bold text-white mb-3">
+            Hybrid Library System for{" "}
+            <span className="text-secondary">NCMC</span>
+          </h2>
           <p className="text-white/80 text-lg leading-relaxed">
-            Your complete learning management solution. Track progress, manage
-            courses, and empower your learners all in one place.
+            A modern solution designed to transform the institution&apos;s
+            library operations.
           </p>
           <div className="mt-8 grid grid-cols-3 gap-4 text-center">
             <div className="rounded-xl bg-white/10 backdrop-blur-sm p-4">
@@ -78,7 +86,7 @@ export function LoginPage() {
             </div>
             <h1 className="text-2xl font-bold">LMS Platform</h1>
           </div>
-          <div className="mb-6">
+          <div className="mb-6 md:text-center">
             <h1 className="text-2xl font-semibold tracking-tight lg:hidden">
               Welcome back
             </h1>
@@ -95,7 +103,7 @@ export function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder="your@gmail.com"
                 required
               />
             </div>
@@ -156,6 +164,14 @@ export function LoginPage() {
               className="font-medium text-primary hover:underline"
             >
               Sign up
+            </Link>
+          </div>
+          <div className="mt-4 text-center">
+            <Link
+              to="/admin/dashboard"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Dev Access
             </Link>
           </div>
         </div>
