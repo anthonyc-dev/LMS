@@ -108,22 +108,12 @@ export function RegisterPage() {
       <div className="flex flex-col items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center text-center mb-8 lg:hidden">
-            <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-primary/10">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="size-6 text-primary"
-              >
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
+            <div className="flex shrink-0 items-center justify-center rounded-lg overflow-hidden size-20">
+              <img
+                src="/img/logo.png"
+                alt="NCMC Library"
+                className="w-full h-full object-contain"
+              />
             </div>
             <h1 className="text-2xl font-bold">LMS Platform</h1>
           </div>

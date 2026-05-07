@@ -6,12 +6,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
-import { RefreshToken } from './refresh-token.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { TokenService } from 'src/common/services/token.service';
 import { RefreshTokenService } from 'src/common/services/refresh-token.service';
 import { sanitizeUser } from 'src/common/utils/user.util';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 @Injectable()
 export class AuthService {

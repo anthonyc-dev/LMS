@@ -14,7 +14,7 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthGuard } from './guard/auth.guard';
+import { AuthGuard } from '../../common/guard/auth.guard';
 import { setAuthCookies } from 'src/common/utils/cookie.util';
 
 interface AuthRequest extends Request {
