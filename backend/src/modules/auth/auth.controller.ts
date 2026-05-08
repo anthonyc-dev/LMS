@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -18,7 +19,7 @@ import { AuthGuard } from '../../common/guard/auth.guard';
 import { setAuthCookies } from 'src/common/utils/cookie.util';
 
 interface AuthRequest extends Request {
-  user: { sub: number; email: string };
+  user: { sub: string; email: string; role: string };
   cookies: Record<string, string | undefined>;
 }
 
@@ -26,8 +27,10 @@ interface AuthRequest extends Request {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @HttpCode(HttpStatus.CREATED)
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async register(
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) response: Response,
@@ -44,8 +47,10 @@ export class AuthController {
     return result;
   }
 
-  @HttpCode(HttpStatus.OK)
   @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
@@ -60,8 +65,10 @@ export class AuthController {
     return result;
   }
 
-  @HttpCode(HttpStatus.OK)
   @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async refresh(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
@@ -79,8 +86,8 @@ export class AuthController {
     return { message: 'Token refreshed', result };
   }
 
-  @HttpCode(HttpStatus.OK)
   @Post('logout')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   async logout(
     @Req() req: AuthRequest,

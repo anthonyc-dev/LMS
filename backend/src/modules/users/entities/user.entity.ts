@@ -1,3 +1,4 @@
+import { Role } from 'src/common/enums/role.enum';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,8 +9,8 @@ import {
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   schoolId: string;
@@ -22,6 +23,19 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.STUDENT,
+  })
+  role: Role;
+
+  @Column({ default: 0 })
+  failedLoginAttempts: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lockoutUntil: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
