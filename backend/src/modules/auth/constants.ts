@@ -1,9 +1,13 @@
+function getEnvOrThrow(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+  return value;
+}
+
 export const jwtConstants = {
-  secret:
-    process.env.JWT_SECRET ||
-    'your-super-secret-access-token-key-change-in-production',
-  refreshSecret:
-    process.env.JWT_REFRESH_SECRET ||
-    'your-super-secret-refresh-token-key-change-in-production',
+  secret: getEnvOrThrow('JWT_SECRET'),
+  refreshSecret: getEnvOrThrow('JWT_REFRESH_SECRET'),
   refreshExpiresIn: '7d' as const,
 };

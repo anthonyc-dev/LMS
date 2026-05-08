@@ -2,24 +2,30 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { TokenService } from 'src/common/services/token.service';
+import { Role } from 'src/common/enums/role.enum';
 import { RefreshTokenService } from 'src/common/services/refresh-token.service';
 import { sanitizeUser } from 'src/common/utils/user.util';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { User } from '../users/entities/user.entity';
+
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService,
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private readonly tokenService: TokenService,
     private readonly refreshTokenService: RefreshTokenService,
   ) {}
@@ -42,6 +48,7 @@ export class AuthService {
       fullName,
       email,
       password: hashedPassword,
+      role: Role.STUDENT,
     });
 
     const tokens = await this.tokenService.generateTokens(user);
@@ -63,10 +70,36 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (user.lockoutUntil && user.lockoutUntil > new Date()) {
+      const remainingMs = user.lockoutUntil.getTime() - Date.now();
+      const remainingMin = Math.ceil(remainingMs / 60000);
+      throw new ForbiddenException(
+        `Account locked. Try again in ${remainingMin} minute(s).`,
+      );
+    }
+
     const isPasswordValid = await bcrypt.compare(pass, user.password);
     if (!isPasswordValid) {
+      const attempts = user.failedLoginAttempts + 1;
+
+      if (attempts >= MAX_FAILED_ATTEMPTS) {
+        await this.userRepository.update(user.id, {
+          failedLoginAttempts: attempts,
+          lockoutUntil: new Date(Date.now() + LOCKOUT_DURATION_MS),
+        });
+      } else {
+        await this.userRepository.update(user.id, {
+          failedLoginAttempts: attempts,
+        });
+      }
+
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    await this.userRepository.update(user.id, {
+      failedLoginAttempts: 0,
+      lockoutUntil: null,
+    });
 
     const tokens = await this.tokenService.generateTokens(user);
     await this.refreshTokenService.saveRefreshToken(
@@ -92,27 +125,22 @@ export class AuthService {
       throw new UnauthorizedException('Access denied');
     }
 
-    // Find the stored refresh token (stored as hash in database)
-    const storedToken = await this.refreshTokenRepository.findOne({
+    const validTokens = await this.refreshTokenRepository.find({
       where: { user: { id: userId }, isRevoked: false },
     });
-    if (!storedToken) {
+
+    const matchedToken = await this.findMatchingToken(validTokens, refreshToken);
+
+    if (!matchedToken) {
       throw new UnauthorizedException('Access denied');
     }
 
-    // Verify the raw refresh token matches the stored hash
-    const isValidToken = await bcrypt.compare(refreshToken, storedToken.token);
-    if (!isValidToken) {
-      throw new UnauthorizedException('Access denied');
-    }
-
-    if (storedToken.expiresAt < new Date()) {
+    if (matchedToken.expiresAt < new Date()) {
       throw new UnauthorizedException('Refresh token expired');
     }
 
-    // Revoke the old refresh token before issuing a new one
     await this.refreshTokenRepository.update(
-      { id: storedToken.id },
+      { id: matchedToken.id },
       { isRevoked: true },
     );
 
@@ -128,58 +156,23 @@ export class AuthService {
     };
   }
 
-  async logout(userId: number): Promise<void> {
+  async logout(userId: string): Promise<void> {
     await this.refreshTokenRepository.update(
       { user: { id: userId }, isRevoked: false },
       { isRevoked: true },
     );
   }
 
-  // private async saveRefreshToken(user: User, token: string) {
-  //   await this.refreshTokenRepository.save({
-  //     token,
-  //     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  //     user,
-  //   });
-  // }
-
-  // private async generateTokens(user: User) {
-  //   const payload = { sub: user.id, email: user.email };
-
-  //   const [accessToken, refreshToken] = await Promise.all([
-  //     this.jwtService.signAsync(payload),
-  //     this.jwtService.signAsync(payload, {
-  //       secret: jwtConstants.refreshSecret,
-  //       expiresIn: jwtConstants.refreshExpiresIn,
-  //     }),
-  //   ]);
-
-  //   const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
-
-  //   return {
-  //     accessToken,
-  //     refreshToken,
-  //     refreshTokenHash,
-  //   };
-  // }
-
-  // private async verifyRefreshToken(token: string): Promise<{ sub: number }> {
-  //   try {
-  //     const payload = await this.jwtService.verifyAsync<{ sub: number }>(
-  //       token,
-  //       {
-  //         secret: jwtConstants.refreshSecret,
-  //       },
-  //     );
-  //     return payload;
-  //   } catch {
-  //     throw new UnauthorizedException('Invalid refresh token');
-  //   }
-  // }
-
-  // private sanitizeUser(user: User) {
-  //   const sanitized = { ...user };
-  //   delete (sanitized as Record<string, unknown>).password;
-  //   return sanitized;
-  // }
+  private async findMatchingToken(
+    tokens: RefreshToken[],
+    rawToken: string,
+  ): Promise<RefreshToken | null> {
+    for (const token of tokens) {
+      const isValid = await bcrypt.compare(rawToken, token.token);
+      if (isValid) {
+        return token;
+      }
+    }
+    return null;
+  }
 }

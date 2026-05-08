@@ -9,7 +9,7 @@ export class TokenService {
   constructor(private readonly jwtService: JwtService) {}
 
   async generateTokens(user: User) {
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, role: user.role };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload),
@@ -28,9 +28,9 @@ export class TokenService {
     };
   }
 
-  async verifyRefreshToken(token: string): Promise<{ sub: number }> {
+  async verifyRefreshToken(token: string): Promise<{ sub: string }> {
     try {
-      return await this.jwtService.verifyAsync<{ sub: number }>(token, {
+      return await this.jwtService.verifyAsync<{ sub: string }>(token, {
         secret: jwtConstants.refreshSecret,
       });
     } catch {

@@ -19,7 +19,7 @@ export class RefreshTokenService {
     });
   }
 
-  async findValidToken(userId: number, token: string) {
+  async findValidToken(userId: string, token: string) {
     return this.refreshTokenRepository.findOne({
       where: {
         user: { id: userId },
