@@ -11,6 +11,7 @@ import { TokenService } from '../../common/services/token.service';
 import { RefreshTokenService } from '../../common/services/refresh-token.service';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from '../users/entities/user.entity';
+import { JwtStrategy } from '../../common/guard/jwt.strategy';
 
 @Module({
   imports: [
@@ -23,7 +24,13 @@ import { User } from '../users/entities/user.entity';
     }),
   ],
   controllers: [AuthController, RoleController],
-  providers: [AuthService, TokenService, RefreshTokenService, RolesGuard],
+  providers: [
+    AuthService,
+    TokenService,
+    RefreshTokenService,
+    RolesGuard,
+    JwtStrategy,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

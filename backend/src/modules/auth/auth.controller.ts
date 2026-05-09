@@ -18,6 +18,7 @@ import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '../../common/guard/auth.guard';
 import { setAuthCookies } from 'src/common/utils/cookie.util';
 import { Public } from '../../common/decorators/public.decorator';
+import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
 
 interface AuthRequest extends Request {
   user: { sub: string; email: string; role: string };
@@ -76,8 +77,9 @@ export class AuthController {
   async refresh(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
+    @Body('refreshToken') bodyRefreshToken?: string,
   ) {
-    const refreshToken = req.cookies?.refreshToken;
+    const refreshToken = bodyRefreshToken || req.cookies?.refreshToken;
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token missing');
@@ -92,7 +94,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   async logout(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) response: Response,
@@ -106,7 +108,7 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   me(@Req() req: AuthRequest) {
     return {
       user: req.user,
