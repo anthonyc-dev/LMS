@@ -129,7 +129,10 @@ export class AuthService {
       where: { user: { id: userId }, isRevoked: false },
     });
 
-    const matchedToken = await this.findMatchingToken(validTokens, refreshToken);
+    const matchedToken = await this.findMatchingToken(
+      validTokens,
+      refreshToken,
+    );
 
     if (!matchedToken) {
       throw new UnauthorizedException('Access denied');
