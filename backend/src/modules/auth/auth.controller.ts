@@ -17,6 +17,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '../../common/guard/auth.guard';
 import { setAuthCookies } from 'src/common/utils/cookie.util';
+import { Public } from '../../common/decorators/public.decorator';
 
 interface AuthRequest extends Request {
   user: { sub: string; email: string; role: string };
@@ -27,6 +28,7 @@ interface AuthRequest extends Request {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(ThrottlerGuard)
@@ -47,6 +49,7 @@ export class AuthController {
     return result;
   }
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @UseGuards(ThrottlerGuard)
@@ -65,6 +68,7 @@ export class AuthController {
     return result;
   }
 
+  @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @UseGuards(ThrottlerGuard)

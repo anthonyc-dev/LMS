@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../common/guard/auth.guard';
 import { RolesGuard } from '../../common/guard/roles.guard';
-import { Roles } from './decorators/roles.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
 
 @Controller('auth')
