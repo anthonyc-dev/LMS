@@ -3,9 +3,10 @@ import { AuthGuard } from '../../common/guard/auth.guard';
 import { RolesGuard } from '../../common/guard/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/enums/role.enum';
+import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
 
 @Controller('auth')
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class RoleController {
   @Get('admin')
   @Roles(Role.ADMIN)

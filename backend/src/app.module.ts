@@ -12,7 +12,7 @@ import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 import { DatabaseModule } from './database/database.module';
 import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from './common/guard/auth.guard';
+import { JwtAuthGuard } from './common/guard/passport-auth.guard';
 
 @Module({
   imports: [
@@ -41,7 +41,7 @@ import { AuthGuard } from './common/guard/auth.guard';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: AuthGuard,
+      useClass: JwtAuthGuard,
     },
   ],
 })

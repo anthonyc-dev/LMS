@@ -51,6 +51,19 @@ export class AuthService {
       role: Role.STUDENT,
     });
 
+    /**
+     * 🔥 FIX: ensure clean session state
+     */
+    await this.refreshTokenRepository.update(
+      {
+        user: { id: user.id },
+        isRevoked: false,
+      },
+      {
+        isRevoked: true,
+      },
+    );
+
     const tokens = await this.tokenService.generateTokens(user);
     await this.refreshTokenService.saveRefreshToken(
       user,
@@ -101,6 +114,19 @@ export class AuthService {
       lockoutUntil: null,
     });
 
+    /**
+     * 🔥 FIX: ensure clean session state
+     */
+    await this.refreshTokenRepository.update(
+      {
+        user: { id: user.id },
+        isRevoked: false,
+      },
+      {
+        isRevoked: true,
+      },
+    );
+
     const tokens = await this.tokenService.generateTokens(user);
     await this.refreshTokenService.saveRefreshToken(
       user,
@@ -117,42 +143,104 @@ export class AuthService {
   async refreshTokens(
     refreshToken: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload = await this.tokenService.verifyRefreshToken(refreshToken);
+    let payload: { sub: string };
+
+    /**
+     * STEP 1: VERIFY JWT
+     */
+    try {
+      payload = await this.tokenService.verifyRefreshToken(refreshToken);
+    } catch (err) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
     const userId = payload.sub;
 
+    /**
+     * STEP 2: FIND USER
+     */
     const user = await this.usersService.findById(userId);
+
     if (!user) {
       throw new UnauthorizedException('Access denied');
     }
 
-    const validTokens = await this.refreshTokenRepository.find({
-      where: { user: { id: userId }, isRevoked: false },
+    /**
+     * STEP 3: ACTIVE TOKENS
+     */
+    const activeTokens = await this.refreshTokenRepository.find({
+      where: {
+        user: { id: userId },
+        isRevoked: false,
+      },
     });
 
-    const matchedToken = await this.findMatchingToken(
-      validTokens,
+    /**
+     * STEP 4: MATCH ACTIVE TOKEN
+     */
+    const matchedActiveToken = await this.findMatchingToken(
+      activeTokens,
       refreshToken,
     );
 
-    if (!matchedToken) {
+    /**
+     * STEP 5: VERIFY TOKEN IS NOT REVOKED
+     */
+    if (!matchedActiveToken) {
+      const allTokens = await this.refreshTokenRepository.find({
+        where: { user: { id: userId } },
+      });
+
+      const existingToken = await this.findMatchingToken(
+        allTokens,
+        refreshToken,
+      );
+
+      if (existingToken) {
+        throw new UnauthorizedException('Access denied');
+      }
+
       throw new UnauthorizedException('Access denied');
     }
 
-    if (matchedToken.expiresAt < new Date()) {
+    /**
+     * STEP 6: EXPIRATION CHECK
+     */
+    if (matchedActiveToken.expiresAt < new Date()) {
+      console.log('TOKEN EXPIRED → REVOKING');
+
+      await this.refreshTokenRepository.update(
+        { id: matchedActiveToken.id },
+        { isRevoked: true },
+      );
+
       throw new UnauthorizedException('Refresh token expired');
     }
 
+    /**
+     * STEP 7: ROTATE TOKEN
+     */
     await this.refreshTokenRepository.update(
-      { id: matchedToken.id },
+      { id: matchedActiveToken.id },
       { isRevoked: true },
     );
 
+    /**
+     * STEP 8: GENERATE NEW TOKENS
+     */
     const tokens = await this.tokenService.generateTokens(user);
+
+    /**
+     * STEP 9: SAVE NEW REFRESH TOKEN
+     */
     await this.refreshTokenService.saveRefreshToken(
       user,
       tokens.refreshTokenHash,
     );
 
+    /**
+     * STEP 10: RETURN
+     */
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
