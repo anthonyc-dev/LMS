@@ -50,11 +50,10 @@ export function AdminDashboardPage() {
               <div className="mt-2 flex items-baseline justify-between">
                 <div className="text-3xl font-bold">{stat.value}</div>
                 <span
-                  className={`text-sm font-medium ${
-                    stat.change.startsWith("+")
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
+                  className={`text-sm font-medium ${stat.change.startsWith("+")
+                    ? "text-green-600"
+                    : "text-red-600"
+                    }`}
                 >
                   {stat.change}
                 </span>
