@@ -13,6 +13,7 @@ import Joi from 'joi';
 import { DatabaseModule } from './database/database.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guard/passport-auth.guard';
+import { BooksModule } from './modules/books/books.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { JwtAuthGuard } from './common/guard/passport-auth.guard';
     AuthModule,
     UsersModule,
     DatabaseModule,
+    BooksModule,
   ],
   controllers: [AppController],
   providers: [
@@ -45,4 +47,4 @@ import { JwtAuthGuard } from './common/guard/passport-auth.guard';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
