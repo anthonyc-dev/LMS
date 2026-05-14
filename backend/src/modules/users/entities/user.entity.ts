@@ -1,10 +1,12 @@
 import { Role } from 'src/common/enums/role.enum';
+import { Borrowing } from 'src/modules/borrowings/entities/borrowing.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -42,4 +44,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Borrowing, (borrowing) => borrowing.user)
+  borrowings: Borrowing[];
 }
