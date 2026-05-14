@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Borrowing } from "src/modules/borrowings/entities/borrowing.entity";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: "books" })
 export class Book {
@@ -74,4 +75,7 @@ export class Book {
     @ApiPropertyOptional()
     @DeleteDateColumn()
     deletedAt?: Date;
+
+    @OneToMany(() => Borrowing, (borrowing) => borrowing.book)
+    borrowings: Borrowing[];
 }

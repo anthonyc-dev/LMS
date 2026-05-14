@@ -9,6 +9,7 @@ export class BooksService {
   private readonly logger = new Logger(BooksService.name);
 
   private bookRepository: Repository<Book>;
+
   constructor(
     private readonly dataSource: DataSource,
   ) {
