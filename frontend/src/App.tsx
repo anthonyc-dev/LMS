@@ -13,6 +13,7 @@ const BorrowingHistoryPage = lazy(() => import("./pages/admin/BorrowingHistoryPa
 const MyBooksPage = lazy(() => import("./pages/admin/MyBooksPage").then(m => ({ default: m.MyBooksPage })))
 const ProfilePage = lazy(() => import("./pages/admin/ProfilePage").then(m => ({ default: m.ProfilePage })))
 const SettingsPage = lazy(() => import("./pages/admin/SettingsPage").then(m => ({ default: m.SettingsPage })))
+const SchedulePage = lazy(() => import("./pages/admin/SchedulePage").then(m => ({ default: m.SchedulePage })))
 
 // Premium Loading Spinner
 const LoadingSpinner = () => (
@@ -43,6 +44,7 @@ function App() {
             </Route>
             <Route path="profile" element={<ProfilePage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="schedule" element={<SchedulePage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
