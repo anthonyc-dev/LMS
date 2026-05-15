@@ -36,7 +36,7 @@ export function LoginPage() {
           </div>
           <h2 className="text-5xl font-bold text-white mb-3">
             Hybrid Library System for{" "}
-            <span className="text-secondary">NCMC</span>
+            <span className="text-secondary">NCMCians</span>
           </h2>
           <p className="text-white/80 text-lg leading-relaxed">
             A modern solution designed to transform the institution&apos;s
