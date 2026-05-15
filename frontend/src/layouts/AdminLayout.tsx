@@ -27,8 +27,7 @@ const menuItems = [
     ],
   },
   { icon: Book, label: "My Books", path: "/admin/books" },
-  { icon: CalendarIcon, label: "Schedule", path: "/admin/schedule" },
-  { icon: BarChart3Icon, label: "Reports", path: "/admin/reports" },
+  // { icon: CalendarIcon, label: "Schedule", path: "/admin/schedule" },
 ];
 
 
@@ -47,9 +46,11 @@ export function AdminLayout() {
           <SidebarContentInner navigate={navigate} location={location} menuItems={menuItems} />
         </Sidebar>
         <main className="flex flex-1 flex-col">
-          <header className="flex h-14 items-center gap-4 border-b px-4 lg:px-6">
+          <header className="flex h-14 items-center gap-4 border-b px-4 lg:px-6 bg-white/50 backdrop-blur-md sticky top-0 z-50">
             <SidebarTrigger />
-            <h1 className="text-lg font-semibold">Dashboard</h1>
+            <h1 className="text-lg font-semibold capitalize">
+              {location.pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
+            </h1>
           </header>
           <div className="flex-1 overflow-auto p-4 lg:p-6 bg-gray-100">
             <Outlet />
