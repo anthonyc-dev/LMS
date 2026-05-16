@@ -1,5 +1,8 @@
-import { lazy, Suspense } from "react"
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { lazy, Suspense, useEffect, useState } from "react"
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom"
+import { useAuthStore } from "./store/authStore"
+import { Toaster } from "sonner"
+import api from "./lib/axios"
 
 // Lazy load all pages
 const LoginPage = lazy(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })))
@@ -25,27 +28,103 @@ const LoadingSpinner = () => (
   </div>
 )
 
+// Protected Route Component
+const ProtectedRoute = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <Outlet />;
+};
+
+// Public Route Component (Redirects to dashboard if already logged in)
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  
+  if (isAuthenticated) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 function App() {
+  const [isInitializing, setIsInitializing] = useState(true);
+  const setAuth = useAuthStore((state) => state.setAuth);
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        // 1. Try to refresh token on app mount using HttpOnly cookie
+        const refreshResponse = await api.post("/auth/refresh");
+        const { token } = refreshResponse.data;
+        
+        // 2. Set the token in memory first
+        useAuthStore.getState().setToken(token);
+
+        // 3. Fetch user profile using the new access token
+        const meResponse = await api.get("/auth/me");
+        const user = meResponse.data;
+        
+        // 4. Hydrate the store
+        setAuth(user, token);
+      } catch (error) {
+        console.log("No active session found or session expired");
+        useAuthStore.getState().logout();
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    initializeAuth();
+  }, [setAuth]);
+
+  if (isInitializing) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <BrowserRouter>
+      <Toaster position="top-center" richColors />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              <PublicRoute>
+                <RegisterPage />
+              </PublicRoute>
+            } 
+          />
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboardPage />} />
-            <Route path="books">
-              <Route index element={<MyBooksPage />} />
-              <Route path="browse" element={<BrowseBooksPage />} />
-              <Route path="borrow" element={<BorrowBooksPage />} />
-              <Route path="history" element={<BorrowingHistoryPage />} />
+          
+          {/* Protected Admin Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboardPage />} />
+              <Route path="books">
+                <Route index element={<MyBooksPage />} />
+                <Route path="browse" element={<BrowseBooksPage />} />
+                <Route path="borrow" element={<BorrowBooksPage />} />
+                <Route path="history" element={<BorrowingHistoryPage />} />
+              </Route>
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="schedule" element={<SchedulePage />} />
             </Route>
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="schedule" element={<SchedulePage />} />
           </Route>
+          
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
