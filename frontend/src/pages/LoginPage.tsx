@@ -1,20 +1,42 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import api from "@/lib/axios";
+import { useAuthStore } from "@/store/authStore";
+import { toast } from "sonner";
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  
+  const navigate = useNavigate();
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Add login logic here
-    setTimeout(() => setIsLoading(false), 2000);
+    
+    try {
+      const response = await api.post("/auth/login", { email, password });
+      const { user, token } = response.data;
+      
+      setAuth(user, token);
+      toast.success("Login successful!");
+      
+      // Redirect based on role or to dashboard
+      navigate("/admin/dashboard");
+    } catch (error: any) {
+      console.error("Login failed:", error);
+      toast.error(error.response?.data?.message || "Invalid credentials. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -88,6 +110,8 @@ export function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="your@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -106,6 +130,8 @@ export function LoginPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   className="pr-10"
                 />

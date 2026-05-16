@@ -1,20 +1,62 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import api from "@/lib/axios";
+import { toast } from "sonner";
 
 export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    schoolId: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const navigate = useNavigate();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 2000);
+    
+    try {
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      const payload = {
+        schoolId: formData.schoolId,
+        fullName,
+        email: formData.email,
+        password: formData.password,
+      };
+
+      await api.post("/auth/register", payload);
+      toast.success("Account created successfully! Please sign in.");
+      navigate("/login");
+    } catch (error: any) {
+      console.error("Registration failed:", error);
+      toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -106,7 +148,7 @@ export function RegisterPage() {
         </div>
       </div>
       <div className="flex flex-col items-center justify-center p-6 sm:p-10">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-sm:max-w-sm">
           <div className="flex flex-col items-center text-center mb-8 lg:hidden">
             <div className="flex shrink-0 items-center justify-center rounded-lg overflow-hidden size-20">
               <img
@@ -132,7 +174,14 @@ export function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First name</Label>
-                <Input id="firstName" type="text" placeholder="Name" required />
+                <Input 
+                  id="firstName" 
+                  type="text" 
+                  placeholder="Name" 
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required 
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last name</Label>
@@ -140,29 +189,22 @@ export function RegisterPage() {
                   id="lastName"
                   type="text"
                   placeholder="Last name"
+                  value={formData.lastName}
+                  onChange={handleChange}
                   required
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="schoolId">School ID</Label>
-                <Input
-                  id="schoolId"
-                  type="text"
-                  placeholder="21-0000"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="09XXXXXXXXX"
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="schoolId">School ID</Label>
+              <Input
+                id="schoolId"
+                type="text"
+                placeholder="21-0000"
+                value={formData.schoolId}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -170,6 +212,8 @@ export function RegisterPage() {
                 id="email"
                 type="email"
                 placeholder="your@gmail.com"
+                value={formData.email}
+                onChange={handleChange}
                 required
               />
             </div>
@@ -180,6 +224,8 @@ export function RegisterPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
+                  value={formData.password}
+                  onChange={handleChange}
                   required
                   className="pr-10"
                 />
@@ -203,6 +249,8 @@ export function RegisterPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
                   required
                   className="pr-10"
                 />

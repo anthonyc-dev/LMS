@@ -27,7 +27,7 @@ const menuItems = [
     ],
   },
   { icon: Book, label: "My Books", path: "/admin/books" },
-  // { icon: CalendarIcon, label: "Schedule", path: "/admin/schedule" },
+  { icon: CalendarIcon, label: "Schedule", path: "/admin/schedule" },
 ];
 
 

@@ -34,6 +34,9 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useAuthStore } from "@/store/authStore";
+import api from "@/lib/axios";
+import { toast } from "sonner";
 
 type MenuItem = {
     icon: LucideIcon;
@@ -56,6 +59,21 @@ export function SidebarContentInner({
 }) {
     const { state } = useSidebar();
     const isCollapsed = state === "collapsed";
+    const { logout, user } = useAuthStore();
+
+    const handleLogout = async () => {
+        try {
+            await api.post("/auth/logout");
+            logout();
+            toast.success("Logged out successfully");
+            navigate("/login");
+        } catch (error) {
+            console.error("Logout failed", error);
+            // Even if API fails, clear local state
+            logout();
+            navigate("/login");
+        }
+    };
 
     return (
         <div className="flex flex-col h-full bg-[#1e293b] text-white/90">
@@ -191,8 +209,12 @@ export function SidebarContentInner({
                                             </div>
                                             {!isCollapsed && (
                                                 <div className="flex flex-col min-w-0 flex-1 text-left">
-                                                    <span className="text-sm font-semibold text-white truncate">Administrator</span>
-                                                    <span className="text-[10px] text-white/50 truncate">admin@ncmc.edu</span>
+                                                    <span className="text-sm font-semibold text-white truncate">
+                                                        {user?.fullName || "Administrator"}
+                                                    </span>
+                                                    <span className="text-[10px] text-white/50 truncate">
+                                                        {user?.email || "admin@ncmc.edu"}
+                                                    </span>
                                                 </div>
                                             )}
                                             {!isCollapsed && (
@@ -224,7 +246,7 @@ export function SidebarContentInner({
                                 </DropdownMenuItem>
                                 <div className="h-px bg-white/5 my-1" />
                                 <DropdownMenuItem
-                                    onClick={() => navigate("/login")}
+                                    onClick={handleLogout}
                                     className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-red-500/10 text-red-400 hover:text-red-300 rounded-lg transition-colors"
                                 >
                                     <LogOutIcon className="w-4 h-4" />
