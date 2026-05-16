@@ -6,37 +6,46 @@ import {
     IsOptional,
     IsUUID
 } from 'class-validator';
-import { BorrowingStatus } from '../entities/borrowing.entity';
 import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BorrowingStatus } from '../entities/borrowing.entity';
 
 export class CreateBorrowingDto {
-    @IsNotEmpty()
+    @ApiPropertyOptional({ example: 'user-uuid' })
+    @IsOptional()
     @IsUUID()
-    userId: string;
+    userId?: string;
 
+    @ApiProperty({ example: 'book-uuid' })
     @IsNotEmpty()
     @IsUUID()
     bookId: string;
 
-    @IsNotEmpty()
-    @Type(() => Date)
-    @IsDate()
-    dueDate: Date;
-
-    @IsNotEmpty()
+    @ApiProperty({ example: '2026-01-01T00:00:00Z' })
     @Type(() => Date)
     @IsDate()
     borrowDate: Date;
 
+    @ApiProperty({ example: '2026-01-15T00:00:00Z' })
+    @Type(() => Date)
+    @IsDate()
+    dueDate: Date;
+
+    @ApiPropertyOptional({ example: '2026-01-10T00:00:00Z' })
     @IsOptional()
     @Type(() => Date)
     @IsDate()
     returnedDate?: Date;
 
+    @ApiProperty({
+        enum: BorrowingStatus,
+        example: BorrowingStatus.PENDING,
+    })
     @IsNotEmpty()
     @IsEnum(BorrowingStatus)
     status: BorrowingStatus;
 
+    @ApiPropertyOptional({ example: 0 })
     @IsOptional()
     @IsInt()
     extendedCount?: number;

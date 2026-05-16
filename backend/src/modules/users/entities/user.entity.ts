@@ -7,9 +7,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 
 @Entity()
+@Index(['email'])
+@Index(['schoolId'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
