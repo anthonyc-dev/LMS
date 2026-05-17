@@ -28,12 +28,13 @@ export class AuthService {
     private userRepository: Repository<User>,
     private readonly tokenService: TokenService,
     private readonly refreshTokenService: RefreshTokenService,
-  ) {}
+  ) { }
 
   async register(
     schoolId: string,
     fullName: string,
     email: string,
+    phoneNumber: string,
     password: string,
   ) {
     const existingUser = await this.usersService.findByEmail(email);
@@ -47,8 +48,9 @@ export class AuthService {
       schoolId,
       fullName,
       email,
+      phoneNumber,
       password: hashedPassword,
-      role: Role.STUDENT,
+      // role: Role.FACULTY,
     });
 
     /**

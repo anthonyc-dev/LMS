@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   IsString,
   MinLength,
+  Matches
 } from 'class-validator';
 
 export class RegisterDto {
@@ -17,6 +18,13 @@ export class RegisterDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @Matches(/^(09|\+639)\d{9}$/, {
+    message: 'Phone number must be a valid PH format (09XXXXXXXXX or +639XXXXXXXXX)',
+  })
+  phoneNumber: string;
 
   @IsNotEmpty()
   @IsString()
