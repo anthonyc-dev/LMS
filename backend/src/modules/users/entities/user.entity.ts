@@ -10,7 +10,7 @@ import {
   Index,
 } from 'typeorm';
 
-@Entity()
+@Entity('users')
 @Index(['email'])
 @Index(['schoolId'])
 export class User {
