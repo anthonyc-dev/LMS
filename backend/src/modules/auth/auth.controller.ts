@@ -42,6 +42,7 @@ export class AuthController {
       registerDto.schoolId,
       registerDto.fullName,
       registerDto.email,
+      registerDto.phoneNumber,
       registerDto.password,
     );
 
