@@ -8,6 +8,7 @@ import api from "./lib/axios"
 const LoginPage = lazy(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })))
 const RegisterPage = lazy(() => import("./pages/RegisterPage").then(m => ({ default: m.RegisterPage })))
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })))
+const UnauthorizedPage = lazy(() => import("./pages/UnauthorizedPage").then(m => ({ default: m.UnauthorizedPage })))
 const AdminLayout = lazy(() => import("./layouts/AdminLayout").then(m => ({ default: m.AdminLayout })))
 const BrowseBooksPage = lazy(() => import("./pages/student/BrowseBooksPage").then(m => ({ default: m.BrowseBooksPage })))
 const AdminDashboardPage = lazy(() => import("./pages/student/AdminDashboardPage").then(m => ({ default: m.AdminDashboardPage })))
@@ -35,11 +36,18 @@ const LoadingSpinner = () => (
 )
 
 // Protected Route Component
-const ProtectedRoute = () => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: string[] }) => {
+  const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles) {
+    if (!user?.role || !allowedRoles.includes(user.role)) {
+      // Redirect to unauthorized page if role doesn't match
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
 
   return <Outlet />;
@@ -112,9 +120,8 @@ function App() {
               </PublicRoute>
             }
           />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
-
-
           {/* Protected Admin Routes */}
           {/* <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
@@ -132,8 +139,8 @@ function App() {
             </Route>
           </Route> */}
 
-          {/* Protected Admin Routes */}
-          <Route element={<ProtectedRoute />}>
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["admin", "student", "faculty"]} />}>
             <Route path="/student" element={<AdminLayout />}>
               <Route index element={<Navigate to="/student/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboardPage />} />
@@ -147,12 +154,14 @@ function App() {
               <Route path="settings" element={<SettingsPage />} />
               <Route path="schedule" element={<SchedulePage />} />
             </Route>
+          </Route>
 
+          {/* Protected Admin Only Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="books" element={<AdminBooksPage />} />
               <Route path="books/add" element={<AdminAddBookPage />} />
             </Route>
-
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />
