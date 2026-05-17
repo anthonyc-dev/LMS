@@ -14,23 +14,32 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const response = await api.post("/auth/login", { email, password });
       const { user, token } = response.data;
-      
+
       setAuth(user, token);
       toast.success("Login successful!");
-      
+
       // Redirect based on role or to dashboard
-      navigate("/admin/dashboard");
+      navigate("/student/dashboard");
+
+      // Redirect based on role
+      // if (user.role === "admin") {
+      //   navigate("/admin/dashboard");
+      // } else if (user.role === "student") {
+      //   navigate("/student/dashboard");
+      // } else {
+      //   navigate("/");
+      // }
     } catch (error: any) {
       console.error("Login failed:", error);
       toast.error(error.response?.data?.message || "Invalid credentials. Please try again.");
@@ -178,7 +187,7 @@ export function LoginPage() {
           </div>
           <div className="mt-4 text-center">
             <Link
-              to="/admin/dashboard"
+              to="/student/dashboard"
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               Dev Access

@@ -5,7 +5,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
-  BarChart3Icon,
   LibraryIcon,
   CalendarIcon,
   HomeIcon,
@@ -15,19 +14,21 @@ import {
 import { SidebarContentInner } from "@/components/admin.component/Sidebar";
 
 const menuItems = [
-  { icon: HomeIcon, label: "Dashboard", path: "/admin/dashboard" },
+  { icon: HomeIcon, label: "Dashboard", path: "/student/dashboard" },
   {
     icon: LibraryIcon,
     label: "Books",
-    path: "/admin/books",
+    path: "/student/books",
     items: [
-      { label: "Browse Books", path: "/admin/books/browse" },
-      { label: "Borrow Books", path: "/admin/books/borrow" },
-      { label: "Borrowing History", path: "/admin/books/history" },
+      { label: "Browse Books", path: "/student/books/browse" },
+      { label: "Borrow Books", path: "/student/books/borrow" },
+      { label: "Borrowing History", path: "/student/books/history" },
     ],
   },
-  { icon: Book, label: "My Books", path: "/admin/books" },
-  { icon: CalendarIcon, label: "Schedule", path: "/admin/schedule" },
+  { icon: Book, label: "My Books", path: "/student/books" },
+  { icon: CalendarIcon, label: "Schedule", path: "/student/schedule" },
+
+  { icon: Book, label: "Admin Books", path: "/admin/books" },
 ];
 
 
