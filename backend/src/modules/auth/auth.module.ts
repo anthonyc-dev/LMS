@@ -5,13 +5,13 @@ import { RoleController } from './role.controller';
 import { AuthService } from './auth.service';
 import { RolesGuard } from '../../common/guard/roles.guard';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
 import { UsersModule } from '../users/users.module';
 import { TokenService } from '../../common/services/token.service';
 import { RefreshTokenService } from '../../common/services/refresh-token.service';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from '../users/entities/user.entity';
 import { JwtStrategy } from '../../common/guard/jwt.strategy';
+import { jwtConstants } from 'src/config/jwt.config';
 
 @Module({
   imports: [
@@ -33,4 +33,4 @@ import { JwtStrategy } from '../../common/guard/jwt.strategy';
   ],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }
