@@ -101,7 +101,21 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Toaster position="top-center" richColors />
+      <Toaster
+        position="top-center"
+        theme="dark"
+        toastOptions={{
+          style: {
+            background: "#000000",
+            color: "#ffffff",
+            border: "1px solid #27272a",
+          },
+          classNames: {
+            success: "!text-[#22c55e] !border-[#22c55e] !bg-[#000000]",
+            error: "!text-[#ef4444] !border-[#ef4444] !bg-[#000000]",
+          },
+        }}
+      />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route
