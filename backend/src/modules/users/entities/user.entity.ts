@@ -39,6 +39,15 @@ export class User {
   })
   role: Role;
 
+  @Column({ default: false })
+  acceptedTerms: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  acceptedAt: Date;
+
+  @Column({ nullable: true })
+  ipAddress: string;
+
   @Column({ default: 0 })
   failedLoginAttempts: number;
 

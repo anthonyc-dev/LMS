@@ -35,7 +35,7 @@ export const registerSchema = z
       .min(1, "Password is required")
       .min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
-    agreeTerms: z
+    acceptedTerms: z
       .boolean()
       .refine((val) => val === true, "You must agree to the Terms and Privacy Policy"),
   })

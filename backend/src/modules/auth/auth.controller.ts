@@ -9,13 +9,13 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
+  Ip,
 } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthGuard } from '../../common/guard/auth.guard';
 import { setAuthCookies } from 'src/common/utils/cookie.util';
 import { Public } from '../../common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
@@ -37,6 +37,7 @@ export class AuthController {
   async register(
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) response: Response,
+    @Ip() ip: string,
   ) {
     const result = await this.authService.register(
       registerDto.schoolId,
@@ -44,6 +45,8 @@ export class AuthController {
       registerDto.email,
       registerDto.phoneNumber,
       registerDto.password,
+      registerDto.acceptedTerms,
+      ip,
     );
 
     setAuthCookies(response, result.accessToken, result.refreshToken);

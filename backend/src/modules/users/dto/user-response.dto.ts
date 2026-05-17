@@ -20,5 +20,5 @@ export class UserResponseDto {
 
     @ApiProperty()
     @Expose()
-    role: Role;
+    phoneNumber: string;
 }
