@@ -13,7 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().token;
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,30 +27,44 @@ api.interceptors.request.use(
 // Response interceptor to handle expired tokens
 api.interceptors.response.use(
   (response) => response,
+
   async (error) => {
     const originalRequest = error.config;
 
-    // If 401 and not already retrying
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // ✅ Skip auth endpoints
+    const excludedRoutes = [
+      "/auth/login",
+      "/auth/register",
+      "/auth/refresh",
+    ];
+
+    const shouldSkipRefresh = excludedRoutes.some((route) =>
+      originalRequest.url?.includes(route)
+    );
+
+    // ✅ Only refresh on protected routes
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !shouldSkipRefresh
+    ) {
       originalRequest._retry = true;
 
       try {
-        // Attempt to refresh token using the HttpOnly cookie
-        const response = await axios.post(
-          `${api.defaults.baseURL}/auth/refresh`, 
-          {}, 
-          { withCredentials: true }
+        // 🔥 Refresh using HttpOnly cookie
+        await axios.post(
+          `${api.defaults.baseURL}/auth/refresh`,
+          {},
+          {
+            withCredentials: true,
+          }
         );
-        
-        const { token } = response.data;
-        useAuthStore.getState().setToken(token);
 
-        // Update the original request header and retry
-        originalRequest.headers.Authorization = `Bearer ${token}`;
+        // ✅ Retry original request
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, logout
         useAuthStore.getState().logout();
+
         return Promise.reject(refreshError);
       }
     }

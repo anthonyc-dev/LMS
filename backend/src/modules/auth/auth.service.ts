@@ -14,6 +14,7 @@ import { RefreshTokenService } from 'src/common/services/refresh-token.service';
 import { sanitizeUser } from 'src/common/utils/user.util';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from '../users/entities/user.entity';
+import { normalizeIp } from 'src/common/utils/normalizedIp.util';
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
@@ -36,13 +37,24 @@ export class AuthService {
     email: string,
     phoneNumber: string,
     password: string,
+    acceptedTerms: boolean,
+    ipAddress: string,
   ) {
+
+    if (!acceptedTerms) {
+      throw new BadRequestException(
+        'You must accept terms and conditions',
+      );
+    }
+
+
     const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
       throw new BadRequestException('Email already registered');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const cleanIp = normalizeIp(ipAddress);
 
     const user = await this.usersService.create({
       schoolId,
@@ -50,7 +62,8 @@ export class AuthService {
       email,
       phoneNumber,
       password: hashedPassword,
-      // role: Role.FACULTY,
+      acceptedTerms,
+      ipAddress: cleanIp,
     });
 
     /**

@@ -33,7 +33,7 @@ export function RegisterPage() {
       phoneNumber: "",
       password: "",
       confirmPassword: "",
-      agreeTerms: false,
+      acceptedTerms: false,
     },
     mode: "onChange",
   });
@@ -41,7 +41,7 @@ export function RegisterPage() {
   const isSubmitting = form.formState.isSubmitting;
 
   const handleSubmit = async (data: RegisterSchema) => {
-    const { confirmPassword, agreeTerms, ...payload } = data;
+    const { confirmPassword, ...payload } = data;
 
     try {
       await api.post("/auth/register", payload);
@@ -301,7 +301,7 @@ export function RegisterPage() {
               />
               <FormField
                 control={form.control}
-                name="agreeTerms"
+                name="acceptedTerms"
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-start gap-2">
