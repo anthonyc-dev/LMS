@@ -9,6 +9,9 @@ import {
 export class RegisterDto {
   @IsNotEmpty()
   @IsString()
+  @Matches(/^\d{2}-\d{4}$/, {
+    message: 'School ID must be a valid format (xx-xxxx)',
+  })
   schoolId: string;
 
   @IsNotEmpty()
