@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Can } from "@/components/commons/Can"
 
 const STATS = [
   { title: "Total Borrowed", value: "1,245", trend: "+12.5%", icon: ArrowUpRight, color: "text-emerald-500", bg: "bg-emerald-50" },
@@ -30,20 +31,22 @@ export function BorrowingHistoryPage() {
   return (
     <div className="max-w-[1600px] mx-auto space-y-8 md:space-y-12 ">
       {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2">
-        <div className="space-y-1">
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Borrowing History</h1>
-          <p className="text-sm sm:text-base text-slate-500 font-medium">Keep track of all book transactions across the library.</p>
+      <Can roles={["admin"]}>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-2">
+          <div className="space-y-1">
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Borrowing History</h1>
+            <p className="text-sm sm:text-base text-slate-500 font-medium">Keep track of all book transactions across the library.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="outline" className="flex-1 sm:flex-none rounded-xl md:rounded-2xl border-2 border-slate-200 font-bold h-12 gap-2 text-sm">
+              <Download size={18} /> Export PDF
+            </Button>
+            <Button className="flex-1 sm:flex-none rounded-xl md:rounded-2xl bg-indigo-600 hover:bg-indigo-500 font-bold h-12 shadow-lg shadow-indigo-200 text-sm">
+              Generate Report
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="outline" className="flex-1 sm:flex-none rounded-xl md:rounded-2xl border-2 border-slate-200 font-bold h-12 gap-2 text-sm">
-            <Download size={18} /> Export PDF
-          </Button>
-          <Button className="flex-1 sm:flex-none rounded-xl md:rounded-2xl bg-indigo-600 hover:bg-indigo-500 font-bold h-12 shadow-lg shadow-indigo-200 text-sm">
-            Generate Report
-          </Button>
-        </div>
-      </div>
+      </Can>
 
       {/* Quick Stats Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
