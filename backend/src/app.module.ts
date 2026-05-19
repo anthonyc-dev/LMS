@@ -16,6 +16,7 @@ import { JwtAuthGuard } from './common/guard/passport-auth.guard';
 import { BooksModule } from './modules/books/books.module';
 import { BorrowingsModule } from './modules/borrowings/borrowings.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
     BooksModule,
     BorrowingsModule,
     CategoriesModule,
+    InventoryModule,
   ],
   controllers: [AppController],
   providers: [
