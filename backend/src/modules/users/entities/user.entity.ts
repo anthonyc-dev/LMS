@@ -54,12 +54,18 @@ export class User {
   @Column({ type: 'timestamp', nullable: true })
   lockoutUntil: Date | null;
 
+  @OneToMany(() => Borrowing, (borrowing) => borrowing.user)
+  borrowings: Borrowing[];
+
+  @Column({ type: 'varchar', nullable: true })
+  resetPasswordOtp: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetPasswordExpires: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @OneToMany(() => Borrowing, (borrowing) => borrowing.user)
-  borrowings: Borrowing[];
 }

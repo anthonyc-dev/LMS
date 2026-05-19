@@ -16,6 +16,9 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { setAuthCookies } from 'src/common/utils/cookie.util';
 import { Public } from '../../common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
@@ -117,5 +120,61 @@ export class AuthController {
     return {
       user: req.user,
     };
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto.email);
+  }
+
+  @Public()
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  async verifyOtp(
+    @Body() verifyOtpDto: VerifyOtpDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const result = await this.authService.verifyOtp(verifyOtpDto.otp);
+    
+    response.cookie('reset_session', result.resetToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000, // 15 mins
+    });
+
+    return { message: result.message };
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const token = req.cookies?.reset_session;
+    if (!token) {
+      throw new UnauthorizedException('Reset session expired or invalid');
+    }
+
+    const result = await this.authService.resetPassword(
+      token,
+      resetPasswordDto.newPassword,
+      resetPasswordDto.confirmPassword,
+    );
+
+    response.clearCookie('reset_session');
+
+    return result;
   }
 }
