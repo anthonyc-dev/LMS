@@ -15,12 +15,17 @@ import { sanitizeUser } from 'src/common/utils/user.util';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from '../users/entities/user.entity';
 import { normalizeIp } from 'src/common/utils/normalizedIp.util';
+import * as nodemailer from 'nodemailer';
+import { randomInt } from 'crypto';
+import { JwtService } from '@nestjs/jwt';
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
+  private transporter: nodemailer.Transporter;
+
   constructor(
     private usersService: UsersService,
     @InjectRepository(RefreshToken)
@@ -29,7 +34,16 @@ export class AuthService {
     private userRepository: Repository<User>,
     private readonly tokenService: TokenService,
     private readonly refreshTokenService: RefreshTokenService,
-  ) { }
+    private readonly jwtService: JwtService,
+  ) {
+    this.transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+  }
 
   async register(
     schoolId: string,
@@ -280,5 +294,103 @@ export class AuthService {
       }
     }
     return null;
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Return a generic message to prevent email enumeration
+      return { message: 'If an account with that email exists, an OTP has been sent.' };
+    }
+
+    const otp = randomInt(100000, 999999).toString();
+    const expires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    await this.userRepository.update(user.id, {
+      resetPasswordOtp: otp,
+      resetPasswordExpires: expires,
+    });
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+    <div style="max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 10px;">
+        <h2 style="color: #333; text-align: center;">Password Reset Request</h2>
+        <p style="color: #666; font-size: 16px;">Your OTP for password reset is:</p>
+        <div style="background: #007bff; color: white; font-size: 32px; font-weight: bold; 
+            padding: 15px; text-align: center; border-radius: 5px; letter-spacing: 5px; margin: 20px 0;">
+            ${otp}
+        </div>
+        <p style="color: #666; font-size: 14px;">This OTP will expire in <strong>5 minutes</strong>.</p>
+        <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            If you didn't request this, please ignore this email. 
+            For security reasons, never share your OTP with anyone.
+        </p>
+    </div>
+</body>
+</html>`;
+
+    await this.transporter.sendMail({
+      from: process.env.SMTP_EMAIL,
+      to: email,
+      subject: 'Password Reset OTP',
+      html: htmlContent,
+    });
+
+    return { message: 'If an account with that email exists, an OTP has been sent.' };
+  }
+
+  async verifyOtp(otp: string) {
+    const user = await this.userRepository.findOne({ where: { resetPasswordOtp: otp } });
+    if (!user) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      throw new BadRequestException('OTP has expired');
+    }
+
+    const resetToken = this.jwtService.sign({ sub: user.id }, { expiresIn: '15m' });
+
+    return { message: 'OTP verified successfully', resetToken };
+  }
+
+  async resetPassword(token: string, newPassword: string, confirmPassword: string) {
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
+    let payload: { sub: string };
+    try {
+      payload = this.jwtService.verify(token);
+    } catch {
+      throw new UnauthorizedException('Reset session expired or invalid');
+    }
+
+    const user = await this.usersService.findById(payload.sub);
+    if (!user) {
+      throw new BadRequestException('Invalid session');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.userRepository.update(user.id, {
+      password: hashedPassword,
+      resetPasswordOtp: null,
+      resetPasswordExpires: null,
+      failedLoginAttempts: 0,
+      lockoutUntil: null,
+    });
+
+    // Revoke all existing sessions so they have to log in again with new password
+    await this.refreshTokenRepository.update(
+      { user: { id: user.id }, isRevoked: false },
+      { isRevoked: true },
+    );
+
+    return { message: 'Password reset successful' };
   }
 }
