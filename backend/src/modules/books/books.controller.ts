@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -40,8 +41,14 @@ export class BooksController {
   @Get()
   @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
   @HttpCode(HttpStatus.OK)
-  findAll() {
-    return this.booksService.findAll();
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.booksService.findAll(pageNum, limitNum, search);
   }
 
   // GET ONE

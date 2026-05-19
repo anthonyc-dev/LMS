@@ -27,7 +27,7 @@ export class CreateBookDto {
 
     @IsString()
     @IsNotEmpty()
-    category: string;
+    categoryId: string;
 
     @IsInt()
     @Min(0)
