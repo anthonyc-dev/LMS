@@ -15,6 +15,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guard/passport-auth.guard';
 import { BooksModule } from './modules/books/books.module';
 import { BorrowingsModule } from './modules/borrowings/borrowings.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { BorrowingsModule } from './modules/borrowings/borrowings.module';
     DatabaseModule,
     BooksModule,
     BorrowingsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [

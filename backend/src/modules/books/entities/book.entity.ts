@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Borrowing } from "src/modules/borrowings/entities/borrowing.entity";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Category } from "src/modules/categories/entities/category.entity";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: "books" })
 export class Book {
@@ -32,9 +33,9 @@ export class Book {
     @Column({ nullable: true })
     publishedDate?: Date;
 
-    @ApiPropertyOptional()
-    @Column({ nullable: true })
-    category?: string;
+    @ApiProperty()
+    @Column('uuid', { nullable: false })
+    categoryId: string;
 
     @ApiPropertyOptional()
     @Column({ nullable: true })
@@ -78,4 +79,7 @@ export class Book {
 
     @OneToMany(() => Borrowing, (borrowing) => borrowing.book)
     borrowings: Borrowing[];
+
+    @ManyToOne(() => Category, (category) => category.books)
+    category: Category;
 }
