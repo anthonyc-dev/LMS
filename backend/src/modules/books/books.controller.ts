@@ -11,6 +11,8 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -21,6 +23,7 @@ import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
 import { Role } from 'src/common/enums/role.enum';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { Throttle } from '@nestjs/throttler';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('books')
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
@@ -31,10 +34,11 @@ export class BooksController {
 
   // CREATE
   @Post()
+  @UseInterceptors(FileInterceptor('coverImage'))
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createBookDto: CreateBookDto) {
-    return this.booksService.create(createBookDto);
+  create(@Body() createBookDto: CreateBookDto, @UploadedFile() file: Express.Multer.File) {
+    return this.booksService.create(createBookDto, file);
   }
 
   // GET ALL
