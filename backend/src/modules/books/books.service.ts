@@ -3,6 +3,7 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
 import { DataSource, Repository, ILike, FindManyOptions } from 'typeorm';
+import { deleteImageFromCloudinary, uploadImageToCloudinary } from 'src/common/utils/cloudinaryUpload';
 
 @Injectable()
 export class BooksService {
@@ -15,9 +16,44 @@ export class BooksService {
   ) {
     this.bookRepository = this.dataSource.getRepository(Book);
   }
-  create(createBookDto: CreateBookDto) {
+  async create(createBookDto: CreateBookDto, file?: Express.Multer.File) {
     this.logger.log('Creating book', createBookDto);
-    return this.bookRepository.save(createBookDto);
+
+    try {
+      // Upload cover image if provided
+      if (file) {
+        const coverImageUrl = await uploadImageToCloudinary(
+          file,
+          'book-covers',
+        );
+
+        if (createBookDto.coverImage) {
+          try {
+            await deleteImageFromCloudinary(
+              createBookDto.coverImage,
+            );
+          } catch (deleteError) {
+            this.logger.error(
+              'Failed to delete old cover image',
+              deleteError,
+            );
+            throw new Error('Failed to delete old cover image');
+          }
+        }
+
+        createBookDto.coverImage = coverImageUrl;
+      }
+
+      const book = this.bookRepository.create(createBookDto);
+
+
+
+      return await this.bookRepository.save(book);
+    } catch (error) {
+      this.logger.error('Failed to create book', error);
+
+      throw new Error('Failed to create book');
+    }
   }
 
   async findAll(page = 1, limit = 10, search?: string) {

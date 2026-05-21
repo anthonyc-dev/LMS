@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { IsString, IsInt, Min, IsNotEmpty, IsOptional, IsDateString, IsNumber } from 'class-validator';
 
 export class CreateBookDto {
@@ -29,11 +30,13 @@ export class CreateBookDto {
     @IsNotEmpty()
     categoryId: string;
 
+    @Type(() => Number)
     @IsInt()
     @Min(0)
     @IsOptional()
     pages?: number;
 
+    @Type(() => Number)
     @IsInt()
     @Min(0)
     @IsNotEmpty()
@@ -43,10 +46,12 @@ export class CreateBookDto {
     @IsOptional()
     coverImage?: string;
 
+    @Type(() => Number)
     @IsNumber()
     @IsOptional()
     rating?: number;
 
+    @Type(() => Number)
     @IsNumber()
     @IsOptional()
     reviewCount?: number;

@@ -17,6 +17,8 @@ import { BooksModule } from './modules/books/books.module';
 import { BorrowingsModule } from './modules/borrowings/borrowings.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
+import { AppHealthIndicator } from './app.health.indicator';
+import { TerminusModule } from '@nestjs/terminus';
 
 @Module({
   imports: [
@@ -36,6 +38,7 @@ import { InventoryModule } from './modules/inventory/inventory.module';
       },
     ]),
     TypeOrmModule.forRoot(databaseConfig),
+    TerminusModule, TypeOrmModule,
     AuthModule,
     UsersModule,
     DatabaseModule,
@@ -51,6 +54,7 @@ import { InventoryModule } from './modules/inventory/inventory.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    AppHealthIndicator
   ],
 })
 export class AppModule { }
