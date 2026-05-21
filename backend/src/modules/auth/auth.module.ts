@@ -12,6 +12,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from '../users/entities/user.entity';
 import { JwtStrategy } from '../../common/guard/jwt.strategy';
 import { jwtConstants } from 'src/config/jwt.config';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -21,6 +22,10 @@ import { jwtConstants } from 'src/config/jwt.config';
       global: true,
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '15m' },
+    }),
+    HttpModule.register({
+      baseURL: process.env.DATA_INTIGRATION_API,
+      timeout: 5000,
     }),
   ],
   controllers: [AuthController, RoleController],

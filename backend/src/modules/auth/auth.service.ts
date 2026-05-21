@@ -3,6 +3,8 @@ import {
   UnauthorizedException,
   BadRequestException,
   ForbiddenException,
+  ServiceUnavailableException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from '../users/users.service';
@@ -18,6 +20,8 @@ import { normalizeIp } from 'src/common/utils/normalizedIp.util';
 import * as nodemailer from 'nodemailer';
 import { randomInt } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
+import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
@@ -35,6 +39,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly jwtService: JwtService,
+    private readonly httpService: HttpService,
   ) {
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -60,6 +65,9 @@ export class AuthService {
         'You must accept terms and conditions',
       );
     }
+
+
+    await this.validateStudent(schoolId);
 
 
     const existingUser = await this.usersService.findByEmail(email);
@@ -392,5 +400,50 @@ export class AuthService {
     );
 
     return { message: 'Password reset successful' };
+  }
+
+  async validateStudent(schoolId: string) {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(
+          `/intigration/getStudentBySchoolId/${schoolId}`,
+        ),
+      );
+
+      if (!response.data) {
+        throw new BadRequestException(
+          'Student ID not found in Enrollment system.',
+        );
+      }
+
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error: any) {
+      console.error('EMS validation error:', error.message);
+
+      // Connection errors
+      if (
+        error.code === 'ECONNREFUSED' ||
+        error.code === 'ETIMEDOUT'
+      ) {
+        throw new ServiceUnavailableException(
+          'Unable to connect to Enrollment Management System. Please try again later.',
+        );
+      }
+
+      // Student not found
+      if (error.response?.status === 404) {
+        throw new BadRequestException(
+          'Student ID not found in Enrollment system.',
+        );
+      }
+
+      throw new InternalServerErrorException({
+        message: 'Error validating student with Enrollment system.',
+        details: error.message,
+      });
+    }
   }
 }
