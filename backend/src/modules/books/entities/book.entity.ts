@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Borrowing } from "src/modules/borrowings/entities/borrowing.entity";
 import { Category } from "src/modules/categories/entities/category.entity";
 import { Inventory } from "src/modules/inventory/entities/inventory.entity";
+import { Shelf } from "src/modules/shelves/entities/shelf.entity";
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: "books" })
@@ -87,4 +88,11 @@ export class Book {
 
     @OneToOne(() => Inventory, (inventory) => inventory.book)
     inventory: Inventory;
+
+    @ManyToOne(() => Shelf, (shelf) => shelf.books)
+    @JoinColumn({ name: 'shelfId' })
+    shelf: Shelf;
+
+    @Column()
+    shelfId: string;
 }

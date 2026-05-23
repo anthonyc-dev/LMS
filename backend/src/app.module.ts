@@ -19,6 +19,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { AppHealthIndicator } from './app.health.indicator';
 import { TerminusModule } from '@nestjs/terminus';
+import { ShelvesModule } from './modules/shelves/shelves.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { TerminusModule } from '@nestjs/terminus';
     BorrowingsModule,
     CategoriesModule,
     InventoryModule,
+    ShelvesModule,
   ],
   controllers: [AppController],
   providers: [
