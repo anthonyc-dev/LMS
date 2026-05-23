@@ -40,7 +40,7 @@ export function BorrowingHistoryPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-4 sm:space-y-5 md:space-y-8 px-3 sm:px-4 md:px-6 lg:px-8">
+    <div className="max-w-[1600px] mx-auto space-y-4 sm:space-y-5 md:space-y-8">
       {/* Header Section */}
       <Can roles={["admin"]}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
@@ -179,7 +179,8 @@ export function BorrowingHistoryPage() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  )}
+                  )
+                }
                 )}
               </TableBody>
             </Table>

@@ -41,7 +41,7 @@ export function BrowseBooksPage() {
   const [viewMode, setViewMode] = useState<readonly string[]>(["grid"])
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-5 md:space-y-8 px-3 sm:px-4 md:px-6 lg:px-8">
+    <div className="max-w-[1600px] mx-auto space-y-5 md:space-y-8">
       {/* Search & Header Section */}
       <section className="sticky top-0 z-30 -mx-3 sm:-mx-4 md:-mx-6 lg:-mx-8 space-y-3 md:space-y-4 pt-2 pb-4 px-3 sm:px-4 md:px-6 lg:px-8 bg-gray-100/90 backdrop-blur-md">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 p-3 md:p-3.5 rounded-lg bg-white/70 border border-white/80 shadow-sm">

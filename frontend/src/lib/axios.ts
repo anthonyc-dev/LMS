@@ -52,7 +52,7 @@ api.interceptors.response.use(
 
       try {
         // 🔥 Refresh using HttpOnly cookie
-        await axios.post(
+        const refreshResponse = await axios.post(
           `${api.defaults.baseURL}/auth/refresh`,
           {},
           {
@@ -60,7 +60,12 @@ api.interceptors.response.use(
           }
         );
 
-        // ✅ Retry original request
+        // ✅ Update the in-memory token
+        const newToken = refreshResponse.data.result.accessToken;
+        useAuthStore.getState().setToken(newToken);
+
+        // ✅ Retry original request with fresh token
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         useAuthStore.getState().logout();
