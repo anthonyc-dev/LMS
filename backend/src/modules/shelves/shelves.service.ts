@@ -10,8 +10,9 @@ export class ShelvesService {
   constructor(
     @InjectRepository(Shelf)
     private readonly shelfRepository: Repository<Shelf>,
-  ) {}
+  ) { }
 
+  //create
   async create(createShelfDto: CreateShelfDto): Promise<Shelf> {
     const shelf = this.shelfRepository.create(createShelfDto);
     return this.shelfRepository.save(shelf);
