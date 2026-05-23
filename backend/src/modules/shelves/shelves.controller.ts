@@ -11,10 +11,20 @@ import {
 import { ShelvesService } from './shelves.service';
 import { CreateShelfDto } from './dto/create-shelf.dto';
 import { UpdateShelfDto } from './dto/update-shelf.dto';
+import { UseGuards } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
+import { RolesGuard } from 'src/common/guard/roles.guard';
+import { Throttle } from '@nestjs/throttler';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from 'src/common/enums/role.enum';
 
 @Controller('shelves')
+@UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
+@Throttle({ default: { limit: 5, ttl: 60000 } })
+@Roles(Role.ADMIN)
 export class ShelvesController {
-  constructor(private readonly shelvesService: ShelvesService) {}
+  constructor(private readonly shelvesService: ShelvesService) { }
 
   @Post()
   create(@Body() createShelfDto: CreateShelfDto) {
