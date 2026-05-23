@@ -11,7 +11,6 @@ import { UsersService } from '../users/users.service';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { TokenService } from 'src/common/services/token.service';
-import { Role } from 'src/common/enums/role.enum';
 import { RefreshTokenService } from 'src/common/services/refresh-token.service';
 import { sanitizeUser } from 'src/common/utils/user.util';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -59,16 +58,11 @@ export class AuthService {
     acceptedTerms: boolean,
     ipAddress: string,
   ) {
-
     if (!acceptedTerms) {
-      throw new BadRequestException(
-        'You must accept terms and conditions',
-      );
+      throw new BadRequestException('You must accept terms and conditions');
     }
 
-
     await this.validateStudent(schoolId);
-
 
     const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
@@ -187,7 +181,7 @@ export class AuthService {
      */
     try {
       payload = await this.tokenService.verifyRefreshToken(refreshToken);
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
@@ -308,7 +302,9 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       // Return a generic message to prevent email enumeration
-      return { message: 'If an account with that email exists, an OTP has been sent.' };
+      return {
+        message: 'If an account with that email exists, an OTP has been sent.',
+      };
     }
 
     const otp = randomInt(100000, 999999).toString();
@@ -348,11 +344,15 @@ export class AuthService {
       html: htmlContent,
     });
 
-    return { message: 'If an account with that email exists, an OTP has been sent.' };
+    return {
+      message: 'If an account with that email exists, an OTP has been sent.',
+    };
   }
 
   async verifyOtp(otp: string) {
-    const user = await this.userRepository.findOne({ where: { resetPasswordOtp: otp } });
+    const user = await this.userRepository.findOne({
+      where: { resetPasswordOtp: otp },
+    });
     if (!user) {
       throw new BadRequestException('Invalid OTP');
     }
@@ -361,12 +361,19 @@ export class AuthService {
       throw new BadRequestException('OTP has expired');
     }
 
-    const resetToken = this.jwtService.sign({ sub: user.id }, { expiresIn: '15m' });
+    const resetToken = this.jwtService.sign(
+      { sub: user.id },
+      { expiresIn: '15m' },
+    );
 
     return { message: 'OTP verified successfully', resetToken };
   }
 
-  async resetPassword(token: string, newPassword: string, confirmPassword: string) {
+  async resetPassword(
+    token: string,
+    newPassword: string,
+    confirmPassword: string,
+  ) {
     if (newPassword !== confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
@@ -405,9 +412,7 @@ export class AuthService {
   async validateStudent(schoolId: string) {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(
-          `/intigration/getStudentBySchoolId/${schoolId}`,
-        ),
+        this.httpService.get(`/intigration/getStudentBySchoolId/${schoolId}`),
       );
 
       if (!response.data) {
@@ -418,23 +423,23 @@ export class AuthService {
 
       return {
         success: true,
-        data: response.data,
+        data: response.data as Record<string, unknown>,
       };
-    } catch (error: any) {
-      console.error('EMS validation error:', error.message);
+    } catch (error) {
+      const err = error as {
+        message?: string;
+        code?: string;
+        response?: { status?: number };
+      };
+      console.error('EMS validation error:', err.message);
 
-      // Connection errors
-      if (
-        error.code === 'ECONNREFUSED' ||
-        error.code === 'ETIMEDOUT'
-      ) {
+      if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
         throw new ServiceUnavailableException(
           'Unable to connect to Enrollment Management System. Please try again later.',
         );
       }
 
-      // Student not found
-      if (error.response?.status === 404) {
+      if (err.response?.status === 404) {
         throw new BadRequestException(
           'Student ID not found in Enrollment system.',
         );
@@ -442,7 +447,7 @@ export class AuthService {
 
       throw new InternalServerErrorException({
         message: 'Error validating student with Enrollment system.',
-        details: error.message,
+        details: err.message,
       });
     }
   }

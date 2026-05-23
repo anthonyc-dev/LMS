@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+} from '@nestjs/common';
 import type { RequestWithUser } from 'src/common/guard/auth.guard';
 import { BorrowingsService } from './borrowings.service';
 import { CreateBorrowingDto } from './dto/create-borrowing.dto';
@@ -17,12 +26,15 @@ import { HttpCode } from '@nestjs/common';
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
 @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
 export class BorrowingsController {
-  constructor(private readonly borrowingsService: BorrowingsService) { }
+  constructor(private readonly borrowingsService: BorrowingsService) {}
 
   @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  create(@Body() createBorrowingDto: CreateBorrowingDto, @Req() req: RequestWithUser) {
+  create(
+    @Body() createBorrowingDto: CreateBorrowingDto,
+    @Req() req: RequestWithUser,
+  ) {
     const userId = req.user.sub;
     return this.borrowingsService.create(createBorrowingDto, userId);
   }
@@ -65,7 +77,10 @@ export class BorrowingsController {
   @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
   @HttpCode(HttpStatus.OK)
   @Patch(':id')
-  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateBorrowingDto: UpdateBorrowingDto) {
+  update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() updateBorrowingDto: UpdateBorrowingDto,
+  ) {
     return this.borrowingsService.update(id, updateBorrowingDto);
   }
 

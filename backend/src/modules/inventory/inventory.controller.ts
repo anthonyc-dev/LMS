@@ -10,8 +10,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 
-
-
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { InventoryService } from './inventory.service';
@@ -27,19 +25,13 @@ import { Role } from 'src/common/enums/role.enum';
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
 @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
 export class InventoryController {
-  constructor(
-    private readonly inventoriesService: InventoryService,
-  ) { }
+  constructor(private readonly inventoriesService: InventoryService) {}
 
   @Post()
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
-  create(
-    @Body() createInventoryDto: CreateInventoryDto,
-  ) {
-    return this.inventoriesService.create(
-      createInventoryDto,
-    );
+  create(@Body() createInventoryDto: CreateInventoryDto) {
+    return this.inventoriesService.create(createInventoryDto);
   }
 
   @Get()
@@ -63,10 +55,7 @@ export class InventoryController {
     @Param('id') id: string,
     @Body() updateInventoryDto: UpdateInventoryDto,
   ) {
-    return this.inventoriesService.update(
-      id,
-      updateInventoryDto,
-    );
+    return this.inventoriesService.update(id, updateInventoryDto);
   }
 
   @Delete(':id')

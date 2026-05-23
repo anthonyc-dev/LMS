@@ -3,7 +3,10 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
 import { DataSource, Repository, ILike, FindManyOptions } from 'typeorm';
-import { deleteImageFromCloudinary, uploadImageToCloudinary } from 'src/common/utils/cloudinaryUpload';
+import {
+  deleteImageFromCloudinary,
+  uploadImageToCloudinary,
+} from 'src/common/utils/cloudinaryUpload';
 
 @Injectable()
 export class BooksService {
@@ -11,9 +14,7 @@ export class BooksService {
 
   private bookRepository: Repository<Book>;
 
-  constructor(
-    private readonly dataSource: DataSource,
-  ) {
+  constructor(private readonly dataSource: DataSource) {
     this.bookRepository = this.dataSource.getRepository(Book);
   }
   async create(createBookDto: CreateBookDto, file?: Express.Multer.File) {
@@ -29,14 +30,9 @@ export class BooksService {
 
         if (createBookDto.coverImage) {
           try {
-            await deleteImageFromCloudinary(
-              createBookDto.coverImage,
-            );
+            await deleteImageFromCloudinary(createBookDto.coverImage);
           } catch (deleteError) {
-            this.logger.error(
-              'Failed to delete old cover image',
-              deleteError,
-            );
+            this.logger.error('Failed to delete old cover image', deleteError);
             throw new Error('Failed to delete old cover image');
           }
         }
@@ -45,8 +41,6 @@ export class BooksService {
       }
 
       const book = this.bookRepository.create(createBookDto);
-
-
 
       return await this.bookRepository.save(book);
     } catch (error) {
@@ -57,7 +51,9 @@ export class BooksService {
   }
 
   async findAll(page = 1, limit = 10, search?: string) {
-    this.logger.log(`Finding all books (page: ${page}, limit: ${limit}, search: ${search})`);
+    this.logger.log(
+      `Finding all books (page: ${page}, limit: ${limit}, search: ${search})`,
+    );
 
     const skip = (page - 1) * limit;
     const findOptions: FindManyOptions<Book> = {
@@ -101,7 +97,10 @@ export class BooksService {
 
   findOne(id: string) {
     this.logger.log('Finding book with id', id);
-    return this.bookRepository.findOne({ where: { id }, relations: ['category', 'shelf'] });
+    return this.bookRepository.findOne({
+      where: { id },
+      relations: ['category', 'shelf'],
+    });
   }
 
   async update(id: string, updateBookDto: UpdateBookDto) {

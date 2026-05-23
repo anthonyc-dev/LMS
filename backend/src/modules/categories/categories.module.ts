@@ -12,4 +12,4 @@ import { ThrottlerGuard } from '@nestjs/throttler';
   controllers: [CategoriesController],
   providers: [CategoriesService, RolesGuard, JwtStrategy, ThrottlerGuard],
 })
-export class CategoriesModule { }
+export class CategoriesModule {}

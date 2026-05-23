@@ -1,8 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { HealthCheck, HealthCheckService, MemoryHealthIndicator, TypeOrmHealthIndicator } from '@nestjs/terminus';
+import {
+  HealthCheck,
+  HealthCheckService,
+  MemoryHealthIndicator,
+  TypeOrmHealthIndicator,
+} from '@nestjs/terminus';
 import { Public } from './common/decorators/public.decorator';
-
 
 @Controller()
 export class AppController {
@@ -10,8 +14,8 @@ export class AppController {
     private readonly health: HealthCheckService,
     private readonly db: TypeOrmHealthIndicator,
     private readonly memory: MemoryHealthIndicator,
-    private readonly appService: AppService
-  ) { }
+    private readonly appService: AppService,
+  ) {}
 
   @Get()
   getHello(): string {

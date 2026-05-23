@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -13,7 +21,7 @@ import { Role } from 'src/common/enums/role.enum';
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
 @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) { }
+  constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
   @Roles(Role.ADMIN)
@@ -35,7 +43,10 @@ export class CategoriesController {
 
   @Patch(':id')
   @Roles(Role.ADMIN)
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 

@@ -7,10 +7,8 @@ import { RolesGuard } from 'src/common/guard/roles.guard';
 import { JwtStrategy } from 'src/common/guard/jwt.strategy';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Book]),
-  ],
+  imports: [TypeOrmModule.forFeature([Book])],
   controllers: [BooksController],
   providers: [BooksService, RolesGuard, JwtStrategy],
 })
-export class BooksModule { }
+export class BooksModule {}

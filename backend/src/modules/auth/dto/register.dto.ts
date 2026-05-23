@@ -6,7 +6,7 @@ import {
   MinLength,
   Matches,
   IsBoolean,
-  IsOptional
+  IsOptional,
 } from 'class-validator';
 
 export class RegisterDto {
@@ -28,7 +28,8 @@ export class RegisterDto {
   @IsNotEmpty()
   @IsString()
   @Matches(/^(09|\+639)\d{9}$/, {
-    message: 'Phone number must be a valid PH format (09XXXXXXXXX or +639XXXXXXXXX)',
+    message:
+      'Phone number must be a valid PH format (09XXXXXXXXX or +639XXXXXXXXX)',
   })
   phoneNumber: string;
 

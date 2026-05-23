@@ -7,10 +7,8 @@ import { RolesGuard } from 'src/common/guard/roles.guard';
 import { JwtStrategy } from 'src/common/guard/jwt.strategy';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Borrowing]),
-  ],
+  imports: [TypeOrmModule.forFeature([Borrowing])],
   controllers: [BorrowingsController],
   providers: [BorrowingsService, RolesGuard, JwtStrategy],
 })
-export class BorrowingsModule { }
+export class BorrowingsModule {}

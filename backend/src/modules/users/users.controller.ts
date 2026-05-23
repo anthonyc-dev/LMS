@@ -1,12 +1,12 @@
 import {
-    Controller,
-    Get,
-    Post,
-    Put,
-    Delete,
-    Body,
-    Param,
-    ParseUUIDPipe,
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
@@ -28,56 +28,52 @@ import { plainToInstance } from 'class-transformer';
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
 @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
 export class UsersController {
-    constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
-    // CREATE USER
-    @Roles(Role.ADMIN)
-    @HttpCode(HttpStatus.CREATED)
-    @Post()
-    async create(@Body() userData: CreateUserDto): Promise<UserResponseDto> {
-        const user = await this.usersService.create(userData);
+  // CREATE USER
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  @Post()
+  async create(@Body() userData: CreateUserDto): Promise<UserResponseDto> {
+    const user = await this.usersService.create(userData);
 
-        return plainToInstance(UserResponseDto, user, {
-            excludeExtraneousValues: true,
-        });
-    }
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+  }
 
-    // GET USER BY ID
-    @Roles(Role.ADMIN)
-    @HttpCode(HttpStatus.OK)
-    @Get(':id')
-    findById(
-        @Param('id', new ParseUUIDPipe()) id: string,
-    ): Promise<User | null> {
-        return this.usersService.findById(id);
-    }
+  // GET USER BY ID
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @Get(':id')
+  findById(@Param('id', new ParseUUIDPipe()) id: string): Promise<User | null> {
+    return this.usersService.findById(id);
+  }
 
-    // GET USER BY EMAIL
-    @Roles(Role.ADMIN)
-    @HttpCode(HttpStatus.OK)
-    @Get('email/:email')
-    findByEmail(@Param('email') email: string): Promise<User | null> {
-        return this.usersService.findByEmail(email);
-    }
+  // GET USER BY EMAIL
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @Get('email/:email')
+  findByEmail(@Param('email') email: string): Promise<User | null> {
+    return this.usersService.findByEmail(email);
+  }
 
-    // UPDATE USER
-    @Roles(Role.ADMIN)
-    @HttpCode(HttpStatus.OK)
-    @Put(':id')
-    update(
-        @Param('id', new ParseUUIDPipe()) id: string,
-        @Body() userData: UpdateUserDto,
-    ): Promise<User | null> {
-        return this.usersService.update(id, userData);
-    }
+  // UPDATE USER
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @Put(':id')
+  update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() userData: UpdateUserDto,
+  ): Promise<User | null> {
+    return this.usersService.update(id, userData);
+  }
 
-    // DELETE USER
-    @Roles(Role.ADMIN)
-    @HttpCode(HttpStatus.OK)
-    @Delete(':id')
-    delete(
-        @Param('id', new ParseUUIDPipe()) id: string,
-    ): Promise<void> {
-        return this.usersService.delete(id);
-    }
+  // DELETE USER
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @Delete(':id')
+  delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
+    return this.usersService.delete(id);
+  }
 }

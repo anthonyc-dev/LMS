@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateBorrowingDto } from './dto/create-borrowing.dto';
 import { UpdateBorrowingDto } from './dto/update-borrowing.dto';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Borrowing, BorrowingStatus } from './entities/borrowing.entity';
 import { LessThan, Not } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,13 +10,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class BorrowingsService {
   private readonly logger = new Logger(BorrowingsService.name);
 
-
   constructor(
     @InjectRepository(Borrowing)
     private borrowingRepository: Repository<Borrowing>,
-  ) {
-
-  }
+  ) {}
 
   create(createBorrowingDto: CreateBorrowingDto, userId: string) {
     this.logger.log('Creating borrowing', { ...createBorrowingDto, userId });
@@ -33,7 +30,10 @@ export class BorrowingsService {
 
   findOne(id: string) {
     this.logger.log('Finding borrowing with id', id);
-    return this.borrowingRepository.findOne({ where: { id }, relations: ['book', 'user'] });
+    return this.borrowingRepository.findOne({
+      where: { id },
+      relations: ['book', 'user'],
+    });
   }
 
   update(id: string, updateBorrowingDto: UpdateBorrowingDto) {

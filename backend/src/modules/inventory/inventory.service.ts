@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,11 +13,10 @@ export class InventoryService {
   constructor(
     @InjectRepository(Inventory)
     private readonly inventoryRepository: Repository<Inventory>,
-  ) { }
+  ) {}
 
   async create(createInventoryDto: CreateInventoryDto) {
-    const inventory =
-      this.inventoryRepository.create(createInventoryDto);
+    const inventory = this.inventoryRepository.create(createInventoryDto);
 
     return await this.inventoryRepository.save(inventory);
   }
@@ -32,39 +28,29 @@ export class InventoryService {
   }
 
   async findOne(id: string) {
-    const inventory =
-      await this.inventoryRepository.findOne({
-        where: { id },
-        relations: ['book'],
-      });
+    const inventory = await this.inventoryRepository.findOne({
+      where: { id },
+      relations: ['book'],
+    });
 
     if (!inventory) {
-      throw new NotFoundException(
-        'Inventory not found',
-      );
+      throw new NotFoundException('Inventory not found');
     }
 
     return inventory;
   }
 
-  async update(
-    id: string,
-    updateInventoryDto: UpdateInventoryDto,
-  ) {
+  async update(id: string, updateInventoryDto: UpdateInventoryDto) {
     const inventory = await this.findOne(id);
 
     Object.assign(inventory, updateInventoryDto);
 
-    return await this.inventoryRepository.save(
-      inventory,
-    );
+    return await this.inventoryRepository.save(inventory);
   }
 
   async remove(id: string) {
     const inventory = await this.findOne(id);
 
-    return await this.inventoryRepository.remove(
-      inventory,
-    );
+    return await this.inventoryRepository.remove(inventory);
   }
 }

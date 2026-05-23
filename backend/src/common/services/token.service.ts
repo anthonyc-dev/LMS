@@ -6,7 +6,7 @@ import { jwtConstants } from 'src/config/jwt.config';
 
 @Injectable()
 export class TokenService {
-  constructor(private readonly jwtService: JwtService) { }
+  constructor(private readonly jwtService: JwtService) {}
 
   async generateTokens(user: User) {
     const payload = { sub: user.id, email: user.email, role: user.role };
