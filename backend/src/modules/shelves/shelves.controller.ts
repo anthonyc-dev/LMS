@@ -1,11 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { ShelvesService } from './shelves.service';
 import { CreateShelfDto } from './dto/create-shelf.dto';
 import { UpdateShelfDto } from './dto/update-shelf.dto';
 
 @Controller('shelves')
 export class ShelvesController {
-  constructor(private readonly shelvesService: ShelvesService) { }
+  constructor(private readonly shelvesService: ShelvesService) {}
 
   @Post()
   create(@Body() createShelfDto: CreateShelfDto) {
@@ -23,7 +32,10 @@ export class ShelvesController {
   }
 
   @Patch(':id')
-  update(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateShelfDto: UpdateShelfDto) {
+  update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() updateShelfDto: UpdateShelfDto,
+  ) {
     return this.shelvesService.update(id, updateShelfDto);
   }
 

@@ -6,13 +6,9 @@ import { Shelf } from './entities/shelf.entity';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { JwtStrategy } from 'src/common/guard/jwt.strategy';
 
-
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Shelf]),
-  ],
+  imports: [TypeOrmModule.forFeature([Shelf])],
   controllers: [ShelvesController],
   providers: [ShelvesService, RolesGuard, JwtStrategy],
-
 })
-export class ShelvesModule { }
+export class ShelvesModule {}

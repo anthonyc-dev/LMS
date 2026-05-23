@@ -9,9 +9,7 @@ export class CategoriesService {
   private readonly logger = new Logger(CategoriesService.name);
   private categoryRepository: Repository<Category>;
 
-  constructor(
-    private readonly dataSource: DataSource,
-  ) {
+  constructor(private readonly dataSource: DataSource) {
     this.categoryRepository = this.dataSource.getRepository(Category);
   }
 

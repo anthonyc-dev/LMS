@@ -30,7 +30,7 @@ interface AuthRequest extends Request {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post('register')
@@ -159,10 +159,10 @@ export class AuthController {
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   async resetPassword(
     @Body() resetPasswordDto: ResetPasswordDto,
-    @Req() req: Request,
+    @Req() req: AuthRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const token = req.cookies?.reset_session;
+    const token: string | undefined = req.cookies?.reset_session;
     if (!token) {
       throw new UnauthorizedException('Reset session expired or invalid');
     }

@@ -39,7 +39,8 @@ import { ShelvesModule } from './modules/shelves/shelves.module';
       },
     ]),
     TypeOrmModule.forRoot(databaseConfig),
-    TerminusModule, TypeOrmModule,
+    TerminusModule,
+    TypeOrmModule,
     AuthModule,
     UsersModule,
     DatabaseModule,
@@ -56,7 +57,7 @@ import { ShelvesModule } from './modules/shelves/shelves.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    AppHealthIndicator
+    AppHealthIndicator,
   ],
 })
-export class AppModule { }
+export class AppModule {}

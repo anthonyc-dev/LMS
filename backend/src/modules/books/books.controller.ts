@@ -29,15 +29,17 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
 @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
 export class BooksController {
-
-  constructor(private readonly booksService: BooksService) { }
+  constructor(private readonly booksService: BooksService) {}
 
   // CREATE
   @Post()
   @UseInterceptors(FileInterceptor('coverImage'))
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createBookDto: CreateBookDto, @UploadedFile() file: Express.Multer.File) {
+  create(
+    @Body() createBookDto: CreateBookDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     return this.booksService.create(createBookDto, file);
   }
 

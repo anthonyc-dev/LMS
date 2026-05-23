@@ -12,7 +12,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async create(userData: CreateUserDto): Promise<User> {
     this.logger.log(`Creating user: ${userData.email}`);
@@ -45,7 +45,10 @@ export class UsersService {
 
   // ---------- Lockout and failed attempts functions || SOON
   async resetFailedAttempts(id: string): Promise<void> {
-    await this.usersRepository.update(id, { failedLoginAttempts: 0, lockoutUntil: null });
+    await this.usersRepository.update(id, {
+      failedLoginAttempts: 0,
+      lockoutUntil: null,
+    });
   }
 
   async incrementFailedAttempts(id: string): Promise<void> {

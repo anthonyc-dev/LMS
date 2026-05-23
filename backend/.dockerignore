@@ -1,0 +1,40 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Git metadata and tools
+.git/
+.gitignore
+.gitattributes
+
+# Project documentation & local scripts
+README.md
+TODO.md
+scripts/
+test/

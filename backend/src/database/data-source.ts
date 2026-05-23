@@ -4,9 +4,6 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const isSslEnabled =
-  process.env.DB_SSL === 'true' || process.env.DB_SSL === '1';
-
 export const AppDataSource = new DataSource({
   type: 'postgres',
 

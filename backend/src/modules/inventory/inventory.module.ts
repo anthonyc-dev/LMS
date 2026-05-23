@@ -12,4 +12,4 @@ import { JwtStrategy } from 'src/common/guard/jwt.strategy';
   controllers: [InventoryController],
   providers: [InventoryService, RolesGuard, JwtStrategy],
 })
-export class InventoryModule { }
+export class InventoryModule {}
