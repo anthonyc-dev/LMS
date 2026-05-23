@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RefreshToken } from 'src/modules/auth/refresh-token.entity';
-import { User } from 'src/modules/users/user.entity';
+import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class RefreshTokenService {
     });
   }
 
-  async findValidToken(userId: number, token: string) {
+  async findValidToken(userId: string, token: string) {
     return this.refreshTokenRepository.findOne({
       where: {
         user: { id: userId },

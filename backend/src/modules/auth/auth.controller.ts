@@ -9,16 +9,22 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
+  Ip,
 } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthGuard } from './guard/auth.guard';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { setAuthCookies } from 'src/common/utils/cookie.util';
+import { Public } from '../../common/decorators/public.decorator';
+import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
 
 interface AuthRequest extends Request {
-  user: { sub: number; email: string };
+  user: { sub: string; email: string; role: string };
   cookies: Record<string, string | undefined>;
 }
 
@@ -26,17 +32,24 @@ interface AuthRequest extends Request {
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @HttpCode(HttpStatus.CREATED)
+  @Public()
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async register(
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) response: Response,
+    @Ip() ip: string,
   ) {
     const result = await this.authService.register(
       registerDto.schoolId,
       registerDto.fullName,
       registerDto.email,
+      registerDto.phoneNumber,
       registerDto.password,
+      registerDto.acceptedTerms,
+      ip,
     );
 
     setAuthCookies(response, result.accessToken, result.refreshToken);
@@ -44,8 +57,11 @@ export class AuthController {
     return result;
   }
 
-  @HttpCode(HttpStatus.OK)
+  @Public()
   @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
@@ -60,13 +76,17 @@ export class AuthController {
     return result;
   }
 
-  @HttpCode(HttpStatus.OK)
+  @Public()
   @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  // @UseGuards(ThrottlerGuard)
+  // @Throttle({ default: { limit: 5, ttl: 60000 } })
   async refresh(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
+    @Body('refreshToken') bodyRefreshToken?: string,
   ) {
-    const refreshToken = req.cookies?.refreshToken;
+    const refreshToken = bodyRefreshToken || req.cookies?.refreshToken;
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token missing');
@@ -79,9 +99,9 @@ export class AuthController {
     return { message: 'Token refreshed', result };
   }
 
-  @HttpCode(HttpStatus.OK)
   @Post('logout')
-  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   async logout(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) response: Response,
@@ -95,10 +115,66 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   me(@Req() req: AuthRequest) {
     return {
       user: req.user,
     };
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto.email);
+  }
+
+  @Public()
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  async verifyOtp(
+    @Body() verifyOtpDto: VerifyOtpDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const result = await this.authService.verifyOtp(verifyOtpDto.otp);
+
+    response.cookie('reset_session', result.resetToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000, // 15 mins
+    });
+
+    return { message: result.message };
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+    @Req() req: AuthRequest,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const token: string | undefined = req.cookies?.reset_session;
+    if (!token) {
+      throw new UnauthorizedException('Reset session expired or invalid');
+    }
+
+    const result = await this.authService.resetPassword(
+      token,
+      resetPasswordDto.newPassword,
+      resetPasswordDto.confirmPassword,
+    );
+
+    response.clearCookie('reset_session');
+
+    return result;
   }
 }

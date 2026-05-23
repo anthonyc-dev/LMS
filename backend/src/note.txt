@@ -2,3 +2,5 @@
 $ git branch -d feat/authentication - Delete local branch
 
 $ git push origin --delete feat/authentication - Delete remote branch
+
+git reset --hard && git clean -fd
