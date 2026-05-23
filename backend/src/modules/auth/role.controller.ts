@@ -13,6 +13,7 @@ export class RoleController {
     return { message: 'Admin access granted' };
   }
 
+  // this only for UI demonstration
   @Get('faculty')
   @Roles(Role.FACULTY)
   getFacultyData() {
