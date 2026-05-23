@@ -66,6 +66,7 @@ export class BooksService {
       order: { createdAt: 'DESC' },
       relations: {
         category: true,
+        shelf: true,
       },
     };
 
@@ -76,6 +77,11 @@ export class BooksService {
         { isbn: ILike(`%${search}%`) },
         {
           category: {
+            name: ILike(`%${search}%`),
+          },
+        },
+        {
+          shelf: {
             name: ILike(`%${search}%`),
           },
         },
@@ -95,7 +101,7 @@ export class BooksService {
 
   findOne(id: string) {
     this.logger.log('Finding book with id', id);
-    return this.bookRepository.findOne({ where: { id }, relations: ['category'] });
+    return this.bookRepository.findOne({ where: { id }, relations: ['category', 'shelf'] });
   }
 
   async update(id: string, updateBookDto: UpdateBookDto) {
