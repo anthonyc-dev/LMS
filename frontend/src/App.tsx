@@ -73,14 +73,14 @@ function App() {
       try {
         // 1. Try to refresh token on app mount using HttpOnly cookie
         const refreshResponse = await api.post("/auth/refresh");
-        const { token } = refreshResponse.data;
+        const token = refreshResponse.data.result.accessToken;
 
         // 2. Set the token in memory first
         useAuthStore.getState().setToken(token);
 
         // 3. Fetch user profile using the new access token
         const meResponse = await api.get("/auth/me");
-        const user = meResponse.data;
+        const user = meResponse.data.user;
 
         // 4. Hydrate the store
         setAuth(user, token);

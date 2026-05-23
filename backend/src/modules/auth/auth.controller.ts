@@ -79,8 +79,8 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  // @UseGuards(ThrottlerGuard)
+  // @Throttle({ default: { limit: 5, ttl: 60000 } })
   async refresh(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
@@ -141,7 +141,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const result = await this.authService.verifyOtp(verifyOtpDto.otp);
-    
+
     response.cookie('reset_session', result.resetToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
