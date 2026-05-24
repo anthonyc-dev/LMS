@@ -456,4 +456,12 @@ export class AuthService {
       });
     }
   }
+
+  async getMe(userId: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return sanitizeUser(user);
+  }
 }
