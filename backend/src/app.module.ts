@@ -63,4 +63,4 @@ dns.setDefaultResultOrder('ipv4first');
     AppHealthIndicator,
   ],
 })
-export class AppModule { }
+export class AppModule {}

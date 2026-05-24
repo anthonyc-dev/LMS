@@ -24,7 +24,7 @@ import { Role } from 'src/common/enums/role.enum';
 @Throttle({ default: { limit: 5, ttl: 60000 } })
 @Roles(Role.ADMIN)
 export class ShelvesController {
-  constructor(private readonly shelvesService: ShelvesService) { }
+  constructor(private readonly shelvesService: ShelvesService) {}
 
   @Post()
   create(@Body() createShelfDto: CreateShelfDto) {
