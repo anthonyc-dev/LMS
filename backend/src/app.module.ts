@@ -35,7 +35,7 @@ import { ShelvesModule } from './modules/shelves/shelves.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 30,
+        limit: 120,
       },
     ]),
     TypeOrmModule.forRoot(databaseConfig),
@@ -60,4 +60,4 @@ import { ShelvesModule } from './modules/shelves/shelves.module';
     AppHealthIndicator,
   ],
 })
-export class AppModule {}
+export class AppModule { }

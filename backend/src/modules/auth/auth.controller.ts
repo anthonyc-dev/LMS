@@ -30,7 +30,7 @@ interface AuthRequest extends Request {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Public()
   @Post('register')
@@ -79,8 +79,8 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  // @UseGuards(ThrottlerGuard)
-  // @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
   async refresh(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
@@ -102,6 +102,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 120, ttl: 60000 } })
   async logout(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) response: Response,
@@ -116,6 +117,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 120, ttl: 60000 } })
   me(@Req() req: AuthRequest) {
     return {
       user: req.user,
