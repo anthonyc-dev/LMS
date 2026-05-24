@@ -118,9 +118,10 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 120, ttl: 60000 } })
-  me(@Req() req: AuthRequest) {
+  async me(@Req() req: AuthRequest) {
+    const user = await this.authService.getMe(req.user.sub);
     return {
-      user: req.user,
+      user,
     };
   }
 
