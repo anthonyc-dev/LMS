@@ -20,6 +20,9 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { AppHealthIndicator } from './app.health.indicator';
 import { TerminusModule } from '@nestjs/terminus';
 import { ShelvesModule } from './modules/shelves/shelves.module';
+import dns from 'dns';
+
+dns.setDefaultResultOrder('ipv4first');
 
 @Module({
   imports: [
