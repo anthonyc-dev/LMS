@@ -1,24 +1,24 @@
 import React, { useState } from 'react';
-import { 
-  format, 
-  addMonths, 
-  subMonths, 
-  startOfMonth, 
-  endOfMonth, 
-  startOfWeek, 
-  endOfWeek, 
-  isSameMonth, 
-  isSameDay, 
-  addDays, 
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  isSameMonth,
+  isSameDay,
+  addDays,
   eachDayOfInterval,
   isToday,
   parseISO
 } from 'date-fns';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Plus, 
-  Search, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Search,
   Calendar as CalendarIcon,
   Clock,
   MoreVertical,
@@ -29,11 +29,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
@@ -51,7 +51,7 @@ interface CalendarEvent {
 const SchedulePage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
+
   // Dummy Data
   const events: CalendarEvent[] = [
     {
@@ -114,24 +114,24 @@ const SchedulePage = () => {
         </div>
 
         <div className="flex items-center gap-3 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={prevMonth}
             className="hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all duration-300"
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={goToToday}
             className="px-6 font-semibold text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all duration-300"
           >
             Today
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={nextMonth}
             className="hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all duration-300"
           >
@@ -142,9 +142,9 @@ const SchedulePage = () => {
         <div className="flex items-center gap-2 mt-4 md:mt-0">
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Search schedule..." 
+            <input
+              type="text"
+              placeholder="Search schedule..."
               className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all w-64 shadow-sm"
             />
           </div>
@@ -186,7 +186,7 @@ const SchedulePage = () => {
         formattedDate = format(day, "d");
         const cloneDay = day;
         const dayEvents = events.filter(e => isSameDay(e.start, cloneDay));
-        
+
         days.push(
           <div
             key={day.toString()}
@@ -200,11 +200,11 @@ const SchedulePage = () => {
             <div className="flex items-center justify-between mb-2 px-1">
               <span className={cn(
                 "text-sm font-bold w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300",
-                isToday(day) 
-                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 scale-110" 
-                  : isSameDay(day, selectedDate) 
-                  ? "bg-indigo-100 text-indigo-700" 
-                  : "group-hover:bg-gray-100"
+                isToday(day)
+                  ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 scale-110"
+                  : isSameDay(day, selectedDate)
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "group-hover:bg-gray-100"
               )}>
                 {formattedDate}
               </span>
@@ -217,24 +217,24 @@ const SchedulePage = () => {
               {dayEvents.map((event) => (
                 <TooltipProvider key={event.id}>
                   <Tooltip>
-                    <TooltipTrigger 
+                    <TooltipTrigger
                       render={
-                        <div 
+                        <div
                           className={cn(
                             "px-2 py-1.5 rounded-lg text-[10px] font-bold leading-tight truncate cursor-pointer transition-all hover:scale-[1.02] active:scale-95 shadow-sm",
                             event.type === 'class' ? "bg-blue-50 text-blue-700 border border-blue-100" :
-                            event.type === 'meeting' ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
-                            event.type === 'exam' ? "bg-rose-50 text-rose-700 border border-rose-100" :
-                            "bg-amber-50 text-amber-700 border border-amber-100"
+                              event.type === 'meeting' ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
+                                event.type === 'exam' ? "bg-rose-50 text-rose-700 border border-rose-100" :
+                                  "bg-amber-50 text-amber-700 border border-amber-100"
                           )}
                         >
                           <div className="flex items-center gap-1">
                             <div className={cn(
                               "w-1 h-1 rounded-full",
                               event.type === 'class' ? "bg-blue-400" :
-                              event.type === 'meeting' ? "bg-emerald-400" :
-                              event.type === 'exam' ? "bg-rose-400" :
-                              "bg-amber-400"
+                                event.type === 'meeting' ? "bg-emerald-400" :
+                                  event.type === 'exam' ? "bg-rose-400" :
+                                    "bg-amber-400"
                             )} />
                             {event.title}
                           </div>
@@ -267,7 +267,7 @@ const SchedulePage = () => {
                 </TooltipProvider>
               ))}
             </div>
-            
+
             <button className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded-md">
               <Plus className="w-3 h-3 text-gray-400" />
             </button>
@@ -347,9 +347,9 @@ const SchedulePage = () => {
           </div>
           <div className="flex flex-wrap gap-2">
             {['Classes', 'Exams', 'Meetings', 'Deadlines'].map((filter) => (
-              <Badge 
-                key={filter} 
-                variant="outline" 
+              <Badge
+                key={filter}
+                variant="outline"
                 className="px-4 py-1.5 rounded-xl border-gray-100 hover:border-indigo-200 hover:bg-indigo-50 transition-all cursor-pointer text-gray-600"
               >
                 {filter}

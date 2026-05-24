@@ -3,10 +3,14 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom
 import { useAuthStore } from "./store/authStore"
 import { Toaster } from "sonner"
 import api from "./lib/axios"
+import Lottie from "lottie-react"
+import booksAnimation from "./assets/animated/Books.json"
 
 // Lazy load all pages
 const LoginPage = lazy(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })))
 const RegisterPage = lazy(() => import("./pages/RegisterPage").then(m => ({ default: m.RegisterPage })))
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword").then(m => ({ default: m.ForgotPassword })))
+const ResetPassword = lazy(() => import("./pages/ResetPassword").then(m => ({ default: m.ResetPassword })))
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })))
 const UnauthorizedPage = lazy(() => import("./pages/UnauthorizedPage").then(m => ({ default: m.UnauthorizedPage })))
 const AdminLayout = lazy(() => import("./layouts/AdminLayout").then(m => ({ default: m.AdminLayout })))
@@ -25,12 +29,21 @@ const AdminAddBookPage = lazy(() => import("./pages/admin/AddBookPage").then(m =
 
 
 
+const LottieComponent = (Lottie as any).default || Lottie;
+
 // Premium Loading Spinner
 const LoadingSpinner = () => (
-  <div className="flex h-svh w-full items-center justify-center bg-[#0f172a]">
-    <div className="relative flex h-20 w-20 items-center justify-center">
-      <div className="absolute h-full w-full rounded-full border-4 border-blue-500/20 border-t-blue-500 animate-spin" />
-      <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-sm animate-pulse" />
+  <div className="flex flex-col h-svh w-full items-center justify-center bg-[#0f172a] gap-2">
+    <div className="w-48 h-48 flex items-center justify-center">
+      <LottieComponent animationData={booksAnimation} loop={true} />
+    </div>
+    <div className="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-1 select-none">
+      <span>Loading</span>
+      <span className="flex gap-0.5">
+        <span className="animate-bounce inline-block" style={{ animationDelay: '0ms', animationDuration: '1s' }}>.</span>
+        <span className="animate-bounce inline-block" style={{ animationDelay: '150ms', animationDuration: '1s' }}>.</span>
+        <span className="animate-bounce inline-block" style={{ animationDelay: '300ms', animationDuration: '1s' }}>.</span>
+      </span>
     </div>
   </div>
 )
@@ -131,6 +144,22 @@ function App() {
             element={
               <PublicRoute>
                 <RegisterPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PublicRoute>
+                <ResetPassword />
               </PublicRoute>
             }
           />

@@ -156,7 +156,7 @@ export function BooksPage() {
     }
 
     return (
-        <div className="max-w-[1600px] mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-500">
+        <div className="max-w-[1600px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header Section */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <div>
