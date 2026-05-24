@@ -39,12 +39,12 @@ export function AddBookPage() {
     }
 
     return (
-        <div className="max-w-[1000px] mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-500 pb-10">
+        <div className="max-w-[1000px] mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
             {/* Header Section */}
             <div className="flex items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
+                <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-10 w-10 rounded-full hover:bg-slate-100 shrink-0"
                     onClick={() => navigate("/admin/books")}
                 >
@@ -158,15 +158,15 @@ export function AddBookPage() {
                 </div>
 
                 <div className="p-8 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row justify-end gap-4 items-center">
-                    <Button 
-                        variant="outline" 
-                        onClick={() => navigate("/admin/books")} 
+                    <Button
+                        variant="outline"
+                        onClick={() => navigate("/admin/books")}
                         className="w-full sm:w-auto h-14 rounded-xl font-bold text-slate-600 text-base px-8"
                     >
                         Cancel
                     </Button>
-                    <Button 
-                        onClick={handleSaveBook} 
+                    <Button
+                        onClick={handleSaveBook}
                         className="w-full sm:w-auto h-14 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base px-10 shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95"
                     >
                         Add Book to Catalog

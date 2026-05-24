@@ -215,14 +215,6 @@ export function LoginPage() {
               Sign up
             </Link>
           </div>
-          <div className="mt-4 text-center">
-            <Link
-              to="/student/dashboard"
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Dev Access
-            </Link>
-          </div>
         </div>
       </div>
     </div>
