@@ -41,16 +41,17 @@ export function RegisterPage() {
   const isSubmitting = form.formState.isSubmitting;
 
   const handleSubmit = async (data: RegisterSchema) => {
-    const { confirmPassword, ...payload } = data;
+    const { confirmPassword: _confirmPassword, ...payload } = data;
 
     try {
       await api.post("/auth/register", payload);
       toast.success("Account created successfully! Please sign in.");
       navigate("/student/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Registration failed:", error);
+      const err = error as { response?: { data?: { message?: string } } };
       toast.error(
-        error.response?.data?.message ||
+        err.response?.data?.message ||
         "Registration failed. Please try again."
       );
     }

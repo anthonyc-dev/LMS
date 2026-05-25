@@ -1,9 +1,9 @@
-import { useState } from "react"
-import { BookOpen, Clock, AlertCircle, Calendar, Bookmark, Star, ArrowRight, Library, RotateCcw, Play } from "lucide-react"
+
+import { BookOpen, Clock, Calendar, Bookmark, Star, ArrowRight, Library, RotateCcw, Play } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress"
+import { Progress } from "@/components/ui/progress"
 
 import book1Img from "@/assets/dashboard/book1.png"
 import book2Img from "@/assets/dashboard/book2.png"

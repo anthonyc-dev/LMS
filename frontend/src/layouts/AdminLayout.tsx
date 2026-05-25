@@ -9,6 +9,10 @@ import {
   CalendarIcon,
   HomeIcon,
   Book,
+  Package,
+  Tag,
+  Layers,
+  Users,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 
@@ -44,12 +48,37 @@ const menuItems = [
     path: "/student/schedule",
     roles: ["admin", "student", "faculty"]
   },
+    {
+    icon: Users,
+    label: "User Management",
+    path: "/admin/users",
+    roles: ["admin"]
+  },
+  {
+    icon: Layers,
+    label: "Shelves",
+    path: "/admin/shelves",
+    roles: ["admin"]
+  },
+  {
+    icon: Tag,
+    label: "Categories",
+    path: "/admin/categories",
+    roles: ["admin"]
+  },
   {
     icon: Book,
-    label: "Admin Books",
+    label: "Books",
     path: "/admin/books",
     roles: ["admin"]
   },
+  {
+    icon: Package,
+    label: "Inventory",
+    path: "/admin/inventory",
+    roles: ["admin"]
+  },
+
 ];
 
 export function AdminLayout() {

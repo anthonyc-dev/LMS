@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Search, Star, Bookmark, ArrowRight, Grid2X2, List, SlidersHorizontal, Sparkles, Heart } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -16,7 +16,6 @@ import { Kbd } from "@/components/ui/kbd"
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 
 // Asset imports
-import bannerImg from "@/assets/dashboard/banner.png"
 import book1Img from "@/assets/dashboard/book1.png"
 import book2Img from "@/assets/dashboard/book2.png"
 import bookDark1Img from "@/assets/dashboard/book_dark1.png"
@@ -64,7 +63,7 @@ export function BrowseBooksPage() {
           </div>
 
           <div className="flex flex-row flex-wrap items-center gap-2 md:gap-3 w-full lg:w-auto">
-            <Select value={activeCategory} onValueChange={setActiveCategory}>
+            <Select value={activeCategory} onValueChange={(v) => { if (v !== null) setActiveCategory(v) }}>
               <SelectTrigger className="h-10 md:h-11 px-3 md:px-4 rounded-lg bg-white/80 border-slate-200/60 shadow-xs flex-1 sm:flex-none sm:w-[130px] md:w-[140px] font-medium text-slate-600 text-sm">
                 <div className="flex items-center gap-2 truncate">
                   <Grid2X2 size={14} className="text-slate-400 shrink-0" />
