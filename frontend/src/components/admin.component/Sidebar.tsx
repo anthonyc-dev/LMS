@@ -83,7 +83,7 @@ export function SidebarContentInner({
                         <SidebarMenuButton
                             size="lg"
                             tooltip="NCMC Library"
-                            onClick={() => navigate("/admin/dashboard")}
+                            onClick={() => navigate("/student/dashboard")}
                             className={`hover:bg-white/5 hover:text-white transition-all duration-300 h-auto py-2 group flex items-center justify-center ${isCollapsed ? 'w-full px-0' : 'w-full px-2'}`}
                         >
                             <div className={`flex items-center ${isCollapsed ? '' : 'gap-3 w-full'}`}>
@@ -100,7 +100,7 @@ export function SidebarContentInner({
                                             NCMC Library
                                         </span>
                                         <span className="text-[10px] uppercase font-semibold text-white/50 tracking-wider leading-tight mt-0.5">
-                                            Admin Panel
+                                            {user ? `${user.role!.toUpperCase()} Panel` : "Panel"}
                                         </span>
                                     </div>
                                 )}
@@ -151,7 +151,7 @@ export function SidebarContentInner({
                                                             <SidebarMenuSubItem key={subItem.label}>
                                                                 <SidebarMenuSubButton
                                                                     onClick={() => navigate(subItem.path)}
-                                                                    className={`px-3 py-2 rounded-lg text-xs transition-all duration-300 
+                                                                    className={`px-3 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer
                                                                         ${location.pathname === subItem.path
                                                                             ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
                                                                             : 'text-white/60 hover:text-white hover:bg-white/5'}`}
@@ -204,7 +204,7 @@ export function SidebarContentInner({
                                         tooltip="Admin Settings"
                                     >
                                         <div className={`flex items-center w-full ${isCollapsed ? "justify-center" : "gap-3"}`}>
-                                            <div className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 shadow-lg transition-all duration-300 ${isCollapsed ? "size-8" : "size-9"}`}>
+                                            <div className={`flex shrink-0 items-center justify-center rounded-full bg-linear-to-tr from-blue-600 to-indigo-500 shadow-lg transition-all duration-300 ${isCollapsed ? "size-8" : "size-9"}`}>
                                                 <UserIcon className={`${isCollapsed ? "size-4" : "size-5"} text-white`} />
                                             </div>
                                             {!isCollapsed && (

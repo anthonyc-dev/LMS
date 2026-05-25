@@ -43,10 +43,11 @@ export function ResetPassword() {
 
             toast.success(response.data.message || "Password reset successful! Please sign in with your new password.");
             navigate("/login");
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Password reset failed:", error);
+            const err = error as { response?: { data?: { message?: string } } };
             toast.error(
-                error.response?.data?.message || "Reset session expired or invalid. Please request a new OTP."
+                err.response?.data?.message || "Reset session expired or invalid. Please request a new OTP."
             );
         }
     };
@@ -60,7 +61,7 @@ export function ResetPassword() {
                     alt=""
                     className="absolute inset-0 h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/60 to-transparent" />
                 <div className="relative z-10 flex flex-col items-center text-center max-w-md">
                     <div className="flex shrink-0 items-center justify-center rounded-lg overflow-hidden size-28">
                         <img

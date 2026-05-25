@@ -46,11 +46,10 @@ export function ForgotPassword() {
             setEmail(data.email);
             setStep("otp");
             toast.success("An OTP has been sent to your email.");
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Forgot password request failed:", error);
-            toast.error(
-                error.response?.data?.message || "Something went wrong. Please try again."
-            );
+            const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Something went wrong. Please try again.";
+            toast.error(msg);
         }
     };
 
@@ -67,11 +66,10 @@ export function ForgotPassword() {
             toast.success(response.data.message || "OTP verified successfully!");
             // Redirect to ResetPassword page
             navigate("/reset-password");
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("OTP verification failed:", error);
-            toast.error(
-                error.response?.data?.message || "Invalid OTP code. Please try again."
-            );
+            const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Invalid OTP code. Please try again.";
+            toast.error(msg);
         } finally {
             setIsVerifyingOtp(false);
         }
@@ -83,11 +81,10 @@ export function ForgotPassword() {
             await api.post("/auth/forgot-password", { email });
             toast.success("OTP has been resent to your email.");
             setOtp("");
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Resending OTP failed:", error);
-            toast.error(
-                error.response?.data?.message || "Could not resend OTP. Please try again."
-            );
+            const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || "Could not resend OTP. Please try again.";
+            toast.error(msg);
         } finally {
             setIsResending(false);
         }

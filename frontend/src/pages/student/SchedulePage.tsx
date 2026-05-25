@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   format,
   addMonths,
@@ -10,9 +10,7 @@ import {
   isSameMonth,
   isSameDay,
   addDays,
-  eachDayOfInterval,
   isToday,
-  parseISO
 } from 'date-fns';
 import {
   ChevronLeft,
@@ -179,11 +177,9 @@ const SchedulePage = () => {
     const rows = [];
     let days = [];
     let day = startDate;
-    let formattedDate = "";
-
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
-        formattedDate = format(day, "d");
+        const formattedDate = format(day, "d");
         const cloneDay = day;
         const dayEvents = events.filter(e => isSameDay(e.start, cloneDay));
 

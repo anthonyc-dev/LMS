@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   Form,
   FormControl,
@@ -42,10 +42,11 @@ export function LoginPage() {
       toast.success("Login successful!");
 
       navigate("/student/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login failed:", error);
+      const err = error as { response?: { data?: { message?: string } } };
       toast.error(
-        error.response?.data?.message || "Invalid credentials. Please try again."
+        err.response?.data?.message || "Invalid credentials. Please try again."
       );
     }
   };

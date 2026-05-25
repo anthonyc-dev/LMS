@@ -1,10 +1,11 @@
 import { lazy, Suspense, useEffect, useState } from "react"
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useAuthStore } from "./store/authStore"
 import { Toaster } from "sonner"
 import api from "./lib/axios"
-import Lottie from "lottie-react"
-import booksAnimation from "./assets/animated/Books.json"
+import PublicRoute from "./components/commons/PublicRoute"
+import ProtectedRoute from "./components/commons/ProtectedRoute"
+import LoadingSpinner from "./components/commons/GlobalLoading"
 
 // Lazy load all pages
 const LoginPage = lazy(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })))
@@ -15,7 +16,7 @@ const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then(m => ({ defa
 const UnauthorizedPage = lazy(() => import("./pages/UnauthorizedPage").then(m => ({ default: m.UnauthorizedPage })))
 const AdminLayout = lazy(() => import("./layouts/AdminLayout").then(m => ({ default: m.AdminLayout })))
 const BrowseBooksPage = lazy(() => import("./pages/student/BrowseBooksPage").then(m => ({ default: m.BrowseBooksPage })))
-const AdminDashboardPage = lazy(() => import("./pages/student/AdminDashboardPage").then(m => ({ default: m.AdminDashboardPage })))
+const DashboardPage = lazy(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })))
 const BorrowBooksPage = lazy(() => import("./pages/student/BorrowBooksPage").then(m => ({ default: m.BorrowBooksPage })))
 const BorrowingHistoryPage = lazy(() => import("./pages/student/BorrowingHistoryPage").then(m => ({ default: m.BorrowingHistoryPage })))
 const MyBooksPage = lazy(() => import("./pages/student/MyBooksPage").then(m => ({ default: m.MyBooksPage })))
@@ -26,56 +27,13 @@ const SchedulePage = lazy(() => import("./pages/student/SchedulePage").then(m =>
 // Admin pages
 const AdminBooksPage = lazy(() => import("./pages/admin/BooksPage").then(m => ({ default: m.BooksPage })))
 const AdminAddBookPage = lazy(() => import("./pages/admin/AddBookPage").then(m => ({ default: m.AddBookPage })))
+const AdminInventoryPage = lazy(() => import("./pages/admin/InventoryPage").then(m => ({ default: m.InventoryPage })))
+const AdminCategoryPage = lazy(() => import("./pages/admin/CategoryPage").then(m => ({ default: m.CategoryPage })))
+const AdminShelfPage = lazy(() => import("./pages/admin/ShelfPage").then(m => ({ default: m.ShelfPage })))
+const AdminUserManagementPage = lazy(() => import("./pages/admin/UserManagement").then(m => ({ default: m.UserManagement })))
 
 
 
-const LottieComponent = (Lottie as any).default || Lottie;
-
-// Premium Loading Spinner
-const LoadingSpinner = () => (
-  <div className="flex flex-col h-svh w-full items-center justify-center bg-[#0f172a] gap-2">
-    <div className="w-48 h-48 flex items-center justify-center">
-      <LottieComponent animationData={booksAnimation} loop={true} />
-    </div>
-    <div className="text-slate-400 text-xs font-bold uppercase tracking-widest flex items-center gap-1 select-none">
-      <span>Loading</span>
-      <span className="flex gap-0.5">
-        <span className="animate-bounce inline-block" style={{ animationDelay: '0ms', animationDuration: '1s' }}>.</span>
-        <span className="animate-bounce inline-block" style={{ animationDelay: '150ms', animationDuration: '1s' }}>.</span>
-        <span className="animate-bounce inline-block" style={{ animationDelay: '300ms', animationDuration: '1s' }}>.</span>
-      </span>
-    </div>
-  </div>
-)
-
-// Protected Route Component
-const ProtectedRoute = ({ allowedRoles }: { allowedRoles?: string[] }) => {
-  const { isAuthenticated, user } = useAuthStore();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRoles) {
-    if (!user?.role || !allowedRoles.includes(user.role)) {
-      // Redirect to unauthorized page if role doesn't match
-      return <Navigate to="/unauthorized" replace />;
-    }
-  }
-
-  return <Outlet />;
-};
-
-// Public Route Component (Redirects to dashboard if already logged in)
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
-  if (isAuthenticated) {
-    return <Navigate to="/student/dashboard" replace />;
-  }
-
-  return <>{children}</>;
-};
 
 function App() {
   const [isInitializing, setIsInitializing] = useState(true);
@@ -97,7 +55,7 @@ function App() {
 
         // 4. Hydrate the store
         setAuth(user, token);
-      } catch (error) {
+      } catch {
         console.log("No active session found or session expired");
         useAuthStore.getState().logout();
       } finally {
@@ -169,7 +127,7 @@ function App() {
           {/* <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="dashboard" element={<AdminDashboardPage />} />
+              <Route path="dashboard" element={<DashboardPage />} />
               <Route path="books">
                 <Route index element={<AdminBooksPage />} />
                 <Route path="browse" element={<BrowseBooksPage />} />
@@ -186,7 +144,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={["admin", "student", "faculty"]} />}>
             <Route path="/student" element={<AdminLayout />}>
               <Route index element={<Navigate to="/student/dashboard" replace />} />
-              <Route path="dashboard" element={<AdminDashboardPage />} />
+              <Route path="dashboard" element={<DashboardPage />} />
               <Route path="books">
                 <Route index element={<MyBooksPage />} />
                 <Route path="browse" element={<BrowseBooksPage />} />
@@ -204,6 +162,10 @@ function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="books" element={<AdminBooksPage />} />
               <Route path="books/add" element={<AdminAddBookPage />} />
+              <Route path="inventory" element={<AdminInventoryPage />} />
+              <Route path="categories" element={<AdminCategoryPage />} />
+              <Route path="shelves" element={<AdminShelfPage />} />
+              <Route path="users" element={<AdminUserManagementPage />} />
             </Route>
           </Route>
 
