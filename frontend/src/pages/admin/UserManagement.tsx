@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import {
   Search,
   Plus,
@@ -25,8 +25,9 @@ import {
   EyeOff,
   CheckCircle2,
   Clock,
-  Sparkles,
+  ChevronDown,
 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -668,6 +669,8 @@ const ROLE_TABS: {
 // ---------------------------------------------------------------------------
 
 export function UserManagement() {
+  const isMobile = useIsMobile();
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>(INITIAL_USERS);
   const [search, setSearch] = useState("");
   const [roleTab, setRoleTab] = useState<"all" | Role>("all");
@@ -791,15 +794,9 @@ export function UserManagement() {
         <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-violet-400/5 blur-3xl" />
 
         <div className="relative z-10 space-y-1">
-          <div className="flex items-center gap-2">
-            <Sparkles className="size-4 animate-pulse text-indigo-500" />
-            <span className="text-[10px] font-bold tracking-widest text-indigo-600 uppercase">
-              User Control Center
-            </span>
-          </div>
           <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
             <div className="rounded-xl bg-indigo-50 p-2">
-              <Users className="size-7 text-indigo-600" />
+              <Users className="size-7 text-slate-900" />
             </div>
             User Management
           </h1>
@@ -811,7 +808,7 @@ export function UserManagement() {
         <Button
           id="add-user-btn"
           onClick={openAddModal}
-          className="relative z-10 h-11 gap-2 rounded-xl bg-indigo-600 px-6 font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:scale-105 hover:bg-indigo-700 active:scale-95"
+          className="relative z-10 h-11 cursor-pointer gap-2 rounded-xl bg-slate-900 px-6 font-bold text-white shadow-lg shadow-slate-200 transition-all hover:scale-105 hover:bg-slate-800 active:scale-95"
         >
           <Plus className="size-4" />
           Add New User
@@ -911,42 +908,44 @@ export function UserManagement() {
 
       {/* ── Table Card ── */}
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-        {/* Role Tabs */}
-        <div className="flex items-center gap-1 border-b border-slate-100 bg-slate-50/60 px-5 pt-4">
-          {ROLE_TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = roleTab === tab.value;
-            return (
-              <button
-                key={tab.value}
-                onClick={() => onRoleTab(tab.value)}
-                className={`flex items-center gap-2 rounded-t-lg px-4 py-2.5 text-xs font-bold transition-all ${
-                  isActive
-                    ? "border border-b-0 border-slate-200 bg-white text-indigo-600 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                <Icon className="size-3.5" />
-                {tab.label}
-                <span
-                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
+        {/* Role Tabs (Desktop) */}
+        {!isMobile && (
+          <div className="flex items-center gap-1 border-b border-slate-100 bg-slate-50/60 px-5 pt-4">
+            {ROLE_TABS.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = roleTab === tab.value;
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => onRoleTab(tab.value)}
+                  className={`flex items-center gap-2 rounded-t-lg px-4 py-2.5 text-xs font-bold transition-all ${
                     isActive
-                      ? "bg-indigo-100 text-indigo-600"
-                      : "bg-slate-200 text-slate-500"
+                      ? "border border-b-0 border-slate-200 bg-white text-indigo-600 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
-                  {tab.value === "all"
-                    ? totalUsers
-                    : tab.value === "admin"
-                      ? adminCount
-                      : tab.value === "faculty"
-                        ? facultyCount
-                        : studentCount}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                  <Icon className="size-3.5" />
+                  {tab.label}
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
+                      isActive
+                        ? "bg-indigo-100 text-indigo-600"
+                        : "bg-slate-200 text-slate-500"
+                    }`}
+                  >
+                    {tab.value === "all"
+                      ? totalUsers
+                      : tab.value === "admin"
+                        ? adminCount
+                        : tab.value === "faculty"
+                          ? facultyCount
+                          : studentCount}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Toolbar */}
         <div className="flex flex-col items-start justify-between gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center">
@@ -977,6 +976,36 @@ export function UserManagement() {
               )}
             </div>
 
+            {/* Role Filter (Mobile) */}
+            {isMobile && (
+              <Select
+                value={roleTab}
+                onValueChange={(v) => onRoleTab(v as typeof roleTab)}
+              >
+                <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 sm:w-44">
+                  <Users className="mr-1.5 size-3.5 text-slate-400" />
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                  {ROLE_TABS.map((tab) => {
+                    const count =
+                      tab.value === "all"
+                        ? totalUsers
+                        : tab.value === "admin"
+                          ? adminCount
+                          : tab.value === "faculty"
+                            ? facultyCount
+                            : studentCount;
+                    return (
+                      <SelectItem key={tab.value} value={tab.value}>
+                        {tab.label} ({count})
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            )}
+
             {/* Status filter */}
             <Select value={statusFilter} onValueChange={onStatus}>
               <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 sm:w-44">
@@ -998,25 +1027,33 @@ export function UserManagement() {
           <Table>
             <TableHeader className="border-b border-slate-100 bg-slate-50">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[280px] py-4 pl-5 font-bold text-slate-500">
+                <TableHead className="w-[280px] py-4 pl-5 text-xs font-bold tracking-wider text-slate-500 uppercase">
                   User
                 </TableHead>
-                <TableHead className="py-4 font-bold text-slate-500">
-                  Role
-                </TableHead>
-                <TableHead className="py-4 font-bold text-slate-500">
-                  Status
-                </TableHead>
-                <TableHead className="py-4 font-bold text-slate-500">
-                  Joined
-                </TableHead>
-                <TableHead className="py-4 font-bold text-slate-500">
-                  Last Active
-                </TableHead>
-                <TableHead className="py-4 text-center font-bold text-slate-500">
-                  Borrowed
-                </TableHead>
-                <TableHead className="py-4 pr-5 text-right font-bold text-slate-500">
+                {!isMobile && (
+                  <>
+                    <TableHead className="py-4 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                      Role
+                    </TableHead>
+                    <TableHead className="py-4 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                      Status
+                    </TableHead>
+                  </>
+                )}
+                {!isMobile && (
+                  <>
+                    <TableHead className="hidden py-4 text-xs font-bold tracking-wider text-slate-500 uppercase md:table-cell">
+                      Joined
+                    </TableHead>
+                    <TableHead className="hidden py-4 text-xs font-bold tracking-wider text-slate-500 uppercase lg:table-cell">
+                      Last Active
+                    </TableHead>
+                    <TableHead className="hidden py-4 text-center text-xs font-bold tracking-wider text-slate-500 uppercase sm:table-cell">
+                      Borrowed
+                    </TableHead>
+                  </>
+                )}
+                <TableHead className="py-4 pr-5 text-right text-xs font-bold tracking-wider text-slate-500 uppercase">
                   Actions
                 </TableHead>
               </TableRow>
@@ -1025,7 +1062,7 @@ export function UserManagement() {
               {paginated.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={isMobile ? 4 : 7}
                     className="py-16 text-center text-slate-400"
                   >
                     <div className="flex flex-col items-center gap-3">
@@ -1048,162 +1085,250 @@ export function UserManagement() {
                   const rc = roleConfig(user.role);
                   const sc = statusConfig(user.status);
                   const RoleIcon = rc.icon;
+                  const isExpanded = isMobile && expandedRow === user.id;
                   return (
-                    <TableRow
-                      key={user.id}
-                      className="group transition-colors hover:bg-slate-50/60"
-                    >
-                      {/* User cell */}
-                      <TableCell className="py-3.5 pl-5">
-                        <div className="flex items-center gap-3">
-                          {/* Avatar */}
-                          <div
-                            className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-black text-white shadow-sm ring-2 ring-white transition-all group-hover:scale-110 ${user.avatarColor}`}
-                          >
-                            {getInitials(user.fullName)}
-                            {/* Online dot */}
-                            {user.status === "active" && (
-                              <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="max-w-[160px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
-                              {user.fullName}
-                            </p>
-                            <p className="truncate text-xs font-medium text-slate-500">
-                              {user.email}
-                            </p>
-                            {user.phone && (
-                              <p className="text-[10px] text-slate-400">
-                                {user.phone}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-
-                      {/* Role */}
-                      <TableCell>
-                        <Badge
-                          className={`flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold shadow-sm ${rc.cls}`}
-                        >
-                          <RoleIcon className="size-3" />
-                          {rc.label}
-                        </Badge>
-                      </TableCell>
-
-                      {/* Status */}
-                      <TableCell>
-                        <div
-                          className={`flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold ${sc.cls}`}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${sc.dot} ${user.status === "active" ? "animate-pulse" : ""}`}
-                          />
-                          {sc.label}
-                        </div>
-                      </TableCell>
-
-                      {/* Joined */}
-                      <TableCell>
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
-                          <Calendar className="size-3.5 text-slate-400" />
-                          {user.joinedAt}
-                        </div>
-                      </TableCell>
-
-                      {/* Last Active */}
-                      <TableCell>
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
-                          <Clock className="size-3.5 text-slate-400" />
-                          {user.lastActive}
-                        </div>
-                      </TableCell>
-
-                      {/* Borrowed */}
-                      <TableCell className="text-center">
-                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-black text-slate-700">
-                          {user.borrowedBooks}
-                        </span>
-                      </TableCell>
-
-                      {/* Actions */}
-                      <TableCell className="pr-5 text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            render={
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-lg text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-700"
-                              >
-                                <MoreHorizontal className="size-4" />
-                              </Button>
-                            }
-                          />
-
-                          <DropdownMenuContent
-                            align="end"
-                            className="w-44 rounded-xl border-slate-100 shadow-xl"
-                          >
-                            <DropdownMenuItem
-                              onClick={() => openEditModal(user)}
-                              className="gap-2 rounded-lg font-semibold text-slate-700 focus:bg-indigo-50 focus:text-indigo-700"
+                    <Fragment key={user.id}>
+                      <TableRow
+                        className={`group transition-colors hover:bg-slate-50/60 ${isMobile ? "cursor-pointer" : ""}`}
+                        onClick={() => {
+                          if (isMobile) {
+                            setExpandedRow(isExpanded ? null : user.id);
+                          }
+                        }}
+                      >
+                        {/* User cell */}
+                        <TableCell className="py-3.5 pl-5">
+                          <div className="flex items-center gap-3">
+                            {/* Avatar */}
+                            <div
+                              className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-black text-white shadow-sm ring-2 ring-white transition-all group-hover:scale-110 ${user.avatarColor}`}
                             >
-                              <Edit className="size-4" />
-                              Edit User
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setUsers((prev) =>
-                                  prev.map((u) =>
-                                    u.id === user.id
-                                      ? {
-                                          ...u,
-                                          status:
-                                            u.status === "active"
-                                              ? "suspended"
-                                              : "active",
-                                        }
-                                      : u,
-                                  ),
-                                );
-                                toast.success(
-                                  user.status === "active"
-                                    ? "User suspended"
-                                    : "User reactivated",
-                                );
-                              }}
-                              className={`gap-2 rounded-lg font-semibold focus:bg-amber-50 focus:text-amber-700 ${
-                                user.status === "active"
-                                  ? "text-amber-600"
-                                  : "text-emerald-600"
-                              }`}
-                            >
-                              {user.status === "active" ? (
-                                <>
-                                  <UserX className="size-4" />
-                                  Suspend
-                                </>
-                              ) : (
-                                <>
-                                  <UserCheck className="size-4" />
-                                  Reactivate
-                                </>
+                              {getInitials(user.fullName)}
+                              {/* Online dot */}
+                              {user.status === "active" && (
+                                <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                               )}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-slate-100" />
-                            <DropdownMenuItem
-                              onClick={() => openDeleteModal(user)}
-                              className="gap-2 rounded-lg font-semibold text-rose-600 focus:bg-rose-50 focus:text-rose-700"
-                            >
-                              <Trash2 className="size-4" />
-                              Delete User
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="max-w-[160px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                                {user.fullName}
+                              </p>
+                              <p className="truncate text-xs font-medium text-slate-500">
+                                {user.email}
+                              </p>
+                              {user.phone && (
+                                <p className="text-[10px] text-slate-400">
+                                  {user.phone}
+                                </p>
+                              )}
+                            </div>
+                            {isMobile && (
+                              <div className="ml-auto flex items-center justify-end">
+                                <ChevronDown
+                                  className={`size-4 text-slate-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+
+                        {/* Role */}
+                        {!isMobile && (
+                          <>
+                            <TableCell>
+                              <Badge
+                                className={`flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold shadow-sm ${rc.cls}`}
+                              >
+                                <RoleIcon className="size-3" />
+                                {rc.label}
+                              </Badge>
+                            </TableCell>
+
+                            {/* Status */}
+                            <TableCell>
+                              <div
+                                className={`flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold ${sc.cls}`}
+                              >
+                                <span
+                                  className={`h-1.5 w-1.5 rounded-full ${sc.dot} ${user.status === "active" ? "animate-pulse" : ""}`}
+                                />
+                                {sc.label}
+                              </div>
+                            </TableCell>
+                          </>
+                        )}
+
+                        {/* Joined */}
+                        {!isMobile && (
+                          <>
+                            <TableCell className="hidden md:table-cell">
+                              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                                <Calendar className="size-3.5 text-slate-400" />
+                                {user.joinedAt}
+                              </div>
+                            </TableCell>
+
+                            {/* Last Active */}
+                            <TableCell className="hidden lg:table-cell">
+                              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+                                <Clock className="size-3.5 text-slate-400" />
+                                {user.lastActive}
+                              </div>
+                            </TableCell>
+
+                            {/* Borrowed */}
+                            <TableCell className="hidden text-center sm:table-cell">
+                              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-black text-slate-700">
+                                {user.borrowedBooks}
+                              </span>
+                            </TableCell>
+                          </>
+                        )}
+
+                        {/* Actions */}
+                        <TableCell className="pr-5 text-right">
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onTouchStart={(e) => e.stopPropagation()}
+                          >
+                            <DropdownMenu modal={false}>
+                              <DropdownMenuTrigger
+                                render={
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={`h-8 w-8 rounded-lg text-slate-400 transition-opacity hover:bg-slate-100 hover:text-slate-700 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                                  >
+                                    <MoreHorizontal className="size-4" />
+                                  </Button>
+                                }
+                              />
+
+                              <DropdownMenuContent
+                                align="end"
+                                sideOffset={8}
+                                className="w-44 rounded-xl border-slate-100 shadow-xl"
+                              >
+                                <DropdownMenuItem
+                                  onClick={() => openEditModal(user)}
+                                  className="gap-2 rounded-lg font-semibold text-slate-700 focus:bg-indigo-50 focus:text-indigo-700"
+                                >
+                                  <Edit className="size-4" />
+                                  Edit User
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setUsers((prev) =>
+                                      prev.map((u) =>
+                                        u.id === user.id
+                                          ? {
+                                              ...u,
+                                              status:
+                                                u.status === "active"
+                                                  ? "suspended"
+                                                  : "active",
+                                            }
+                                          : u,
+                                      ),
+                                    );
+                                    toast.success(
+                                      user.status === "active"
+                                        ? "User suspended"
+                                        : "User reactivated",
+                                    );
+                                  }}
+                                  className={`gap-2 rounded-lg font-semibold focus:bg-amber-50 focus:text-amber-700 ${
+                                    user.status === "active"
+                                      ? "text-amber-600"
+                                      : "text-emerald-600"
+                                  }`}
+                                >
+                                  {user.status === "active" ? (
+                                    <>
+                                      <UserX className="size-4" />
+                                      Suspend
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UserCheck className="size-4" />
+                                      Reactivate
+                                    </>
+                                  )}
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="bg-slate-100" />
+                                <DropdownMenuItem
+                                  onClick={() => openDeleteModal(user)}
+                                  className="gap-2 rounded-lg font-semibold text-rose-600 focus:bg-rose-50 focus:text-rose-700"
+                                >
+                                  <Trash2 className="size-4" />
+                                  Delete User
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      {isExpanded && (
+                        <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
+                          <TableCell
+                            colSpan={2}
+                            className="border-b border-slate-100 p-0"
+                          >
+                            <div className="flex flex-col gap-3 px-5 py-4 text-sm">
+                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Role
+                                </span>
+                                <Badge
+                                  className={`flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold shadow-sm ${rc.cls}`}
+                                >
+                                  <RoleIcon className="size-3" />
+                                  {rc.label}
+                                </Badge>
+                              </div>
+                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Status
+                                </span>
+                                <div
+                                  className={`flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold ${sc.cls}`}
+                                >
+                                  <span
+                                    className={`h-1.5 w-1.5 rounded-full ${sc.dot} ${user.status === "active" ? "animate-pulse" : ""}`}
+                                  />
+                                  {sc.label}
+                                </div>
+                              </div>
+                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Joined
+                                </span>
+                                <span className="font-bold text-slate-800">
+                                  {user.joinedAt}
+                                </span>
+                              </div>
+                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Last Active
+                                </span>
+                                <span className="font-bold text-slate-800">
+                                  {user.lastActive}
+                                </span>
+                              </div>
+                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Borrowed
+                                </span>
+                                <span className="font-bold text-slate-800">
+                                  {user.borrowedBooks} books
+                                </span>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </Fragment>
                   );
                 })
               )}
@@ -1213,11 +1338,11 @@ export function UserManagement() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-4">
-            <p className="text-xs font-semibold text-slate-500">
+          <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:flex-row">
+            <p className="order-2 text-xs font-medium text-slate-500 sm:order-1">
               Showing{" "}
               <span className="font-bold text-slate-700">
-                {(page - 1) * ROWS_PER_PAGE + 1}–
+                {filtered.length === 0 ? 0 : (page - 1) * ROWS_PER_PAGE + 1}–
                 {Math.min(page * ROWS_PER_PAGE, filtered.length)}
               </span>{" "}
               of{" "}
@@ -1226,7 +1351,7 @@ export function UserManagement() {
               </span>{" "}
               users
             </p>
-            <div className="flex items-center gap-2">
+            <div className="order-1 flex items-center gap-2 sm:order-2">
               <Button
                 variant="outline"
                 size="icon"
@@ -1241,9 +1366,9 @@ export function UserManagement() {
                   key={p}
                   variant={p === page ? "default" : "outline"}
                   size="icon"
-                  className={`h-8 w-8 rounded-lg text-xs font-bold ${
+                  className={`h-8 w-8 cursor-pointer rounded-lg text-xs font-bold ${
                     p === page
-                      ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700"
+                      ? "bg-slate-900 text-white shadow-sm shadow-slate-200 hover:bg-slate-800"
                       : "border-slate-200 text-slate-600"
                   }`}
                   onClick={() => setPage(p)}

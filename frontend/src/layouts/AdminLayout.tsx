@@ -13,23 +13,25 @@ import {
   Tag,
   Layers,
   Users,
+  ClipboardList,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 
 import { SidebarContentInner } from "@/components/admin.component/Sidebar";
+import { MobileNav } from "@/components/admin.component/MobileNav";
 
 const menuItems = [
   {
     icon: HomeIcon,
     label: "Dashboard",
     path: "/student/dashboard",
-    roles: ["admin", "student", "faculty"]
+    roles: ["admin", "student", "faculty"],
   },
   {
     icon: LibraryIcon,
     label: "Books",
     path: "/student/books",
-    roles: ["admin", "student", "faculty"],
+    roles: ["student", "faculty"],
     items: [
       { label: "Browse Books", path: "/student/books/browse" },
       { label: "Borrow Books", path: "/student/books/borrow" },
@@ -40,45 +42,50 @@ const menuItems = [
     icon: Book,
     label: "My Books",
     path: "/student/books",
-    roles: ["student", "faculty"] // Example: might not need this for admin if admin has Admin Books
+    roles: ["student", "faculty"], // Example: might not need this for admin if admin has Admin Books
   },
   {
     icon: CalendarIcon,
     label: "Schedule",
     path: "/student/schedule",
-    roles: ["admin", "student", "faculty"]
+    roles: ["admin", "student", "faculty"],
   },
-    {
+  {
     icon: Users,
     label: "User Management",
     path: "/admin/users",
-    roles: ["admin"]
+    roles: ["admin"],
   },
   {
     icon: Layers,
     label: "Shelves",
     path: "/admin/shelves",
-    roles: ["admin"]
+    roles: ["admin"],
   },
   {
     icon: Tag,
     label: "Categories",
     path: "/admin/categories",
-    roles: ["admin"]
+    roles: ["admin"],
   },
   {
     icon: Book,
     label: "Books",
     path: "/admin/books",
-    roles: ["admin"]
+    roles: ["admin"],
   },
   {
     icon: Package,
     label: "Inventory",
     path: "/admin/inventory",
-    roles: ["admin"]
+    roles: ["admin"],
   },
-
+  {
+    icon: ClipboardList,
+    label: "Borrowing History",
+    path: "/admin/borrowing-history",
+    roles: ["admin"],
+  },
 ];
 
 export function AdminLayout() {
@@ -97,21 +104,31 @@ export function AdminLayout() {
         <Sidebar
           collapsible="icon"
           variant="sidebar"
-          className="text-white"
+          className="hidden border-none text-white md:flex"
         >
-          <SidebarContentInner navigate={navigate} location={location} menuItems={filteredMenuItems} />
+          <SidebarContentInner
+            navigate={navigate}
+            location={location}
+            menuItems={filteredMenuItems}
+          />
         </Sidebar>
-        <main className="flex flex-1 flex-col">
-          <header className="flex h-14 items-center gap-4 border-b px-4 lg:px-6 bg-white/50 backdrop-blur-md sticky top-0 z-50">
-            <SidebarTrigger />
+        <main className="flex flex-1 flex-col pb-20 md:pb-0">
+          <header className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b bg-white/50 px-4 backdrop-blur-md lg:px-6">
+            <div className="hidden md:block">
+              <SidebarTrigger />
+            </div>
             <h1 className="text-lg font-semibold capitalize">
-              {location.pathname.split("/").pop()?.replace("-", " ") || "Dashboard"}
+              {location.pathname.split("/").pop()?.replace("-", " ") ||
+                "Dashboard"}
             </h1>
           </header>
-          <div className="flex-1 overflow-auto p-4 lg:p-6 bg-gray-100">
+          <div className="flex-1 overflow-auto bg-gray-100 p-4 lg:p-6">
             <Outlet />
           </div>
         </main>
+        
+        {/* Mobile Navigation */}
+        <MobileNav menuItems={filteredMenuItems} />
       </div>
     </SidebarProvider>
   );
