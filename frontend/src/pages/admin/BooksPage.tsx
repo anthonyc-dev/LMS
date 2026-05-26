@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, Fragment } from "react";
 import {
   Search,
   Plus,
@@ -15,7 +15,9 @@ import {
   Hash,
   TrendingUp,
   CheckCircle2,
+  ChevronDown,
 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -266,7 +268,7 @@ function EditBookModal({ book, open, onClose, onSave }: EditModalProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-w-[560px]">
         {/* Header */}
-        <div className="relative overflow-hidden bg-indigo-600 p-6 text-white">
+        <div className="relative overflow-hidden bg-slate-900 p-6 text-white">
           <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
           <div className="absolute top-4 right-10 opacity-10">
             <BookOpen size={80} className="-rotate-12" />
@@ -451,6 +453,8 @@ function DeleteBookModal({
 
 export function BooksPage() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   const [books, setBooks] = useState<Book[]>(INITIAL_BOOKS);
   const [search, setSearch] = useState("");
@@ -497,10 +501,16 @@ export function BooksPage() {
     setPage(1);
   };
   const onCat = (v: string | null) => {
-    if (v !== null) { setCatFilter(v); setPage(1); }
+    if (v !== null) {
+      setCatFilter(v);
+      setPage(1);
+    }
   };
   const onStatus = (v: string | null) => {
-    if (v !== null) { setStatusFilter(v); setPage(1); }
+    if (v !== null) {
+      setStatusFilter(v);
+      setPage(1);
+    }
   };
 
   const handleEdit = (book: Book) => {
@@ -527,7 +537,7 @@ export function BooksPage() {
         <div>
           <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
             <div className="rounded-xl bg-indigo-50 p-2">
-              <BookOpen className="size-7 text-indigo-600" />
+              <BookOpen className="size-7" />
             </div>
             Book Management
           </h1>
@@ -538,7 +548,7 @@ export function BooksPage() {
         <Button
           onClick={() => navigate("/admin/books/add")}
           id="add-book-btn"
-          className="h-11 gap-2 rounded-xl bg-indigo-600 px-6 font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:scale-105 hover:bg-indigo-700 active:scale-95"
+          className="h-11 gap-2 rounded-xl bg-slate-900 px-6 font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:scale-105 hover:bg-slate-800 active:scale-95"
         >
           <Plus className="size-4" /> Add New Book
         </Button>
@@ -690,21 +700,25 @@ export function BooksPage() {
                 <TableHead className="w-[300px] py-4 pl-5 font-bold text-slate-500">
                   Book
                 </TableHead>
-                <TableHead className="py-4 font-bold text-slate-500">
-                  Category
-                </TableHead>
-                <TableHead className="py-4 text-center font-bold text-slate-500">
-                  Stock
-                </TableHead>
-                <TableHead className="min-w-[130px] py-4 font-bold text-slate-500">
-                  Stock Level
-                </TableHead>
-                <TableHead className="py-4 font-bold text-slate-500">
-                  Status
-                </TableHead>
-                <TableHead className="py-4 font-bold text-slate-500">
-                  Rating
-                </TableHead>
+                {!isMobile && (
+                  <>
+                    <TableHead className="py-4 font-bold text-slate-500">
+                      Category
+                    </TableHead>
+                    <TableHead className="py-4 text-center font-bold text-slate-500">
+                      Stock
+                    </TableHead>
+                    <TableHead className="min-w-[130px] py-4 font-bold text-slate-500">
+                      Stock Level
+                    </TableHead>
+                    <TableHead className="py-4 font-bold text-slate-500">
+                      Status
+                    </TableHead>
+                    <TableHead className="py-4 font-bold text-slate-500">
+                      Rating
+                    </TableHead>
+                  </>
+                )}
                 <TableHead className="py-4 pr-5 text-right font-bold text-slate-500">
                   Actions
                 </TableHead>
@@ -723,11 +737,18 @@ export function BooksPage() {
                     : book.status === "Low Stock"
                       ? "bg-amber-500"
                       : "bg-emerald-500";
+                
+                const isExpanded = isMobile && expandedRow === book.id;
 
                 return (
+                  <Fragment key={book.id}>
                   <TableRow
-                    key={book.id}
-                    className="group transition-colors hover:bg-slate-50/60"
+                    className="group cursor-pointer transition-colors hover:bg-slate-50/60"
+                    onClick={() => {
+                      if (isMobile) {
+                        setExpandedRow(isExpanded ? null : book.id);
+                      }
+                    }}
                   >
                     {/* Book cover + info */}
                     <TableCell className="py-3.5 pl-5">
@@ -756,11 +777,18 @@ export function BooksPage() {
                             {book.isbn}
                           </p>
                         </div>
+                        {isMobile && (
+                          <div className="ml-auto flex items-center justify-end">
+                            <ChevronDown className={`size-4 text-slate-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                          </div>
+                        )}
                       </div>
                     </TableCell>
 
                     {/* Category */}
-                    <TableCell>
+                    {!isMobile && (
+                      <>
+                        <TableCell>
                       <Badge
                         variant="secondary"
                         className="border-none bg-slate-100 text-xs font-bold text-slate-600 hover:bg-slate-200"
@@ -807,6 +835,8 @@ export function BooksPage() {
                         </span>
                       </div>
                     </TableCell>
+                      </>
+                    )}
 
                     {/* Actions */}
                     <TableCell className="pr-5 text-right">
@@ -816,7 +846,10 @@ export function BooksPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-lg text-slate-500 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-100"
+                              className={`h-8 w-8 rounded-lg text-slate-500 transition-opacity group-hover:opacity-100 hover:bg-slate-100 ${isMobile ? "opacity-100" : "opacity-0"}`}
+                              onClick={(e) => {
+                                if (isMobile) e.stopPropagation();
+                              }}
                             >
                               <MoreHorizontal className="size-4" />
                             </Button>
@@ -846,6 +879,50 @@ export function BooksPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
+                  {isExpanded && (
+                    <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
+                      <TableCell colSpan={2} className="p-0 border-b border-slate-100">
+                        <div className="flex flex-col gap-3 px-5 py-4 text-sm">
+                          <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                            <span className="font-medium text-slate-500">Category</span>
+                            <Badge variant="secondary" className="border-none bg-slate-100 text-xs font-bold text-slate-600">
+                              {book.category}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0 items-center">
+                            <span className="font-medium text-slate-500">Stock</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-black text-slate-700">{book.stock}</span>
+                              <span className="text-xs text-slate-400">units</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                            <div className="flex justify-between">
+                              <span className="font-medium text-slate-500">Stock Level</span>
+                              <span className="text-xs font-medium text-slate-500">{pct}%</span>
+                            </div>
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                              <div className={`h-full rounded-full ${barCls}`} style={{ width: `${pct}%` }} />
+                            </div>
+                          </div>
+                          <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                            <span className="font-medium text-slate-500">Status</span>
+                            <Badge className={`rounded-full border px-2.5 py-1 text-xs font-bold shadow-sm ${statusToBadge(book.status)}`}>
+                              {book.status}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                            <span className="font-medium text-slate-500">Rating</span>
+                            <div className="flex items-center gap-1.5">
+                              <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                              <span className="text-sm font-bold text-slate-700">{book.rating?.toFixed(1) ?? "—"}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  </Fragment>
                 );
               })}
 
@@ -893,7 +970,7 @@ export function BooksPage() {
               <Button
                 key={p}
                 size="icon"
-                className={`h-8 w-8 rounded-lg text-xs font-bold ${p === page ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200 hover:bg-indigo-700" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+                className={`h-8 w-8 rounded-lg text-xs font-bold ${p === page ? "bg-slate-900 text-white shadow-sm shadow-indigo-200 hover:bg-slate-800" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
                 onClick={() => setPage(p)}
               >
                 {p}
