@@ -110,7 +110,7 @@ function App() {
       try {
         // 1. Try to refresh token on app mount using HttpOnly cookie
         const refreshResponse = await api.post("/auth/refresh");
-        const token = refreshResponse.data.result.accessToken;
+        const token = refreshResponse.data.accessToken || refreshResponse.data.result?.accessToken;
 
         console.log("Datas", token);
 

@@ -22,6 +22,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { setAuthCookies } from 'src/common/utils/cookie.util';
 import { Public } from '../../common/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
+import { CsrfService } from 'src/common/services/csrf.service';
 
 interface AuthRequest extends Request {
   user: { sub: string; email: string; role: string };
@@ -30,7 +31,23 @@ interface AuthRequest extends Request {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly csrfService: CsrfService,
+  ) {}
+
+  @Public()
+  @Get('csrf')
+  getCsrfToken(@Res({ passthrough: true }) res: Response) {
+    const token = this.csrfService.generateToken();
+    res.cookie('csrf_token', token, {
+      httpOnly: false, // Accessible by frontend JS (Axios)
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+    return { csrfToken: token };
+  }
 
   @Public()
   @Post('register')
@@ -54,7 +71,10 @@ export class AuthController {
 
     setAuthCookies(response, result.accessToken, result.refreshToken);
 
-    return result;
+    return {
+      user: result.user,
+      accessToken: result.accessToken,
+    };
   }
 
   @Public()
@@ -73,7 +93,10 @@ export class AuthController {
 
     setAuthCookies(response, result.accessToken, result.refreshToken);
 
-    return result;
+    return {
+      user: result.user,
+      accessToken: result.accessToken,
+    };
   }
 
   @Public()
@@ -96,7 +119,10 @@ export class AuthController {
 
     setAuthCookies(res, result.accessToken, result.refreshToken);
 
-    return { message: 'Token refreshed', result };
+    return {
+      message: 'Token refreshed',
+      accessToken: result.accessToken,
+    };
   }
 
   @Post('logout')
