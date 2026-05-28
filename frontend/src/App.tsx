@@ -112,6 +112,8 @@ function App() {
         const refreshResponse = await api.post("/auth/refresh");
         const token = refreshResponse.data.result.accessToken;
 
+        console.log("Datas", token);
+
         // 2. Set the token in memory first
         useAuthStore.getState().setToken(token);
 
