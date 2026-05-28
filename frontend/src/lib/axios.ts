@@ -1,13 +1,23 @@
-import axios from 'axios';
-import { useAuthStore } from '@/store/authStore';
+import axios from "axios";
+import { useAuthStore } from "@/store/authStore";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true, // Required for cookies
+  xsrfCookieName: "csrf_token",
+  xsrfHeaderName: "x-csrf-token",
 });
+
+// Helper to get cookie by name
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift();
+  return null;
+};
 
 // Request interceptor to add auth token from memory
 api.interceptors.request.use(
@@ -17,11 +27,18 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Manually attach CSRF token for cross-origin requests
+    const csrfToken = getCookie("csrf_token");
+    if (csrfToken && !config.headers["x-csrf-token"]) {
+      config.headers["x-csrf-token"] = csrfToken;
+    }
+
     return config;
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor to handle expired tokens
@@ -32,14 +49,10 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // ✅ Skip auth endpoints
-    const excludedRoutes = [
-      "/auth/login",
-      "/auth/register",
-      "/auth/refresh",
-    ];
+    const excludedRoutes = ["/auth/login", "/auth/register", "/auth/refresh"];
 
     const shouldSkipRefresh = excludedRoutes.some((route) =>
-      originalRequest.url?.includes(route)
+      originalRequest.url?.includes(route),
     );
 
     // ✅ Only refresh on protected routes
@@ -57,7 +70,7 @@ api.interceptors.response.use(
           {},
           {
             withCredentials: true,
-          }
+          },
         );
 
         // ✅ Update the in-memory token
@@ -75,7 +88,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

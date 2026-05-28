@@ -108,9 +108,12 @@ function App() {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        // Fetch CSRF token first so all subsequent POST requests include it
+        await api.get("/auth/csrf");
+
         // 1. Try to refresh token on app mount using HttpOnly cookie
         const refreshResponse = await api.post("/auth/refresh");
-        const token = refreshResponse.data.result.accessToken;
+        const token = refreshResponse.data.accessToken || refreshResponse.data.result?.accessToken;
 
         console.log("Datas", token);
 

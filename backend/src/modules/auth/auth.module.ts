@@ -11,6 +11,7 @@ import { RefreshTokenService } from '../../common/services/refresh-token.service
 import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from '../users/entities/user.entity';
 import { JwtStrategy } from '../../common/guard/jwt.strategy';
+import { CsrfService } from '../../common/services/csrf.service';
 import { jwtConstants } from 'src/config/jwt.config';
 import { HttpModule } from '@nestjs/axios';
 
@@ -35,6 +36,7 @@ import { HttpModule } from '@nestjs/axios';
     RefreshTokenService,
     RolesGuard,
     JwtStrategy,
+    CsrfService,
   ],
   exports: [AuthService],
 })
