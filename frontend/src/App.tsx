@@ -109,7 +109,10 @@ function App() {
     const initializeAuth = async () => {
       try {
         // Fetch CSRF token first so all subsequent POST requests include it
-        await api.get("/auth/csrf");
+        const csrfResponse = await api.get("/auth/csrf");
+        if (csrfResponse.data.csrfToken) {
+          useAuthStore.getState().setCsrfToken(csrfResponse.data.csrfToken);
+        }
 
         // 1. Try to refresh token on app mount using HttpOnly cookie
         const refreshResponse = await api.post("/auth/refresh");

@@ -22,14 +22,14 @@ const getCookie = (name: string) => {
 // Request interceptor to add auth token from memory
 api.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().token;
+    const { token, csrfToken: storeCsrfToken } = useAuthStore.getState();
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
     // Manually attach CSRF token for cross-origin requests
-    const csrfToken = getCookie("csrf_token");
+    const csrfToken = storeCsrfToken || getCookie("csrf_token");
     if (csrfToken && !config.headers["x-csrf-token"]) {
       config.headers["x-csrf-token"] = csrfToken;
     }
