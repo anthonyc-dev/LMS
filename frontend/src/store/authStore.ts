@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface User {
   id: string;
@@ -29,17 +29,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({
       user,
       token,
-      isAuthenticated: true
+      isAuthenticated: true,
     }),
   logout: () =>
     set({
       user: null,
       token: null,
-      isAuthenticated: false
+      isAuthenticated: false,
     }),
   updateUser: (userData) =>
     set((state) => ({
-      user: state.user ? { ...state.user, ...userData } : null
+      user: state.user ? { ...state.user, ...userData } : null,
     })),
   setToken: (token) => set({ token }),
   setCsrfToken: (token) => set({ csrfToken: token }),
