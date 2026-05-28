@@ -126,7 +126,7 @@ export function AdminLayout() {
             <Outlet />
           </div>
         </main>
-        
+
         {/* Mobile Navigation */}
         <MobileNav menuItems={filteredMenuItems} />
       </div>

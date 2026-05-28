@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -189,11 +190,8 @@ export function BorrowBooksPage() {
             <Separator />
             <div className="space-y-8">
               {RESERVED_BOOKS.map((book, i) => (
-                <>
-                  <div
-                    key={i}
-                    className="group flex cursor-pointer items-center gap-5"
-                  >
+                <Fragment key={i}>
+                  <div className="group flex cursor-pointer items-center gap-5">
                     <div className="h-24 w-20 shrink-0 overflow-hidden rounded-xl shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
                       <img
                         src={book.image}
@@ -219,7 +217,7 @@ export function BorrowBooksPage() {
                     </div>
                   </div>
                   <Separator />
-                </>
+                </Fragment>
               ))}
             </div>
           </CardContent>
@@ -234,11 +232,8 @@ export function BorrowBooksPage() {
             <Separator />
             <div className="space-y-8">
               {FAVORITE_AUTHORS.map((author, i) => (
-                <>
-                  <div
-                    key={i}
-                    className="group flex cursor-pointer items-center gap-5"
-                  >
+                <Fragment key={i}>
+                  <div className="group flex cursor-pointer items-center gap-5">
                     <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg">
                       <img
                         src={author.image}
@@ -264,7 +259,7 @@ export function BorrowBooksPage() {
                     )}
                   </div>
                   <Separator />
-                </>
+                </Fragment>
               ))}
             </div>
           </CardContent>
@@ -277,11 +272,8 @@ export function BorrowBooksPage() {
             <Separator />
             <div className="space-y-8">
               {POPULAR_READS.map((book, i) => (
-                <>
-                  <div
-                    key={i}
-                    className="group flex cursor-pointer items-center gap-5"
-                  >
+                <Fragment key={i}>
+                  <div className="group flex cursor-pointer items-center gap-5">
                     <div className="h-24 w-20 shrink-0 overflow-hidden rounded-xl shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
                       <img
                         src={book.image}
@@ -299,7 +291,7 @@ export function BorrowBooksPage() {
                     </div>
                   </div>
                   <Separator />
-                </>
+                </Fragment>
               ))}
             </div>
           </CardContent>

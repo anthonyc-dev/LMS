@@ -141,54 +141,60 @@ export function AdminDashboardPage() {
   return (
     <div className="animate-fade-in mx-auto max-w-[1600px] space-y-6 pb-12">
       {/* Header and Welcome Panel */}
-      <div className="relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm md:flex-row md:items-center">
-        <div className="absolute top-0 right-0 h-64 w-64 translate-x-12 -translate-y-12 rounded-full bg-blue-500/5 blur-3xl" />
+      <div className="relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-xl md:flex-row md:items-center">
+        {/* Animated Background Elements */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 -left-24 h-96 w-96 animate-pulse rounded-full bg-blue-500/10 blur-3xl" />
+          <div className="absolute -right-24 -bottom-24 h-96 w-96 animate-pulse rounded-full bg-indigo-500/10 blur-3xl delay-1000" />
+          <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 animate-[spin_10s_linear_infinite] rounded-full bg-emerald-500/5 blur-3xl" />
+        </div>
+
         <div className="z-10 space-y-1.5">
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 md:text-3xl">
+          <h1 className="text-2xl font-black tracking-tight text-white md:text-3xl">
             Welcome back,{" "}
-            <span className="bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
               {user?.fullName || "Administrator"}
             </span>
           </h1>
-          <p className="flex items-center gap-2 text-sm font-medium text-slate-500">
-            <Calendar className="size-4 text-slate-400" />
+          <p className="flex items-center gap-2 text-sm font-medium text-slate-400">
+            <Calendar className="size-4 text-slate-500" />
             <span>{currentDate}</span>
           </p>
         </div>
 
         {/* Real-time Telemetry Dashboard HUD */}
-        <div className="z-10 flex w-full flex-wrap items-center gap-4 rounded-xl border border-slate-100 bg-slate-50 p-3.5 md:w-auto">
-          <div className="flex items-center gap-2.5 rounded-lg border border-slate-100 bg-white px-3 py-1 shadow-xs">
-            <Cpu className="size-4 text-blue-500" />
+        <div className="z-10 flex w-full flex-wrap items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/50 p-3.5 backdrop-blur-sm md:w-auto">
+          <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
+            <Cpu className="size-4 text-blue-400" />
             <div className="flex flex-col">
               <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
                 CPU Core
               </span>
-              <span className="text-xs leading-normal font-bold text-slate-700">
+              <span className="text-xs leading-normal font-bold text-slate-200">
                 {cpuUsage}%
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2.5 rounded-lg border border-slate-100 bg-white px-3 py-1 shadow-xs">
-            <Database className="size-4 text-emerald-500" />
+          <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
+            <Database className="size-4 text-emerald-400" />
             <div className="flex flex-col">
               <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
                 DB Latency
               </span>
-              <span className="text-xs leading-normal font-bold text-slate-700">
+              <span className="text-xs leading-normal font-bold text-slate-200">
                 {latency} ms
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2.5 rounded-lg border border-slate-100 bg-white px-3 py-1 shadow-xs">
-            <Wifi className="size-4 animate-pulse text-indigo-500" />
+          <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
+            <Wifi className="size-4 animate-pulse text-indigo-400" />
             <div className="flex flex-col">
               <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
                 Gateway
               </span>
-              <span className="flex items-center gap-1 text-xs leading-normal font-bold text-emerald-600">
+              <span className="flex items-center gap-1 text-xs leading-normal font-bold text-emerald-400">
                 Active{" "}
-                <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-emerald-500" />
+                <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-emerald-400" />
               </span>
             </div>
           </div>

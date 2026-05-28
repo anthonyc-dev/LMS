@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LoadingOverlay } from "@/components/commons/loading-overlay";
 import {
   SidebarMenu,
@@ -49,6 +49,83 @@ type MenuItem = {
     path: string;
   }[];
 };
+
+function CollapsibleSidebarItem({
+  item,
+  location,
+  handleNavigate,
+}: {
+  item: MenuItem;
+  location: { pathname: string };
+  handleNavigate: (path: string) => void;
+}) {
+  const hasSubItems = item.items && item.items.length > 0;
+  const isSubItemActive =
+    !!hasSubItems &&
+    !!item.items?.some((subItem) => location.pathname === subItem.path);
+  const isActive = location.pathname === item.path || isSubItemActive;
+
+  const [isOpen, setIsOpen] = useState(isSubItemActive || false);
+
+  useEffect(() => {
+    if (isSubItemActive) {
+      setIsOpen(true);
+    }
+  }, [isSubItemActive]);
+
+  return (
+    <Collapsible
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      className="group/collapsible"
+    >
+      <SidebarMenuItem>
+        <CollapsibleTrigger
+          render={
+            <SidebarMenuButton
+              tooltip={item.label}
+              className={`group relative flex items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-300 ${isActive ? "bg-white/5 text-white" : "hover:bg-white/5 hover:text-white"}`}
+            >
+              <item.icon
+                className={`transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-blue-400" : ""}`}
+              />
+              <span className="text-sm font-medium tracking-wide">
+                {item.label}
+              </span>
+              <ChevronRightIcon
+                className={`ml-auto h-4 w-4 text-white/30 transition-all duration-300 ease-in-out group-hover:text-white group-data-[state=open]/collapsible:rotate-90 group-data-[state=open]/collapsible:text-blue-400 ${
+                  !isOpen ? "rotate-180" : ""
+                }`}
+              />
+
+              {isActive && !isSubItemActive && (
+                <div className="absolute left-0 h-5 w-1 rounded-r-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+              )}
+            </SidebarMenuButton>
+          }
+        />
+        <CollapsibleContent className="data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-top-4 data-[state=open]:slide-in-from-top-4 overflow-hidden duration-300 ease-out">
+          <SidebarMenuSub className="mt-1 ml-4 gap-1 border-l border-white/5 pl-2">
+            {item.items?.map((subItem) => (
+              <SidebarMenuSubItem key={subItem.label}>
+                <SidebarMenuSubButton
+                  onClick={() => handleNavigate(subItem.path)}
+                  className={`cursor-pointer rounded-lg px-3 py-2 text-xs transition-all duration-300 ${
+                    location.pathname === subItem.path
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40"
+                      : "text-white/60 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <span className="font-medium">{subItem.label}</span>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  );
+}
 
 export function SidebarContentInner({
   menuItems,
@@ -148,63 +225,15 @@ export function SidebarContentInner({
               <SidebarMenu className="gap-1">
                 {menuItems.map((item) => {
                   const hasSubItems = item.items && item.items.length > 0;
-                  const isSubItemActive =
-                    hasSubItems &&
-                    item.items?.some(
-                      (subItem) => location.pathname === subItem.path,
-                    );
-                  const isActive =
-                    location.pathname === item.path || isSubItemActive;
 
                   if (hasSubItems && !isCollapsed) {
                     return (
-                      <Collapsible
+                      <CollapsibleSidebarItem
                         key={item.label}
-                        defaultOpen={isSubItemActive}
-                        className="group/collapsible"
-                      >
-                        <SidebarMenuItem>
-                          <CollapsibleTrigger
-                            render={
-                              <SidebarMenuButton
-                                tooltip={item.label}
-                                className={`group relative flex items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-300 ${isActive ? "bg-white/5 text-white" : "hover:bg-white/5 hover:text-white"}`}
-                              >
-                                <item.icon
-                                  className={`transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-blue-400" : ""}`}
-                                />
-                                <span className="text-sm font-medium tracking-wide">
-                                  {item.label}
-                                </span>
-                                <ChevronRightIcon className="ml-auto h-4 w-4 text-white/30 transition-transform duration-300 group-hover:text-white group-data-[state=open]/collapsible:rotate-90" />
-                                {isActive && !isSubItemActive && (
-                                  <div className="absolute left-0 h-5 w-1 rounded-r-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-                                )}
-                              </SidebarMenuButton>
-                            }
-                          />
-                          <CollapsibleContent>
-                            <SidebarMenuSub className="mt-1 ml-4 gap-1 border-l border-white/5 pl-2">
-                              {item.items?.map((subItem) => (
-                                <SidebarMenuSubItem key={subItem.label}>
-                                  <SidebarMenuSubButton
-                                    onClick={() => handleNavigate(subItem.path)}
-                                    className={`cursor-pointer rounded-lg px-3 py-2 text-xs transition-all duration-300 ${
-                                      location.pathname === subItem.path
-                                        ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40"
-                                        : "text-white/60 hover:bg-white/5 hover:text-white"
-                                    }`}
-                                  >
-                                    <span className="font-medium">
-                                      {subItem.label}
-                                    </span>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              ))}
-                            </SidebarMenuSub>
-                          </CollapsibleContent>
-                        </SidebarMenuItem>
-                      </Collapsible>
+                        item={item}
+                        location={location}
+                        handleNavigate={handleNavigate}
+                      />
                     );
                   }
 

@@ -539,8 +539,8 @@ export function AdminBorrowingHistory() {
     });
 
     list.sort((a, b) => {
-      let va = a[sortKey] ?? "";
-      let vb = b[sortKey] ?? "";
+      const va = a[sortKey] ?? "";
+      const vb = b[sortKey] ?? "";
       if (sortDir === "asc") return va < vb ? -1 : va > vb ? 1 : 0;
       return va > vb ? -1 : va < vb ? 1 : 0;
     });
@@ -564,7 +564,7 @@ export function AdminBorrowingHistory() {
     setPage(1);
   }
 
-  function SortIcon({ k }: { k: SortKey }) {
+  const renderSortIcon = (k: SortKey) => {
     if (sortKey !== k)
       return <ArrowUpDown className="ml-1 inline size-3.5 text-slate-300" />;
     return sortDir === "asc" ? (
@@ -572,7 +572,7 @@ export function AdminBorrowingHistory() {
     ) : (
       <ArrowDown className="ml-1 inline size-3.5 text-indigo-500" />
     );
-  }
+  };
 
   const openDetail = (r: BorrowRecord) => {
     setDetailRecord(r);
@@ -819,7 +819,7 @@ export function AdminBorrowingHistory() {
                     className="flex items-center"
                     onClick={() => toggleSort("bookTitle")}
                   >
-                    Book <SortIcon k="bookTitle" />
+                    Book {renderSortIcon("bookTitle")}
                   </button>
                 </TableHead>
                 {!isMobile && (
@@ -829,7 +829,7 @@ export function AdminBorrowingHistory() {
                         className="flex items-center"
                         onClick={() => toggleSort("borrowerName")}
                       >
-                        Borrower <SortIcon k="borrowerName" />
+                        Borrower {renderSortIcon("borrowerName")}
                       </button>
                     </TableHead>
                     <TableHead className="text-[11px] font-black tracking-wider text-slate-400 uppercase">
@@ -837,7 +837,7 @@ export function AdminBorrowingHistory() {
                         className="flex items-center"
                         onClick={() => toggleSort("borrowDate")}
                       >
-                        Borrow Date <SortIcon k="borrowDate" />
+                        Borrow Date {renderSortIcon("borrowDate")}
                       </button>
                     </TableHead>
                     <TableHead className="text-[11px] font-black tracking-wider text-slate-400 uppercase">
@@ -845,7 +845,7 @@ export function AdminBorrowingHistory() {
                         className="flex items-center"
                         onClick={() => toggleSort("dueDate")}
                       >
-                        Due Date <SortIcon k="dueDate" />
+                        Due Date {renderSortIcon("dueDate")}
                       </button>
                     </TableHead>
                     <TableHead className="text-[11px] font-black tracking-wider text-slate-400 uppercase">

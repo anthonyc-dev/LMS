@@ -288,13 +288,13 @@ const statusConfig = {
 function MiniBookCover({ color, title }: { color: string; title: string }) {
   return (
     <div
-      className="relative flex h-14 w-10 shrink-0 items-end justify-center overflow-hidden rounded-md pb-1 shadow-md"
+      className="relative flex h-10 w-7 shrink-0 items-end justify-center overflow-hidden rounded-md pb-0.5 shadow-md sm:h-14 sm:w-10 sm:pb-1"
       style={{ background: `linear-gradient(135deg, ${color}cc, ${color})` }}
       aria-label={title}
     >
       <div className="absolute top-1 right-1 left-1 h-0.5 rounded-full bg-white/20" />
       <div className="absolute top-2.5 right-1 left-1 h-0.5 rounded-full bg-white/10" />
-      <BookOpen className="size-3.5 text-white/70" />
+      <BookOpen className="size-2.5 text-white/70 sm:size-3.5" />
     </div>
   );
 }
@@ -941,7 +941,9 @@ export function InventoryPage() {
           <Table>
             <TableHeader className="border-b border-slate-100 bg-slate-50">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[300px] py-4 pl-5 font-bold text-slate-500">
+                <TableHead
+                  className={`py-4 pl-5 font-bold text-slate-500 ${isMobile ? "" : "w-[300px]"}`}
+                >
                   Book
                 </TableHead>
                 {!isMobile && (
@@ -1008,11 +1010,11 @@ export function InventoryPage() {
                             color={book.coverColor}
                             title={book.title}
                           />
-                          <div className="min-w-0">
-                            <p className="max-w-[180px] truncate text-sm font-bold text-slate-900">
+                          <div className="min-w-0 flex-1">
+                            <p className="max-w-[220px] text-sm font-bold wrap-break-word whitespace-normal text-slate-900 sm:max-w-[180px] sm:truncate">
                               {book.title}
                             </p>
-                            <p className="truncate text-xs font-medium text-slate-500">
+                            <p className="max-w-[220px] truncate text-xs font-medium text-slate-500 sm:max-w-[180px]">
                               {book.author}
                             </p>
                             <p className="mt-0.5 font-mono text-[10px] text-slate-400">
@@ -1205,7 +1207,7 @@ export function InventoryPage() {
               {paginatedBooks.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
+                    colSpan={isMobile ? 2 : 9}
                     className="h-48 text-center text-slate-400"
                   >
                     <div className="flex flex-col items-center gap-2">
@@ -1222,16 +1224,15 @@ export function InventoryPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-5 py-4">
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:flex-row">
           <p className="text-xs font-medium text-slate-500">
             Showing{" "}
             <span className="font-bold text-slate-700">
-              {Math.min((page - 1) * ROWS_PER_PAGE + 1, filtered.length)}–
+              {filtered.length === 0 ? 0 : (page - 1) * ROWS_PER_PAGE + 1}–
               {Math.min(page * ROWS_PER_PAGE, filtered.length)}
             </span>{" "}
             of{" "}
-            <span className="font-bold text-slate-700">{filtered.length}</span>{" "}
-            results
+            <span className="font-bold text-slate-700">{filtered.length}</span>
           </p>
           <div className="flex items-center gap-2">
             <Button
