@@ -9,10 +9,12 @@ import {
   SlidersHorizontal,
   Sparkles,
   Heart,
+  BookOpen,
+  TrendingUp,
+  ChevronDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -22,8 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Kbd } from "@/components/ui/kbd";
-import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
 
 // Asset imports
 import book1Img from "@/assets/dashboard/book1.png";
@@ -48,80 +48,88 @@ const BOOKS = [
     title: "The Great Gatsby",
     author: "F. Scott Fitzgerald",
     rating: 4.8,
+    reviews: 2431,
     category: "Fiction",
     image: book1Img,
     status: "Available",
-    color: "bg-blue-50/50",
+    color: "from-blue-100 to-indigo-50",
   },
   {
     id: 2,
     title: "Brief History of Time",
     author: "Stephen Hawking",
     rating: 4.9,
+    reviews: 3892,
     category: "Science",
     image: bookDark1Img,
     status: "Borrowed",
-    color: "bg-slate-900/90",
+    color: "from-slate-800 to-slate-900",
   },
   {
     id: 3,
     title: "A Promised Land",
     author: "Barack Obama",
     rating: 4.7,
+    reviews: 1854,
     category: "Biography",
     image: book2Img,
     status: "Available",
-    color: "bg-amber-50/50",
+    color: "from-amber-50 to-orange-50",
   },
   {
     id: 4,
     title: "The Silent Patient",
     author: "Alex Michaelides",
     rating: 4.5,
+    reviews: 4201,
     category: "Mystery",
     image: bookDark2Img,
     status: "Reserved",
-    color: "bg-rose-900/90",
+    color: "from-rose-800 to-rose-900",
   },
   {
     id: 5,
     title: "Steve Jobs",
     author: "Walter Isaacson",
     rating: 4.8,
+    reviews: 2109,
     category: "Biography",
     image: book1Img,
     status: "Available",
-    color: "bg-gray-100/50",
+    color: "from-gray-50 to-slate-100",
   },
   {
     id: 6,
     title: "Atomic Habits",
     author: "James Clear",
     rating: 5.0,
+    reviews: 8743,
     category: "Technology",
     image: book2Img,
     status: "Available",
-    color: "bg-emerald-50/50",
+    color: "from-emerald-50 to-teal-50",
   },
   {
     id: 7,
     title: "Deep Work",
     author: "Cal Newport",
     rating: 4.6,
+    reviews: 1567,
     category: "Technology",
     image: bookDark1Img,
     status: "Available",
-    color: "bg-indigo-900/90",
+    color: "from-indigo-800 to-indigo-900",
   },
   {
     id: 8,
     title: "The Alchemist",
     author: "Paulo Coelho",
     rating: 4.7,
+    reviews: 6231,
     category: "Fiction",
     image: bookDark2Img,
     status: "Available",
-    color: "bg-orange-900/90",
+    color: "from-orange-800 to-orange-900",
   },
 ];
 
@@ -130,65 +138,45 @@ export function BrowseBooksPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<readonly string[]>(["grid"]);
 
+  const filteredBooks =
+    activeCategory === "All Books"
+      ? BOOKS
+      : BOOKS.filter((b) => b.category === activeCategory);
+
+  const displayBooks = searchQuery
+    ? filteredBooks.filter(
+        (b) =>
+          b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          b.author.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    : filteredBooks;
+
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 md:space-y-8">
-      {/* Search & Header Section */}
-      <section className="sticky top-0 z-30 -mx-3 space-y-3 bg-gray-100/90 px-3 pt-2 pb-4 backdrop-blur-md sm:-mx-4 sm:px-4 md:-mx-6 md:space-y-4 md:px-6 lg:-mx-8 lg:px-8">
-        <div className="flex flex-col items-stretch justify-between gap-3 rounded-lg border border-white/80 bg-white/70 p-3 shadow-sm md:p-3.5 lg:flex-row lg:items-center">
-          <div className="relative w-full lg:max-w-2xl lg:min-w-0">
-            <InputGroup className="h-10 rounded-lg border-slate-200/60 bg-white/80 shadow-xs md:h-11">
-              <InputGroupAddon align="inline-start">
-                <Search className="size-4 text-slate-400" />
-              </InputGroupAddon>
-              <Input
-                placeholder="Search books, authors, ISBN..."
-                className="h-10 rounded-none border-0 bg-transparent text-sm shadow-none ring-0 md:h-11"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <InputGroupAddon
-                align="inline-end"
-                className="hidden gap-1 lg:flex"
-              >
-                <Kbd>⌘</Kbd>
-                <Kbd>K</Kbd>
-              </InputGroupAddon>
-            </InputGroup>
+    <div className="mx-auto max-w-[1600px] space-y-6 md:space-y-8">
+      {/* ── Search Bar ─────────────────────────────────────────────── */}
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          {/* Search Input */}
+          <div className="relative w-full md:max-w-md lg:max-w-lg">
+            <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Search books, authors, ISBN…"
+              className="h-11 rounded-xl border-slate-200 bg-white pl-10 text-sm shadow-sm transition-shadow focus:shadow-md focus:ring-2 focus:ring-indigo-500/20"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
 
-          <div className="flex w-full flex-row flex-wrap items-center gap-2 md:gap-3 lg:w-auto">
-            <Select
-              value={activeCategory}
-              onValueChange={(v) => {
-                if (v !== null) setActiveCategory(v);
-              }}
-            >
-              <SelectTrigger className="h-10 flex-1 rounded-lg border-slate-200/60 bg-white/80 px-3 text-sm font-medium text-slate-600 shadow-xs sm:w-[130px] sm:flex-none md:h-11 md:w-[140px] md:px-4">
-                <div className="flex items-center gap-2 truncate">
-                  <Grid2X2 size={14} className="shrink-0 text-slate-400" />
-                  <SelectValue placeholder="Category" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="min-w-[160px] rounded-lg border-slate-200 shadow-lg">
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
+          {/* Controls */}
+          <div className="flex items-center gap-2">
             <Select defaultValue="popular">
-              <SelectTrigger className="h-10 flex-1 rounded-lg border-slate-200/60 bg-white/80 px-3 text-sm font-medium text-slate-600 shadow-xs sm:w-[130px] sm:flex-none md:h-11 md:w-[140px] md:px-4">
-                <div className="flex items-center gap-2 truncate">
-                  <SlidersHorizontal
-                    size={14}
-                    className="shrink-0 text-slate-400"
-                  />
+              <SelectTrigger className="h-11 w-[140px] flex-1 rounded-xl border-slate-200 bg-white text-sm shadow-sm sm:w-[150px] sm:flex-none">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal size={14} className="text-slate-400" />
                   <SelectValue placeholder="Sort by" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="min-w-[160px] rounded-lg border-slate-200 shadow-lg">
+              <SelectContent className="rounded-xl">
                 <SelectItem value="popular">Most Popular</SelectItem>
                 <SelectItem value="newest">Recently Added</SelectItem>
                 <SelectItem value="rating">Highest Rated</SelectItem>
@@ -199,195 +187,238 @@ export function BrowseBooksPage() {
               value={viewMode}
               onValueChange={(v) => v && setViewMode(v)}
               variant="outline"
-              className="rounded-lg border-slate-200/60 bg-white/80 shadow-xs"
+              className="h-11 rounded-xl border-slate-200 bg-white shadow-sm"
             >
-              <ToggleGroupItem value="grid" aria-label="Grid view">
+              <ToggleGroupItem
+                value="grid"
+                aria-label="Grid view"
+                className="h-full rounded-l-xl px-3"
+              >
                 <Grid2X2 size={16} />
               </ToggleGroupItem>
-              <ToggleGroupItem value="list" aria-label="List view">
+              <ToggleGroupItem
+                value="list"
+                aria-label="List view"
+                className="h-full rounded-r-xl px-3"
+              >
                 <List size={16} />
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
         </div>
-      </section>
 
-      {/* Featured Hero Card */}
-      <section className="group relative flex flex-col items-center justify-between overflow-hidden rounded-xl bg-slate-900 p-4 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200 sm:p-6 md:flex-row md:p-8">
-        <div className="z-10 max-w-xl space-y-3 text-center md:space-y-4 md:text-left">
-          <div className="flex items-center justify-center gap-1.5 text-[9px] font-medium tracking-widest text-indigo-400 uppercase md:justify-start md:text-xs">
-            <Sparkles size={12} />
-            <span>Curated For You</span>
-          </div>
-          <h1 className="text-xl leading-[1.1] font-black tracking-tight text-white sm:text-2xl md:text-3xl lg:text-4xl">
-            Uncover the <span className="text-indigo-400">Classics</span>
-          </h1>
-          <p className="max-w-md text-xs leading-relaxed font-medium text-slate-400 sm:text-sm md:text-base">
-            Discover a handpicked collection of timeless literature that shaped
-            the world. From epic journeys to intimate portraits of the human
-            soul.
-          </p>
-          <div className="flex flex-col items-center gap-2 sm:flex-row md:gap-3">
-            <Button className="w-full rounded-lg bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5 hover:scale-[1.02] hover:bg-indigo-500 active:scale-95 sm:w-auto sm:text-sm md:px-8 md:py-3.5 md:text-base">
-              Explore Collection
-            </Button>
-            <Button
-              variant="ghost"
-              className="gap-1.5 text-xs font-bold text-white hover:bg-white/5 hover:text-indigo-400 sm:text-sm md:text-base"
+        {/* Category Pills */}
+        <div className="flex flex-wrap gap-2 pb-1">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all duration-200 sm:text-sm ${
+                activeCategory === cat
+                  ? "bg-slate-900 text-white shadow-md shadow-slate-900/20"
+                  : "bg-white text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-900"
+              }`}
             >
-              Learn More <ArrowRight size={14} />
-            </Button>
-          </div>
+              {cat}
+            </button>
+          ))}
         </div>
-
-        <div className="relative mt-6 flex aspect-square w-full max-w-[200px] items-center justify-center sm:mt-8 sm:max-w-[240px] md:mt-0 md:w-[280px] md:max-w-none">
-          <div className="absolute inset-0 animate-pulse rounded-full bg-indigo-500/20 blur-2xl md:blur-[60px]" />
-          <div className="relative z-20 w-32 transition-transform duration-700 group-hover:scale-110 group-hover:rotate-3 sm:w-40 md:w-52">
-            <div className="absolute inset-0 translate-y-8 scale-90 bg-black/40 blur-xl" />
-            <img
-              src={bookDark1Img}
-              alt="Featured Book"
-              className="h-full w-full object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.5)]"
-            />
-          </div>
-        </div>
-
-        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-indigo-600/10 blur-2xl transition-colors group-hover:bg-indigo-600/20 md:h-64 md:w-64" />
-        <div className="absolute -bottom-16 -left-16 h-32 w-32 rounded-full bg-slate-800/50 blur-xl md:h-48 md:w-48" />
       </section>
 
-      {/* Main Grid Section */}
-      <section className="space-y-5 md:space-y-6">
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div className="space-y-0.5">
-            <h2 className="text-lg font-black tracking-tight text-slate-900 sm:text-xl md:text-2xl">
+      {/* ── Featured Hero ──────────────────────────────────────────── */}
+      <section className="group relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-900 to-indigo-950 p-6 sm:p-8 md:p-10">
+        <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:gap-12">
+          {/* Text Content */}
+          <div className="flex-1 space-y-4 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 px-3 py-1.5 text-xs font-semibold text-indigo-400">
+              <Sparkles size={12} />
+              Curated For You
+            </div>
+            <h1 className="text-2xl leading-tight font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
+              Uncover the{" "}
+              <span className="bg-linear-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                Classics
+              </span>
+            </h1>
+            <p className="max-w-lg text-sm leading-relaxed text-slate-400 md:text-base">
+              Discover a handpicked collection of timeless literature that
+              shaped the world. From epic journeys to intimate portraits of the
+              human soul.
+            </p>
+            <div className="flex flex-col items-center gap-3 sm:flex-row md:items-start">
+              <Button className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98]">
+                <BookOpen size={16} className="mr-2" />
+                Explore Collection
+              </Button>
+              <Button
+                variant="ghost"
+                className="gap-2 text-sm font-semibold text-slate-300 hover:bg-white/5 hover:text-white"
+              >
+                Learn More <ArrowRight size={14} />
+              </Button>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="flex items-center justify-center gap-6 pt-2 md:justify-start">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <BookOpen size={14} className="text-indigo-400" />
+                <span>
+                  <strong className="text-white">12,450</strong> Books
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <TrendingUp size={14} className="text-emerald-400" />
+                <span>
+                  <strong className="text-white">98%</strong> Satisfaction
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Book Visual */}
+          <div className="relative flex w-48 shrink-0 items-center justify-center sm:w-56 md:w-64">
+            <div className="absolute inset-0 scale-150 rounded-full bg-indigo-500/15 blur-3xl transition-all duration-700 group-hover:bg-indigo-500/25" />
+            <div className="relative transition-transform duration-700 ease-out group-hover:-translate-y-2 group-hover:scale-105 group-hover:rotate-2">
+              <div className="absolute inset-0 translate-y-6 scale-[0.85] rounded-xl bg-black/30 blur-2xl" />
+              <img
+                src={bookDark1Img}
+                alt="Featured Book"
+                className="relative w-full drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Background Decorations */}
+        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-violet-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute top-0 right-0 h-full w-1/3 bg-linear-to-l from-indigo-500/5 to-transparent" />
+      </section>
+
+      {/* ── Book Grid ──────────────────────────────────────────────── */}
+      <section className="space-y-5">
+        <div className="flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
               Recent Discovery
             </h2>
-            <p className="text-xs font-medium text-slate-500 md:text-sm">
-              Explore 12,450 books in our library
+            <p className="mt-1 text-sm text-slate-500">
+              {displayBooks.length} books found
             </p>
           </div>
           <Button
             variant="ghost"
-            className="w-fit px-0 text-sm font-bold text-indigo-600 hover:bg-indigo-50/50 sm:px-3"
+            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
           >
             View All
+            <ChevronDown size={14} className="ml-1 -rotate-90" />
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-          {BOOKS.map((book) => (
-            <div
+        <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+          {displayBooks.map((book) => (
+            <article
               key={book.id}
-              className="group relative flex flex-col rounded-lg border border-slate-50 bg-white p-3 shadow-sm transition-all duration-500 hover:shadow-lg hover:shadow-slate-200/50 md:p-4"
+              className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60"
             >
-              {/* Book Cover Container */}
+              {/* Book Cover */}
               <div
-                className={`relative mb-3 aspect-[3/4.2] overflow-hidden rounded-lg shadow-md transition-all duration-500 group-hover:-translate-y-2 group-hover:scale-[1.02] md:mb-4 ${book.color}`}
+                className={`relative aspect-3/4 overflow-hidden bg-linear-to-br ${book.color}`}
               >
                 <img
                   src={book.image}
                   alt={book.title}
-                  className="h-full w-full object-cover opacity-90 mix-blend-multiply transition-all duration-700 group-hover:scale-110 group-hover:opacity-100"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
 
-                {/* Floating Actions on Cover */}
-                <div className="absolute top-2 right-2 flex translate-x-3 flex-col gap-1.5 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-                  <Button
-                    size="icon-xs"
-                    className="border border-white/20 bg-white/90 text-slate-900 shadow-md backdrop-blur-md hover:bg-white hover:text-indigo-600"
-                  >
-                    <Heart
-                      size={12}
-                      className="transition-transform group-active:scale-125"
-                    />
-                  </Button>
-                  <Button
-                    size="icon-xs"
-                    className="border border-white/20 bg-white/90 text-slate-900 shadow-md backdrop-blur-md hover:bg-white hover:text-indigo-600"
-                  >
-                    <Bookmark size={12} />
-                  </Button>
+                {/* Hover Overlay Actions */}
+                <div className="absolute inset-0 flex items-start justify-end bg-linear-to-t from-black/50 via-transparent to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  <div className="flex flex-col gap-2">
+                    <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-rose-500">
+                      <Heart size={14} />
+                    </button>
+                    <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-indigo-600">
+                      <Bookmark size={14} />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Bottom Badge */}
-                <div className="absolute bottom-2 left-2 flex items-center gap-1.5">
+                {/* Status Badge */}
+                <div className="absolute bottom-3 left-3">
                   <Badge
-                    className={`rounded-full border-none px-2 py-0.5 text-[7px] font-bold tracking-widest uppercase shadow-md backdrop-blur-xl md:px-2.5 md:py-1 md:text-[8px] ${
+                    className={`rounded-full border-0 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase shadow-lg backdrop-blur-md ${
                       book.status === "Available"
-                        ? "bg-emerald-500/80 text-white"
+                        ? "bg-emerald-500/90 text-white"
                         : book.status === "Borrowed"
-                          ? "bg-rose-500/80 text-white"
-                          : "bg-amber-500/80 text-white"
+                          ? "bg-rose-500/90 text-white"
+                          : "bg-amber-500/90 text-white"
                     }`}
                   >
                     {book.status === "Available" && (
-                      <span className="relative mr-1 flex h-1 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75"></span>
-                        <span className="relative inline-flex h-1 w-1.5 rounded-full bg-emerald-100"></span>
+                      <span className="relative mr-1.5 flex size-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/75" />
+                        <span className="relative inline-flex size-1.5 rounded-full bg-white" />
                       </span>
                     )}
                     {book.status}
                   </Badge>
                 </div>
-
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
               </div>
 
-              {/* Book Details */}
-              <div className="flex-1 space-y-2 md:space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 space-y-0.5">
-                    <h3 className="line-clamp-1 text-xs leading-tight font-bold tracking-tight text-slate-900 transition-colors group-hover:text-indigo-600 sm:text-sm md:text-base">
-                      {book.title}
-                    </h3>
-                    <p className="truncate text-[10px] font-medium text-slate-500 sm:text-xs md:text-sm">
-                      {book.author}
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-1 rounded-md border border-white bg-white/80 px-1.5 py-1 shadow-sm backdrop-blur-md">
-                    <Star
-                      size={9}
-                      className="fill-amber-400 text-amber-400 md:size-[10px]"
-                    />
-                    <span className="text-[8px] font-bold text-slate-700 md:text-[9px]">
-                      {book.rating}
-                    </span>
-                  </div>
+              {/* Book Info */}
+              <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4">
+                <div className="space-y-1.5">
+                  <h3 className="line-clamp-1 text-sm font-bold tracking-tight text-slate-900 transition-colors group-hover:text-indigo-600 sm:text-base">
+                    {book.title}
+                  </h3>
+                  <p className="truncate text-xs text-slate-500 sm:text-sm">
+                    {book.author}
+                  </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex min-w-0 flex-col">
-                    <span className="mb-0.5 text-[7px] font-bold tracking-widest text-slate-300 uppercase md:text-[8px]">
-                      Category
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-0.5 rounded-md bg-amber-50 px-1.5 py-0.5">
+                      <Star
+                        size={11}
+                        className="fill-amber-400 text-amber-400"
+                      />
+                      <span className="text-[11px] font-bold text-amber-700">
+                        {book.rating}
+                      </span>
+                    </div>
+                    <span className="hidden text-[10px] text-slate-400 sm:inline">
+                      ({book.reviews.toLocaleString()})
                     </span>
-                    <Badge
-                      variant="secondary"
-                      className="max-w-[100px] truncate border-none bg-slate-100 text-[8px] font-medium text-slate-600 sm:max-w-[120px] md:text-[10px]"
-                    >
-                      {book.category}
-                    </Badge>
                   </div>
-                  <Button className="shrink-0 rounded-lg border-none bg-slate-900 px-3 py-1.5 text-[10px] font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-md hover:shadow-indigo-200 active:scale-95 sm:text-xs md:px-5 md:py-2.5 md:text-sm">
-                    Borrow
-                  </Button>
+
+                  <Badge
+                    variant="secondary"
+                    className="rounded-md bg-slate-100 text-[10px] font-medium text-slate-500 sm:text-xs"
+                  >
+                    {book.category}
+                  </Badge>
                 </div>
+
+                <Button
+                  className="mt-3 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:bg-indigo-600 hover:shadow-md hover:shadow-indigo-200 active:scale-[0.98] sm:text-sm"
+                  disabled={book.status === "Borrowed"}
+                >
+                  {book.status === "Borrowed" ? "Unavailable" : "Borrow Now"}
+                </Button>
               </div>
-
-              {/* Decorative hover elements */}
-              <div className="absolute -right-1.5 -bottom-1.5 h-12 w-12 rounded-full bg-indigo-500/5 opacity-0 blur-xl transition-opacity group-hover:opacity-100 md:h-16 md:w-16" />
-            </div>
+            </article>
           ))}
         </div>
 
-        {/* Load More Section */}
-        <div className="flex flex-col items-center justify-center space-y-3 pt-4 md:space-y-4 md:pt-6">
-          <p className="text-xs font-medium text-slate-400 md:text-sm">
-            Showing 8 of 12,450 books
+        {/* Load More */}
+        <div className="flex flex-col items-center gap-3 pt-6">
+          <p className="text-xs text-slate-400 sm:text-sm">
+            Showing {displayBooks.length} of 12,450 books
           </p>
           <Button
             variant="outline"
-            className="h-10 rounded-lg border-2 border-slate-200 px-5 text-xs font-bold text-slate-600 transition-all hover:border-indigo-600 hover:bg-indigo-50/30 hover:text-indigo-600 sm:text-sm md:h-12 md:px-8 md:text-base"
+            className="h-11 rounded-xl border-2 border-slate-200 px-8 text-sm font-semibold text-slate-600 transition-all hover:border-indigo-600 hover:bg-indigo-50/50 hover:text-indigo-600"
           >
             Load More Books
           </Button>

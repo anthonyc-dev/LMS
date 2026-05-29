@@ -83,35 +83,32 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="animate-fade-in mx-auto max-w-[1400px] space-y-6 pb-12">
+    <div className="mx-auto max-w-[1400px] space-y-6 pb-12">
       {/* Page Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div className="space-y-1">
+        <div className="space-y-2">
           <div className="flex items-center gap-1.5 text-xs font-bold tracking-widest text-indigo-600 uppercase">
             <Settings className="size-3.5" />
             <span>Platform Configuration</span>
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 md:text-3xl">
-            Account{" "}
-            <span className="bg-linear-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-              Settings
-            </span>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl md:text-4xl">
+            Account <span className="text-indigo-600">Settings</span>
           </h1>
-          <p className="text-sm font-medium text-slate-500">
+          <p className="max-w-2xl text-sm leading-relaxed text-slate-500 sm:text-base">
             Customize your experience and manage system-wide preferences.
           </p>
         </div>
         <div className="flex items-center gap-2.5">
           <Button
             variant="ghost"
-            className="h-9 cursor-pointer rounded-lg px-4 text-sm font-bold text-slate-500 hover:bg-slate-100"
+            className="h-10 cursor-pointer rounded-xl px-4 text-sm font-bold text-slate-500 hover:bg-slate-100"
           >
             Reset
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="h-9 cursor-pointer rounded-lg bg-slate-900 px-5 text-sm font-bold text-white transition-all hover:bg-indigo-600 hover:shadow-md hover:shadow-indigo-200"
+            className="h-10 cursor-pointer rounded-xl bg-slate-900 px-6 text-sm font-bold text-white transition-all hover:bg-indigo-600 hover:shadow-lg active:scale-[0.98]"
           >
             {isSaving ? (
               <span className="flex items-center gap-1.5">
@@ -127,17 +124,17 @@ export function SettingsPage() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         {/* ── Notifications ─────────────────────────────────────── */}
-        <Card className="group border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
+        <Card className="group overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
           <CardHeader className="border-b border-slate-50 px-6 py-5">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-all duration-300 group-hover:bg-blue-600 group-hover:text-white">
                 <Bell className="size-5" />
               </div>
               <div>
-                <CardTitle className="text-base font-black text-slate-900">
+                <CardTitle className="text-base font-bold text-slate-900">
                   Notifications
                 </CardTitle>
-                <CardDescription className="text-xs font-medium text-slate-400">
+                <CardDescription className="text-xs font-medium text-slate-500">
                   Manage how you receive alerts and updates.
                 </CardDescription>
               </div>
@@ -178,11 +175,11 @@ export function SettingsPage() {
                   htmlFor={item.id}
                   className="flex min-w-0 flex-1 cursor-pointer flex-col gap-1 pr-4"
                 >
-                  <span className="flex items-center gap-2 text-sm font-black text-slate-900">
+                  <span className="flex items-center gap-2 text-sm font-bold text-slate-900">
                     {item.icon}
                     {item.label}
                   </span>
-                  <span className="text-[11px] leading-relaxed font-medium text-slate-500">
+                  <span className="text-xs leading-relaxed text-slate-500">
                     {item.desc}
                   </span>
                 </Label>
@@ -198,14 +195,14 @@ export function SettingsPage() {
         </Card>
 
         {/* ── Appearance ────────────────────────────────────────── */}
-        <Card className="group border-0 bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5">
+        <Card className="group overflow-hidden rounded-2xl border-0 bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
           <CardHeader className="border-b border-white/5 px-6 py-5">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-white/10 p-2.5 text-white transition-all duration-300 group-hover:bg-white group-hover:text-slate-900">
                 <Palette className="size-5" />
               </div>
               <div>
-                <CardTitle className="text-base font-black text-white">
+                <CardTitle className="text-base font-bold text-white">
                   Appearance
                 </CardTitle>
                 <CardDescription className="text-xs font-medium text-slate-400">
@@ -219,10 +216,10 @@ export function SettingsPage() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleTheme("light")}
-                className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm font-bold transition-all ${
+                className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 text-sm font-bold transition-all ${
                   theme === "light"
                     ? "border-white bg-white text-slate-900 shadow-md"
-                    : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                    : "border-transparent bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <Sun className="size-4" />
@@ -230,10 +227,10 @@ export function SettingsPage() {
               </button>
               <button
                 onClick={() => handleTheme("dark")}
-                className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border text-sm font-bold transition-all ${
+                className={`flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border-2 text-sm font-bold transition-all ${
                   theme === "dark"
                     ? "border-indigo-500 bg-indigo-600 text-white shadow-md shadow-indigo-900/40"
-                    : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                    : "border-transparent bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <Moon className="size-4" />
@@ -262,17 +259,17 @@ export function SettingsPage() {
             ].map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4 transition-all duration-200 hover:bg-white/10"
+                className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 p-4 transition-all duration-200 hover:bg-white/10"
               >
                 <Label
                   htmlFor={item.id}
                   className="flex min-w-0 flex-1 cursor-pointer flex-col gap-1 pr-4"
                 >
-                  <span className="flex items-center gap-2 text-sm font-black text-white">
+                  <span className="flex items-center gap-2 text-sm font-bold text-white">
                     {item.icon}
                     {item.label}
                   </span>
-                  <span className="text-[11px] leading-relaxed font-medium text-slate-400">
+                  <span className="text-xs leading-relaxed text-slate-400">
                     {item.desc}
                   </span>
                 </Label>
@@ -288,17 +285,17 @@ export function SettingsPage() {
         </Card>
 
         {/* ── Security & Privacy ────────────────────────────────── */}
-        <Card className="border border-slate-100 shadow-sm transition-shadow hover:shadow-md lg:col-span-2">
+        <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md lg:col-span-2">
           <CardHeader className="border-b border-slate-50 px-6 py-5">
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-rose-50 p-2.5 text-rose-600 transition-all duration-300 group-hover:bg-rose-600 group-hover:text-white">
                 <Shield className="size-5" />
               </div>
               <div>
-                <CardTitle className="text-base font-black text-slate-900">
+                <CardTitle className="text-base font-bold text-slate-900">
                   Security & Privacy
                 </CardTitle>
-                <CardDescription className="text-xs font-medium text-slate-400">
+                <CardDescription className="text-xs font-medium text-slate-500">
                   Protect your account and manage platform data.
                 </CardDescription>
               </div>
@@ -331,22 +328,22 @@ export function SettingsPage() {
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/80 p-5 transition-all duration-200 hover:bg-white hover:shadow-sm"
+                  className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-5 transition-all duration-200 hover:bg-white hover:shadow-md"
                 >
                   <div className={`w-fit rounded-xl p-2.5 ${item.iconBg}`}>
                     {item.icon}
                   </div>
                   <div className="space-y-1.5">
-                    <h4 className="text-sm font-black text-slate-900">
+                    <h4 className="text-sm font-bold text-slate-900">
                       {item.title}
                     </h4>
-                    <p className="text-[11px] leading-relaxed font-medium text-slate-500">
+                    <p className="text-xs leading-relaxed text-slate-500">
                       {item.desc}
                     </p>
                   </div>
                   <Button
                     variant="outline"
-                    className="h-9 w-full cursor-pointer rounded-lg border-slate-200 text-xs font-bold transition-all hover:border-slate-700 hover:text-slate-900"
+                    className="h-10 w-full cursor-pointer rounded-xl border-slate-200 text-xs font-bold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                   >
                     {item.action}
                   </Button>
@@ -357,39 +354,39 @@ export function SettingsPage() {
             {/* Danger Zone + System Status footer */}
             <div className="mt-6 grid gap-5 border-t border-slate-100 pt-6 sm:grid-cols-2">
               {/* System Status */}
-              <div className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+              <div className="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
                 <div className="relative">
-                  <Cloud className="size-5 text-emerald-500" />
+                  <Cloud className="size-5 text-emerald-600" />
                   <span className="absolute -top-0.5 -right-0.5 h-2 w-2 animate-ping rounded-full bg-emerald-500" />
                   <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-slate-900">
+                  <p className="text-xs font-bold text-slate-900">
                     System Status:{" "}
                     <span className="text-emerald-600">
                       All Systems Operational
                     </span>
                   </p>
-                  <p className="mt-0.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                  <p className="mt-0.5 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
                     Last checked: 5 minutes ago
                   </p>
                 </div>
               </div>
 
               {/* Danger zone */}
-              <div className="flex items-center gap-3 rounded-xl border border-rose-100 bg-rose-50/50 p-4">
-                <Trash2 className="size-5 shrink-0 text-rose-400" />
+              <div className="flex items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 p-4">
+                <Trash2 className="size-5 shrink-0 text-rose-500" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs leading-tight font-black text-slate-900">
+                  <p className="text-xs font-bold text-slate-900">
                     Delete Account
                   </p>
-                  <p className="mt-0.5 text-[10px] font-medium text-slate-500">
-                    Permanently remove your account and all associated data.
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Permanently remove your account and all data.
                   </p>
                 </div>
                 <Button
                   variant="ghost"
-                  className="h-8 shrink-0 cursor-pointer rounded-lg px-3 text-xs font-bold text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+                  className="h-9 shrink-0 cursor-pointer rounded-xl px-4 text-xs font-bold text-rose-600 hover:bg-rose-100/50 hover:text-rose-700"
                 >
                   Delete
                 </Button>

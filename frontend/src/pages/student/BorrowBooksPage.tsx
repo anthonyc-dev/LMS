@@ -1,5 +1,12 @@
 import { Fragment } from "react";
-import { Plus } from "lucide-react";
+import {
+  Plus,
+  Clock,
+  BookOpen,
+  Heart,
+  TrendingUp,
+  ArrowRight,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +16,6 @@ import bannerImg from "@/assets/dashboard/banner.png";
 import book1Img from "@/assets/dashboard/book1.png";
 import book2Img from "@/assets/dashboard/book2.png";
 import author1Img from "@/assets/dashboard/author1.png";
-import { Separator } from "@/components/ui/separator";
 
 const ON_LOAN_BOOKS = [
   {
@@ -18,7 +24,7 @@ const ON_LOAN_BOOKS = [
     author: "Barack Obama",
     due: "02/02/22",
     image: book1Img,
-    color: "bg-gray-100",
+    color: "from-gray-100 to-gray-200",
   },
   {
     id: 2,
@@ -26,7 +32,7 @@ const ON_LOAN_BOOKS = [
     author: "April Hartman",
     due: "12/02/22",
     image: book2Img,
-    color: "bg-red-500",
+    color: "from-red-400 to-red-500",
   },
   {
     id: 3,
@@ -34,7 +40,7 @@ const ON_LOAN_BOOKS = [
     author: "Emily Brontë",
     due: "22/02/22",
     image: book2Img,
-    color: "bg-slate-700",
+    color: "from-slate-600 to-slate-700",
   },
   {
     id: 4,
@@ -42,7 +48,7 @@ const ON_LOAN_BOOKS = [
     author: "Kate Atkinson",
     due: "22/02/22",
     image: book1Img,
-    color: "bg-red-400",
+    color: "from-red-300 to-red-400",
   },
   {
     id: 5,
@@ -50,7 +56,7 @@ const ON_LOAN_BOOKS = [
     author: "Gordon Sombrowski",
     due: "22/02/22",
     image: book2Img,
-    color: "bg-blue-100",
+    color: "from-blue-100 to-blue-200",
   },
   {
     id: 6,
@@ -58,7 +64,7 @@ const ON_LOAN_BOOKS = [
     author: "Gillian Flynn",
     due: "22/02/22",
     image: book1Img,
-    color: "bg-indigo-900",
+    color: "from-indigo-800 to-indigo-900",
   },
 ];
 
@@ -96,127 +102,153 @@ const FAVORITE_AUTHORS = [
 
 const POPULAR_READS = [
   { title: "A Passage North", author: "Anuk Arudpragasam", image: book2Img },
-  { title: "The Sweetness of Water", author: "Nathan Harris", image: book1Img },
+  {
+    title: "The Sweetness of Water",
+    author: "Nathan Harris",
+    image: book1Img,
+  },
 ];
 
 export function BorrowBooksPage() {
   return (
-    <>
-      {/* Banner Section */}
-      <section className="relative flex flex-col items-center justify-between overflow-hidden rounded-[2.5rem] bg-[#E2E2F8] p-8 transition-all hover:shadow-2xl hover:shadow-indigo-100 md:flex-row md:p-10">
-        <div className="z-10 max-w-2xl space-y-8 text-center md:text-left">
-          <h1 className="text-5xl leading-[1.1] font-bold tracking-tight text-slate-900 md:text-6xl">
-            Black History Month
-          </h1>
-          <p className="max-w-lg text-xl leading-relaxed text-slate-600">
-            From firebrand fiction to cultural history, and from seminal lives
-            to inspiring volumes for children, we're celebrating classic works
-            and contemporary triumphs from the best black authors and
-            commentators.
-          </p>
-          <Button className="rounded-full bg-[#FF7A59] px-10 py-7 text-xl font-bold text-white shadow-2xl shadow-orange-200 transition-all hover:-translate-y-1 hover:scale-105 hover:bg-[#FF6B49] active:scale-95">
-            Find out more
-          </Button>
+    <div className="mx-auto max-w-[1600px] space-y-8 md:space-y-10">
+      {/* ── Banner Section ────────────────────────────────────────── */}
+      <section className="group relative overflow-hidden rounded-2xl bg-[#E2E2F8] p-6 transition-shadow duration-300 hover:shadow-xl sm:p-8 md:p-10">
+        <div className="relative z-10 flex flex-col items-center gap-6 md:flex-row md:gap-10">
+          <div className="flex-1 space-y-4 text-center md:text-left">
+            <Badge className="rounded-full border-0 bg-indigo-600/10 px-3 py-1 text-xs font-semibold text-indigo-700">
+              Featured Collection
+            </Badge>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
+              Black History Month
+            </h1>
+            <p className="max-w-lg text-sm leading-relaxed text-slate-600 md:text-base">
+              From firebrand fiction to cultural history, and from seminal lives
+              to inspiring volumes for children, we&apos;re celebrating classic
+              works and contemporary triumphs.
+            </p>
+            <Button className="rounded-xl bg-[#FF7A59] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200/50 transition-all hover:bg-[#FF6B49] hover:shadow-xl active:scale-[0.98]">
+              Find out more
+            </Button>
+          </div>
+          <div className="relative w-48 shrink-0 sm:w-56 md:w-64">
+            <img
+              src={bannerImg}
+              alt="Banner Illustration"
+              className="w-full drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
         </div>
-        <div className="relative mt-12 h-64 w-64 overflow-hidden rounded-2xl md:mt-0 md:h-80 md:w-80">
-          <img
-            src={bannerImg}
-            alt="Banner Illustration"
-            className="h-full w-full object-contain drop-shadow-2xl"
-          />
-        </div>
-        {/* Abstract background shapes */}
-        <div className="absolute top-0 right-0 h-96 w-96 translate-x-1/2 -translate-y-1/2 rounded-full bg-white/20 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-64 w-64 -translate-x-1/2 translate-y-1/2 rounded-full bg-indigo-200/30 blur-2xl" />
+
+        {/* Background shapes */}
+        <div className="pointer-events-none absolute top-0 right-0 h-80 w-80 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/20 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-0 h-48 w-48 -translate-x-1/3 translate-y-1/3 rounded-full bg-indigo-200/30 blur-2xl" />
       </section>
 
-      {/* On Loan Section */}
-      <section className="my-10 space-y-8 rounded-2xl bg-white p-4 py-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold text-slate-900">On Loan</h2>
+      {/* ── On Loan Section ───────────────────────────────────────── */}
+      <section className="space-y-5">
+        <div className="flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
+              On Loan
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {ON_LOAN_BOOKS.length} books currently borrowed
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            className="gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+          >
+            View All <ArrowRight size={14} />
+          </Button>
         </div>
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-7">
+
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
           {ON_LOAN_BOOKS.map((book) => (
-            <div key={book.id} className="group cursor-pointer space-y-4">
+            <div key={book.id} className="group cursor-pointer space-y-3">
               <div
-                className={`relative aspect-[3/4.2] overflow-hidden rounded-2xl shadow-lg transition-all duration-500 group-hover:-translate-y-3 group-hover:shadow-2xl ${book.color}`}
+                className={`relative aspect-3/4 overflow-hidden rounded-xl bg-linear-to-br shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl ${book.color}`}
               >
                 <img
                   src={book.image}
                   alt={book.title}
-                  className="h-full w-full object-cover opacity-90 mix-blend-multiply transition-all duration-500 group-hover:scale-110 group-hover:opacity-100"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
               </div>
-              <div className="space-y-2">
-                <h3 className="truncate text-base leading-tight font-bold text-slate-900">
+              <div className="space-y-1">
+                <h3 className="truncate text-sm font-bold text-slate-900">
                   {book.title}
                 </h3>
-                <p className="text-sm font-medium text-slate-500">
-                  {book.author}
-                </p>
-                <div className="flex items-center gap-1.5 pt-1">
-                  <span className="text-[11px] font-black tracking-widest text-slate-400 uppercase">
-                    Due
-                  </span>
-                  <span className="text-[11px] font-black tracking-widest text-amber-500 uppercase">
-                    {book.due}
+                <p className="truncate text-xs text-slate-500">{book.author}</p>
+                <div className="flex items-center gap-1.5">
+                  <Clock size={10} className="text-amber-500" />
+                  <span className="text-[10px] font-semibold text-amber-600">
+                    Due {book.due}
                   </span>
                 </div>
               </div>
             </div>
           ))}
 
-          {/* Borrow more books card */}
-          <div className="group flex aspect-[3/4.2] cursor-pointer flex-col items-center justify-center rounded-2xl border-4 border-dashed border-slate-200 bg-white/40 transition-all duration-300 hover:-translate-y-2 hover:border-slate-400 hover:bg-white hover:shadow-xl">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-300 transition-all duration-300 group-hover:rotate-90 group-hover:bg-slate-100 group-hover:text-slate-500">
-              <Plus size={32} />
+          {/* Add more card */}
+          <div className="group flex aspect-3/4 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:border-indigo-400 hover:bg-indigo-50/50 hover:shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-all group-hover:bg-indigo-100 group-hover:text-indigo-600">
+              <Plus size={24} />
             </div>
-            <p className="mt-4 px-6 text-center text-sm leading-relaxed font-bold text-slate-400 group-hover:text-slate-600">
-              Borrow more books
+            <p className="mt-3 px-4 text-center text-xs font-semibold text-slate-400 group-hover:text-indigo-600">
+              Borrow more
             </p>
           </div>
         </div>
       </section>
 
-      {/* Bottom Grid Section */}
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      {/* ── Bottom Grid ───────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {/* Reserved Books */}
-        <Card className="overflow-hidden rounded-3xl border-none bg-white shadow-sm transition-shadow hover:shadow-md">
-          <CardContent className="space-y-8 p-8">
-            <h2 className="text-2xl font-bold text-slate-900">
-              Reserved books
-            </h2>
-            <Separator />
-            <div className="space-y-8">
+        <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
+          <CardContent className="p-5 sm:p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900">
+                Reserved Books
+              </h2>
+              <Badge
+                variant="secondary"
+                className="rounded-md bg-slate-100 text-[10px] font-semibold text-slate-500"
+              >
+                {RESERVED_BOOKS.length}
+              </Badge>
+            </div>
+            <div className="space-y-4">
               {RESERVED_BOOKS.map((book, i) => (
                 <Fragment key={i}>
-                  <div className="group flex cursor-pointer items-center gap-5">
-                    <div className="h-24 w-20 shrink-0 overflow-hidden rounded-xl shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
+                  <div className="group flex cursor-pointer items-center gap-4">
+                    <div className="size-16 shrink-0 overflow-hidden rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-105">
                       <img
                         src={book.image}
                         alt={book.title}
                         className="h-full w-full object-cover"
                       />
                     </div>
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <h3 className="truncate text-base leading-tight font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
                         {book.title}
                       </h3>
-                      <p className="text-sm font-medium text-slate-500">
+                      <p className="mt-0.5 text-xs text-slate-500">
                         {book.author}
                       </p>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-black tracking-widest text-slate-300 uppercase">
-                          Due
-                        </span>
-                        <span className="text-[10px] font-black tracking-widest text-slate-400">
-                          {book.due}
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <Clock size={10} className="text-slate-400" />
+                        <span className="text-[10px] font-semibold text-slate-400">
+                          Due {book.due}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <Separator />
+                  {i < RESERVED_BOOKS.length - 1 && (
+                    <div className="border-t border-slate-50" />
+                  )}
                 </Fragment>
               ))}
             </div>
@@ -224,41 +256,40 @@ export function BorrowBooksPage() {
         </Card>
 
         {/* Favourite Authors */}
-        <Card className="overflow-hidden rounded-3xl border-none bg-white shadow-sm transition-shadow hover:shadow-md">
-          <CardContent className="space-y-8 p-8">
-            <h2 className="text-2xl font-bold text-slate-900">
-              Favourite Authors
-            </h2>
-            <Separator />
-            <div className="space-y-8">
+        <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
+          <CardContent className="p-5 sm:p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900">
+                Favourite Authors
+              </h2>
+              <Heart size={16} className="text-slate-300" />
+            </div>
+            <div className="space-y-4">
               {FAVORITE_AUTHORS.map((author, i) => (
                 <Fragment key={i}>
-                  <div className="group flex cursor-pointer items-center gap-5">
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl shadow-md transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg">
+                  <div className="group flex cursor-pointer items-center gap-4">
+                    <div className="size-14 shrink-0 overflow-hidden rounded-full shadow-sm transition-transform duration-300 group-hover:scale-105">
                       <img
                         src={author.image}
                         alt={author.name}
                         className="h-full w-full object-cover"
                       />
                     </div>
-                    <div className="min-w-0 flex-1 space-y-1.5">
-                      <h3 className="truncate text-base font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
                         {author.name}
                       </h3>
-                      <p className="text-sm font-medium text-slate-500">
-                        {author.period}
-                      </p>
+                      <p className="text-xs text-slate-500">{author.period}</p>
                     </div>
                     {author.badge && (
-                      <Badge
-                        variant="secondary"
-                        className="rounded-full border-none bg-indigo-50 px-3 py-1 text-[10px] font-black text-indigo-600"
-                      >
+                      <Badge className="shrink-0 rounded-md border-0 bg-indigo-50 px-2 py-0.5 text-[9px] font-bold text-indigo-600">
                         {author.badge}
                       </Badge>
                     )}
                   </div>
-                  <Separator />
+                  {i < FAVORITE_AUTHORS.length - 1 && (
+                    <div className="border-t border-slate-50" />
+                  )}
                 </Fragment>
               ))}
             </div>
@@ -266,37 +297,50 @@ export function BorrowBooksPage() {
         </Card>
 
         {/* Popular Reads */}
-        <Card className="overflow-hidden rounded-3xl border-none bg-white shadow-sm transition-shadow hover:shadow-md">
-          <CardContent className="space-y-8 p-8">
-            <h2 className="text-2xl font-bold text-slate-900">Popular reads</h2>
-            <Separator />
-            <div className="space-y-8">
+        <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
+          <CardContent className="p-5 sm:p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900">
+                Popular Reads
+              </h2>
+              <TrendingUp size={16} className="text-slate-300" />
+            </div>
+            <div className="space-y-4">
               {POPULAR_READS.map((book, i) => (
                 <Fragment key={i}>
-                  <div className="group flex cursor-pointer items-center gap-5">
-                    <div className="h-24 w-20 shrink-0 overflow-hidden rounded-xl shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
+                  <div className="group flex cursor-pointer items-center gap-4">
+                    <div className="size-16 shrink-0 overflow-hidden rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-105">
                       <img
                         src={book.image}
                         alt={book.title}
                         className="h-full w-full object-cover"
                       />
                     </div>
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <h3 className="truncate text-base leading-tight font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
                         {book.title}
                       </h3>
-                      <p className="text-sm font-medium text-slate-500">
+                      <p className="mt-0.5 text-xs text-slate-500">
                         {book.author}
                       </p>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 shrink-0 rounded-lg text-slate-300 hover:text-indigo-600"
+                    >
+                      <BookOpen size={14} />
+                    </Button>
                   </div>
-                  <Separator />
+                  {i < POPULAR_READS.length - 1 && (
+                    <div className="border-t border-slate-50" />
+                  )}
                 </Fragment>
               ))}
             </div>
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   );
 }
