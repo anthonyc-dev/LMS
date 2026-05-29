@@ -68,16 +68,9 @@ export function LoginPage() {
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/60 to-transparent" />
           <div className="relative z-10 flex max-w-md flex-col items-center text-center">
-            <div className="flex size-28 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-              <img
-                src="/img/logo.png"
-                alt="NCMC Library"
-                className="h-full w-full object-contain"
-              />
-            </div>
             <h2 className="mb-3 text-5xl font-bold text-white">
               Hybrid Library System for{" "}
-              <span className="text-secondary">NCMCians</span>
+              <span className="text-primary">NCMC&apos;ians</span>
             </h2>
             <p className="text-lg leading-relaxed text-white/80">
               A modern solution designed to transform the institution&apos;s
@@ -101,21 +94,15 @@ export function LoginPage() {
         </div>
         <div className="flex flex-col items-center justify-center p-6 sm:p-10">
           <div className="w-full max-w-sm">
-            <div className="mb-8 flex flex-col items-center text-center lg:hidden">
-              <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+            <div className="mb-6 flex flex-col items-center text-center">
+              <div className="mb-4 flex size-32 shrink-0 items-center justify-center overflow-hidden">
                 <img
-                  src="/img/logo.png"
+                  src="/logo.png"
                   alt="NCMC Library"
                   className="h-full w-full object-contain"
                 />
               </div>
-              <h1 className="text-2xl font-bold">LMS Platform</h1>
-            </div>
-            <div className="mb-6 md:text-center">
-              <h1 className="text-2xl font-semibold tracking-tight lg:hidden">
-                Welcome back
-              </h1>
-              <h1 className="hidden text-2xl font-semibold tracking-tight lg:block">
+              <h1 className="text-2xl font-semibold tracking-tight">
                 Sign in to your account
               </h1>
               <p className="text-muted-foreground mt-2 text-sm">
