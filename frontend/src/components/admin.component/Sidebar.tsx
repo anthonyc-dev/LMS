@@ -188,10 +188,10 @@ export function SidebarContentInner({
                   className={`flex items-center ${isCollapsed ? "" : "w-full gap-3"}`}
                 >
                   <div
-                    className={`flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/10 shadow-inner transition-all duration-300 group-hover:scale-105 ${isCollapsed ? "size-10 p-2" : "size-11 p-2"}`}
+                    className={`flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/10 shadow-inner transition-all duration-300 group-hover:scale-105 ${isCollapsed ? "size-10 p-2" : "size-16 p-2"}`}
                   >
                     <img
-                      src="/img/logo.png"
+                      src="/logo.png"
                       alt="NCMC Library"
                       className="h-full w-full object-contain drop-shadow-md filter"
                     />
