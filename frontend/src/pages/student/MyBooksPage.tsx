@@ -8,11 +8,13 @@ import {
   Library,
   RotateCcw,
   Play,
+  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useAuthStore } from "@/store/authStore";
 
 import book1Img from "@/assets/dashboard/book1.png";
 import book2Img from "@/assets/dashboard/book2.png";
@@ -23,123 +25,135 @@ const MY_BOOKS = [
     title: "The Great Gatsby",
     author: "F. Scott Fitzgerald",
     progress: 68,
+    pagesRead: 182,
+    totalPages: 240,
     dueDate: "May 15, 2026",
+    daysLeft: 4,
     status: "Reading",
     image: book1Img,
     category: "Classic Literature",
-    color: "bg-amber-50",
+    rating: 4.9,
+    color: "from-amber-50 to-orange-50",
   },
   {
     id: 2,
     title: "Atomic Habits",
     author: "James Clear",
     progress: 32,
+    pagesRead: 96,
+    totalPages: 320,
     dueDate: "May 20, 2026",
+    daysLeft: 9,
     status: "Reading",
     image: book2Img,
     category: "Self-Improvement",
-    color: "bg-emerald-50",
+    rating: 5.0,
+    color: "from-emerald-50 to-teal-50",
   },
 ];
 
 export function MyBooksPage() {
+  const { user } = useAuthStore();
+  const firstName = user?.fullName?.split(" ")[0] || "Reader";
+
   return (
-    <div className="mx-auto max-w-[1600px] space-y-8 md:space-y-16">
-      {/* Welcome Section */}
-      <section className="space-y-3 px-2 md:space-y-4">
-        <h1 className="text-3xl leading-none font-black tracking-tight text-slate-900 sm:text-5xl md:text-7xl">
-          Hello, <span className="text-emerald-600">Anthony</span>.
+    <div className="mx-auto max-w-[1600px] space-y-8 md:space-y-12">
+      {/* ── Welcome Section ───────────────────────────────────────── */}
+      <section className="space-y-2">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl md:text-4xl">
+          Hello, <span className="text-emerald-600">{firstName}</span>.
         </h1>
-        <p className="max-w-3xl text-base leading-relaxed font-medium text-slate-500 sm:text-xl md:text-2xl">
+        <p className="max-w-2xl text-sm leading-relaxed text-slate-500 sm:text-base md:text-lg">
           You have{" "}
-          <span className="font-bold text-slate-900 underline decoration-emerald-200 decoration-4">
-            2 books
+          <span className="font-semibold text-slate-900">
+            {MY_BOOKS.length} books
           </span>{" "}
           currently in progress. Your next deadline is in{" "}
-          <span className="font-bold text-slate-900 underline decoration-amber-200 decoration-4">
-            4 days
+          <span className="font-semibold text-amber-600">
+            {MY_BOOKS[0].daysLeft} days
           </span>
           .
         </p>
       </section>
 
-      {/* Overview Grid */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
-        <Card className="group overflow-hidden rounded-2xl border-none bg-slate-900 text-white shadow-sm md:rounded-4xl">
-          <CardContent className="space-y-4 p-6 md:space-y-8 md:p-10">
+      {/* ── Stats Cards ───────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-5 lg:grid-cols-3">
+        {/* Active Reading */}
+        <Card className="group overflow-hidden rounded-2xl border-0 bg-slate-900 text-white shadow-sm transition-shadow hover:shadow-lg">
+          <CardContent className="space-y-5 p-6">
             <div className="flex items-center justify-between">
-              <div className="rounded-xl bg-white/10 p-3 md:p-4">
-                <BookOpen size={28} className="md:size-8" />
+              <div className="rounded-xl bg-white/10 p-3">
+                <BookOpen size={22} />
               </div>
-              <Badge className="border-none bg-emerald-500/20 px-4 py-2 text-[10px] font-black text-emerald-400 md:text-xs">
+              <Badge className="border-0 bg-emerald-500/15 px-3 py-1 text-[10px] font-bold text-emerald-400">
                 ACTIVE
               </Badge>
             </div>
-            <div className="space-y-1 md:space-y-2">
-              <p className="text-5xl font-black tracking-tighter md:text-6xl">
-                02
-              </p>
-              <p className="text-base font-bold tracking-widest text-slate-400 uppercase md:text-lg">
+            <div>
+              <p className="text-4xl font-extrabold tracking-tighter">02</p>
+              <p className="mt-1 text-sm font-semibold tracking-wide text-slate-400 uppercase">
                 Books Reading
               </p>
             </div>
-            <Button className="h-14 w-full gap-3 rounded-xl bg-white text-base font-black text-slate-900 transition-all group-hover:scale-[1.02] hover:bg-slate-100 md:h-16 md:text-lg">
-              Continue Reading <ArrowRight size={20} />
+            <Button className="h-11 w-full gap-2 rounded-xl bg-white text-sm font-bold text-slate-900 transition-all hover:bg-slate-100 active:scale-[0.98]">
+              Continue Reading <ArrowRight size={16} />
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="group overflow-hidden rounded-2xl border-none bg-stone-100 shadow-sm md:rounded-4xl">
-          <CardContent className="space-y-4 p-6 text-slate-900 md:space-y-8 md:p-10">
+        {/* Reservation */}
+        <Card className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow hover:shadow-lg">
+          <CardContent className="space-y-5 p-6">
             <div className="flex items-center justify-between">
-              <div className="rounded-xl bg-white p-3 shadow-sm md:p-4">
-                <Clock size={28} className="text-amber-600 md:size-8" />
+              <div className="rounded-xl bg-amber-50 p-3">
+                <Clock size={22} className="text-amber-600" />
               </div>
-              <Badge className="border-none bg-amber-600/10 px-4 py-2 text-[10px] font-black text-amber-600 md:text-xs">
+              <Badge className="border-0 bg-amber-500/10 px-3 py-1 text-[10px] font-bold text-amber-600">
                 PENDING
               </Badge>
             </div>
-            <div className="space-y-1 md:space-y-2">
-              <p className="text-5xl font-black tracking-tighter md:text-6xl">
+            <div>
+              <p className="text-4xl font-extrabold tracking-tighter text-slate-900">
                 01
               </p>
-              <p className="text-base font-bold tracking-widest text-slate-500 uppercase md:text-lg">
+              <p className="mt-1 text-sm font-semibold tracking-wide text-slate-500 uppercase">
                 Reservation
               </p>
             </div>
-            <p className="line-clamp-2 text-sm leading-relaxed font-medium text-slate-500 md:text-base">
-              "The Alchemist" is being processed and will be ready for pickup by
-              tomorrow afternoon.
+            <p className="text-sm leading-relaxed text-slate-500">
+              &ldquo;The Alchemist&rdquo; will be ready for pickup by tomorrow
+              afternoon.
             </p>
           </CardContent>
         </Card>
 
-        <Card className="group overflow-hidden rounded-2xl border border-none border-slate-100 bg-white shadow-sm md:col-span-2 md:rounded-4xl lg:col-span-1">
-          <CardContent className="space-y-4 p-6 text-slate-900 md:space-y-8 md:p-10">
+        {/* History */}
+        <Card className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow hover:shadow-lg sm:col-span-2 lg:col-span-1">
+          <CardContent className="space-y-5 p-6">
             <div className="flex items-center justify-between">
-              <div className="rounded-xl bg-emerald-50 p-3 md:p-4">
-                <Library size={28} className="text-emerald-600 md:size-8" />
+              <div className="rounded-xl bg-emerald-50 p-3">
+                <Library size={22} className="text-emerald-600" />
               </div>
-              <Badge className="border-none bg-slate-100 px-4 py-2 text-[10px] font-black text-slate-600 md:text-xs">
+              <Badge className="border-0 bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-600">
                 HISTORY
               </Badge>
             </div>
-            <div className="space-y-1 md:space-y-2">
-              <p className="text-5xl font-black tracking-tighter md:text-6xl">
+            <div>
+              <p className="text-4xl font-extrabold tracking-tighter text-slate-900">
                 48
               </p>
-              <p className="text-base font-bold tracking-widest text-slate-500 uppercase md:text-lg">
+              <p className="mt-1 text-sm font-semibold tracking-wide text-slate-500 uppercase">
                 Books Finished
               </p>
             </div>
-            <div className="flex -space-x-3 overflow-hidden md:-space-x-4">
+            <div className="flex -space-x-2.5">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="inline-block h-10 w-10 rounded-lg bg-slate-200 ring-2 ring-white md:h-12 md:w-12 md:rounded-xl md:ring-4"
+                  className="inline-block size-9 rounded-lg bg-slate-200 ring-2 ring-white"
                 />
               ))}
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-[10px] font-bold text-white ring-2 ring-white md:h-12 md:w-12 md:rounded-xl md:text-sm md:ring-4">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-slate-900 text-[10px] font-bold text-white ring-2 ring-white">
                 +44
               </div>
             </div>
@@ -147,157 +161,174 @@ export function MyBooksPage() {
         </Card>
       </div>
 
-      {/* Active Reading Section */}
-      <section className="space-y-8 md:space-y-10">
-        <div className="flex items-center justify-between px-2">
-          <h2 className="text-2xl font-black tracking-tight text-slate-900 sm:text-4xl">
+      {/* ── Active Reading Section ────────────────────────────────── */}
+      <section className="space-y-5">
+        <div className="flex items-end justify-between">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
             Active Reading
           </h2>
           <Button
             variant="ghost"
-            className="gap-2 text-sm font-bold text-emerald-600 hover:bg-emerald-50 md:text-lg"
+            className="gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700"
           >
-            View All <ArrowRight size={18} className="md:size-5" />
+            View All <ArrowRight size={14} />
           </Button>
         </div>
 
-        <div className="space-y-5 md:space-y-8">
+        <div className="space-y-4">
           {MY_BOOKS.map((book) => (
-            <div
+            <article
               key={book.id}
-              className="group relative flex flex-col items-center gap-5 rounded-2xl border border-slate-100 bg-white p-5 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50 sm:gap-8 md:gap-12 md:rounded-4xl md:p-10 xl:flex-row"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:shadow-lg sm:flex-row"
             >
-              {/* Large Book Cover */}
+              {/* Book Cover */}
               <div
-                className={`relative h-44 w-32 shrink-0 overflow-hidden rounded-xl shadow-2xl transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-2 sm:h-64 sm:w-48 ${book.color}`}
+                className={`relative flex w-full shrink-0 items-center justify-center bg-linear-to-br p-6 sm:w-48 sm:p-8 md:w-56 ${book.color}`}
               >
-                <img
-                  src={book.image}
-                  alt={book.title}
-                  className="h-full w-full object-cover opacity-90 mix-blend-multiply transition-all group-hover:opacity-100"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
+                <div className="relative w-24 transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-2 sm:w-28 md:w-32">
+                  <div className="absolute inset-0 translate-y-4 scale-90 bg-black/20 blur-xl" />
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    className="relative w-full drop-shadow-lg"
+                  />
+                </div>
+                {/* Play button overlay */}
                 <Button
                   size="icon"
-                  className="absolute top-1/2 left-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 scale-75 rounded-full bg-white text-slate-900 opacity-0 shadow-2xl transition-all duration-300 group-hover:scale-100 group-hover:opacity-100 sm:h-16 sm:w-16"
+                  className="absolute bottom-4 right-4 size-10 rounded-full bg-white/90 text-slate-900 opacity-0 shadow-lg backdrop-blur-sm transition-all group-hover:opacity-100 hover:bg-white sm:bottom-auto sm:right-auto"
                 >
-                  <Play className="ml-1 fill-current" />
+                  <Play size={16} className="ml-0.5 fill-current" />
                 </Button>
               </div>
 
-              {/* Book Details & Progress */}
-              <div className="w-full flex-1 space-y-6 md:space-y-10">
-                <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
-                  <div className="space-y-2 md:space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Badge
-                        variant="secondary"
-                        className="border-none bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-600 md:text-xs"
-                      >
-                        {book.category}
-                      </Badge>
-                      <div className="flex items-center gap-1 text-amber-500">
-                        <Star
-                          size={12}
-                          className="fill-current md:size-[14px]"
-                        />
-                        <span className="text-xs font-black md:text-sm">
-                          4.9
-                        </span>
-                      </div>
+              {/* Details */}
+              <div className="flex flex-1 flex-col justify-between p-5 sm:p-6 md:p-8">
+                <div className="space-y-3">
+                  {/* Top row */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant="secondary"
+                      className="rounded-md bg-slate-100 text-[10px] font-semibold text-slate-600 sm:text-xs"
+                    >
+                      {book.category}
+                    </Badge>
+                    <div className="flex items-center gap-1 text-amber-500">
+                      <Star size={12} className="fill-current" />
+                      <span className="text-xs font-bold">{book.rating}</span>
                     </div>
-                    <h3 className="text-2xl leading-tight font-black tracking-tight text-slate-900 sm:text-3xl md:text-5xl">
+                  </div>
+
+                  {/* Title */}
+                  <div>
+                    <h3 className="text-lg font-bold tracking-tight text-slate-900 sm:text-xl md:text-2xl">
                       {book.title}
                     </h3>
-                    <p className="text-lg font-bold text-slate-500 md:text-xl">
+                    <p className="mt-0.5 text-sm text-slate-500">
                       by {book.author}
                     </p>
                   </div>
 
-                  <div className="flex shrink-0 flex-col gap-2 md:items-end">
-                    <div className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase md:text-xs">
-                      <Calendar size={14} />
-                      Due on {book.dueDate}
-                    </div>
-                    <Badge className="w-fit border-none bg-amber-500/10 px-4 py-2 text-[10px] font-black text-amber-600 md:text-xs">
-                      4 DAYS LEFT
+                  {/* Due date */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <Calendar size={12} />
+                      Due {book.dueDate}
+                    </span>
+                    <Badge
+                      className={`rounded-md border-0 px-2 py-0.5 text-[10px] font-bold ${
+                        book.daysLeft <= 5
+                          ? "bg-amber-500/10 text-amber-600"
+                          : "bg-emerald-500/10 text-emerald-600"
+                      }`}
+                    >
+                      {book.daysLeft} DAYS LEFT
                     </Badge>
                   </div>
                 </div>
 
-                <div className="space-y-4 md:space-y-5">
-                  <div className="flex items-center justify-between">
-                    <p className="text-base font-black text-slate-900 md:text-lg">
-                      Reading Progress
-                    </p>
-                    <p className="text-base font-black text-emerald-600 md:text-lg">
+                {/* Progress */}
+                <div className="mt-5 space-y-2.5 border-t border-slate-50 pt-5">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-semibold text-slate-700">
+                      Progress
+                    </span>
+                    <span className="font-bold text-emerald-600">
                       {book.progress}%
-                    </p>
+                    </span>
                   </div>
-                  <Progress value={book.progress} className="h-3 md:h-4" />
-                  <p className="text-sm font-medium text-slate-500 md:text-base">
-                    You've completed{" "}
-                    <span className="font-bold text-slate-900">182 of 240</span>{" "}
-                    pages. Keep it up!
+                  <Progress value={book.progress} className="h-2" />
+                  <p className="text-xs text-slate-400">
+                    {book.pagesRead} of {book.totalPages} pages completed
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 border-t border-slate-50 pt-6 md:gap-4 md:pt-8">
-                  <Button className="h-12 flex-1 rounded-xl bg-slate-900 px-6 text-sm font-black text-white transition-all hover:bg-emerald-600 sm:flex-none md:h-14 md:px-10 md:text-base">
+                {/* Actions */}
+                <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                  <Button className="h-10 rounded-xl bg-slate-900 px-5 text-xs font-bold text-white transition-all hover:bg-emerald-600 active:scale-[0.98] sm:text-sm">
                     Continue Reading
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-12 flex-1 gap-2 rounded-xl border-2 border-slate-200 px-6 text-sm font-black text-slate-600 transition-all hover:border-slate-900 sm:flex-none md:h-14 md:px-10 md:text-base"
+                    className="h-10 gap-1.5 rounded-xl border-slate-200 px-4 text-xs font-semibold text-slate-600 hover:border-slate-300 sm:text-sm"
                   >
-                    <RotateCcw size={16} /> Renew Loan
+                    <RotateCcw size={14} /> Renew
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-12 w-12 rounded-xl text-slate-400 transition-all hover:text-slate-900 md:h-14 md:w-14"
+                    className="size-10 rounded-xl text-slate-400 hover:text-slate-700"
                   >
-                    <Bookmark size={20} className="md:size-6" />
+                    <Bookmark size={18} />
                   </Button>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </section>
 
-      {/* Suggested Reading */}
-      <section className="relative flex flex-col items-center justify-between gap-8 overflow-hidden rounded-2xl bg-stone-100 p-6 md:flex-row md:gap-12 md:rounded-[2.5rem] md:p-20">
-        <div className="z-10 space-y-4 text-center md:space-y-8 md:text-left">
-          <Badge className="border-none bg-white px-4 py-2 text-xs font-black text-slate-900 md:text-sm">
-            RECOMMENDED
-          </Badge>
-          <h2 className="text-3xl leading-tight font-black tracking-tight text-slate-900 sm:text-4xl md:text-6xl">
-            Discover your <br className="hidden md:block" /> next{" "}
-            <span className="font-serif text-emerald-600 italic">
-              Masterpiece
-            </span>
-            .
-          </h2>
-          <p className="max-w-xl text-base leading-relaxed font-medium text-slate-600 md:text-xl">
-            Based on your interest in Classic Literature and Productivity, we
-            think you'll love these hand-picked titles.
-          </p>
-          <Button className="h-14 w-full rounded-xl bg-slate-900 px-8 text-base font-black text-white transition-all hover:bg-slate-800 sm:w-auto md:h-16 md:px-12 md:text-lg">
-            Browse Recommendations
-          </Button>
+      {/* ── Recommendation CTA ────────────────────────────────────── */}
+      <section className="relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-900 to-emerald-950 p-6 sm:p-8 md:p-10">
+        <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:gap-12">
+          <div className="flex-1 space-y-4 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400">
+              <Sparkles size={12} />
+              Recommended For You
+            </div>
+            <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
+              Discover your next{" "}
+              <span className="bg-linear-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                Masterpiece
+              </span>
+            </h2>
+            <p className="max-w-lg text-sm leading-relaxed text-slate-400 md:text-base">
+              Based on your interest in Classic Literature and Productivity, we
+              think you&apos;ll love these hand-picked titles.
+            </p>
+            <Button className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-slate-900 shadow-lg transition-all hover:bg-slate-100 active:scale-[0.98]">
+              Browse Recommendations
+            </Button>
+          </div>
+
+          {/* Stacked book previews */}
+          <div className="relative flex shrink-0 -space-x-8 sm:-space-x-10 md:-space-x-12">
+            {[
+              { bg: "from-amber-100 to-amber-200", rotate: "-rotate-6" },
+              { bg: "from-indigo-100 to-indigo-200", rotate: "-rotate-2" },
+              { bg: "from-emerald-100 to-emerald-200", rotate: "rotate-2" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className={`h-36 w-24 rounded-xl bg-linear-to-br shadow-xl transition-all duration-500 hover:-translate-y-4 sm:h-48 sm:w-32 md:h-56 md:w-40 ${item.bg} ${item.rotate}`}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className="relative flex translate-x-2 -space-x-10 sm:translate-x-4 sm:-space-x-12 md:translate-x-8 md:-space-x-16">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className={`h-40 w-28 rounded-xl shadow-2xl transition-all duration-700 hover:-translate-y-10 hover:rotate-6 sm:h-60 sm:w-40 md:h-80 md:w-56 ${i === 1 ? "bg-amber-100" : i === 2 ? "bg-indigo-100" : "bg-emerald-100"}`}
-            />
-          ))}
-        </div>
-
-        <div className="absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-emerald-500/5 blur-3xl" />
+        {/* Background glow */}
+        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-emerald-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-teal-600/10 blur-3xl" />
       </section>
     </div>
   );

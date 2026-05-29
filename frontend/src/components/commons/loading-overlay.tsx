@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import LottieRaw from "lottie-react";
 
 // Handle ESM/CJS interop — the default export may be wrapped in a module namespace object
@@ -16,7 +17,7 @@ interface LoadingOverlayProps {
 export function LoadingOverlay({ isOpen, className }: LoadingOverlayProps) {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       className={cn(
         "fixed inset-0 z-9999 flex items-center justify-center",
@@ -50,6 +51,7 @@ export function LoadingOverlay({ isOpen, className }: LoadingOverlayProps) {
             />
           ))}
         </div> */}
-    </div>
+    </div>,
+    document.body,
   );
 }
