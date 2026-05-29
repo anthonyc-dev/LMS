@@ -9,6 +9,7 @@ import { UsersModule } from '../users/users.module';
 import { TokenService } from '../../common/services/token.service';
 import { RefreshTokenService } from '../../common/services/refresh-token.service';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { Session } from './entities/session.entity';
 import { User } from '../users/entities/user.entity';
 import { JwtStrategy } from '../../common/guard/jwt.strategy';
 import { CsrfService } from '../../common/services/csrf.service';
@@ -17,7 +18,7 @@ import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([RefreshToken, User]),
+    TypeOrmModule.forFeature([RefreshToken, Session, User]),
     UsersModule,
     JwtModule.register({
       global: true,

@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { Session } from './session.entity';
 
 @Entity()
 export class RefreshToken {
@@ -21,6 +22,10 @@ export class RefreshToken {
 
   @Column({ default: false })
   isRevoked: boolean;
+
+  @ManyToOne(() => Session, (session) => session.refreshTokens, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'sessionId' })
+  session: Session;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })

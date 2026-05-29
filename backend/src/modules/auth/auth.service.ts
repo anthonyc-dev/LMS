@@ -14,6 +14,7 @@ import { TokenService } from 'src/common/services/token.service';
 import { RefreshTokenService } from 'src/common/services/refresh-token.service';
 import { sanitizeUser } from 'src/common/utils/user.util';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { Session } from './entities/session.entity';
 import { User } from '../users/entities/user.entity';
 import { normalizeIp } from 'src/common/utils/normalizedIp.util';
 import * as nodemailer from 'nodemailer';
@@ -33,6 +34,8 @@ export class AuthService {
     private usersService: UsersService,
     @InjectRepository(RefreshToken)
     private refreshTokenRepository: Repository<RefreshToken>,
+    @InjectRepository(Session)
+    private sessionRepository: Repository<Session>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private readonly tokenService: TokenService,
@@ -62,6 +65,7 @@ export class AuthService {
     password: string,
     acceptedTerms: boolean,
     ipAddress: string,
+    deviceInfo: string,
   ) {
     if (!acceptedTerms) {
       throw new BadRequestException('You must accept terms and conditions');
@@ -87,23 +91,20 @@ export class AuthService {
       ipAddress: cleanIp,
     });
 
-    /**
-     * 🔥 FIX: ensure clean session state
-     */
-    await this.refreshTokenRepository.update(
-      {
-        user: { id: user.id },
-        isRevoked: false,
-      },
-      {
-        isRevoked: true,
-      },
-    );
+    await this.enforceMaxDevices(user.id);
+
+    const session = await this.sessionRepository.save({
+      user,
+      deviceInfo,
+      ipAddress: cleanIp,
+      lastUsedAt: new Date(),
+    });
 
     const tokens = await this.tokenService.generateTokens(user);
     await this.refreshTokenService.saveRefreshToken(
       user,
       tokens.refreshTokenHash,
+      session,
     );
 
     return {
@@ -113,7 +114,7 @@ export class AuthService {
     };
   }
 
-  async signIn(email: string, pass: string) {
+  async signIn(email: string, pass: string, ipAddress: string, deviceInfo: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -150,23 +151,20 @@ export class AuthService {
       lockoutUntil: null,
     });
 
-    /**
-     * 🔥 FIX: ensure clean session state
-     */
-    await this.refreshTokenRepository.update(
-      {
-        user: { id: user.id },
-        isRevoked: false,
-      },
-      {
-        isRevoked: true,
-      },
-    );
+    await this.enforceMaxDevices(user.id);
+
+    const session = await this.sessionRepository.save({
+      user,
+      deviceInfo,
+      ipAddress: normalizeIp(ipAddress),
+      lastUsedAt: new Date(),
+    });
 
     const tokens = await this.tokenService.generateTokens(user);
     await this.refreshTokenService.saveRefreshToken(
       user,
       tokens.refreshTokenHash,
+      session,
     );
 
     return {
@@ -203,6 +201,7 @@ export class AuthService {
         user: { id: userId },
         isRevoked: false,
       },
+      relations: ['session'],
     });
 
     const matchedActiveToken = await this.findMatchingToken(
@@ -213,6 +212,7 @@ export class AuthService {
     if (!matchedActiveToken) {
       const allTokens = await this.refreshTokenRepository.find({
         where: { user: { id: userId } },
+        relations: ['session'],
       });
 
       const existingToken = await this.findMatchingToken(
@@ -243,11 +243,17 @@ export class AuthService {
       { isRevoked: true },
     );
 
+    if (matchedActiveToken.session) {
+      matchedActiveToken.session.lastUsedAt = new Date();
+      await this.sessionRepository.save(matchedActiveToken.session);
+    }
+
     const tokens = await this.tokenService.generateTokens(user);
 
     await this.refreshTokenService.saveRefreshToken(
       user,
       tokens.refreshTokenHash,
+      matchedActiveToken.session,
     );
 
     return {
@@ -256,11 +262,97 @@ export class AuthService {
     };
   }
 
-  async logout(userId: string): Promise<void> {
-    await this.refreshTokenRepository.update(
-      { user: { id: userId }, isRevoked: false },
-      { isRevoked: true },
-    );
+  async logout(userId: string, refreshToken: string): Promise<void> {
+    const activeTokens = await this.refreshTokenRepository.find({
+      where: { user: { id: userId }, isRevoked: false },
+      relations: ['session'],
+    });
+    
+    const matchedToken = await this.findMatchingToken(activeTokens, refreshToken);
+    if (matchedToken && matchedToken.session) {
+      await this.sessionRepository.update(
+        { id: matchedToken.session.id },
+        { isRevoked: true },
+      );
+    }
+    if (matchedToken) {
+      await this.refreshTokenRepository.update(
+        { id: matchedToken.id },
+        { isRevoked: true },
+      );
+    }
+  }
+
+  async getSessions(userId: string) {
+    const sessions = await this.sessionRepository.find({
+      where: { user: { id: userId }, isRevoked: false },
+      order: { lastUsedAt: 'DESC' },
+    });
+
+    return sessions.map(s => ({
+      id: s.id,
+      deviceInfo: s.deviceInfo || 'Unknown Device',
+      ipAddress: s.ipAddress || 'Unknown IP',
+      lastUsedAt: s.lastUsedAt || s.createdAt,
+      createdAt: s.createdAt,
+    }));
+  }
+
+  async revokeSession(userId: string, sessionId: string) {
+    const session = await this.sessionRepository.findOne({
+      where: { id: sessionId, user: { id: userId }, isRevoked: false },
+    });
+
+    if (!session) {
+      throw new BadRequestException('Session not found or already revoked');
+    }
+
+    await this.sessionRepository.update({ id: sessionId }, { isRevoked: true });
+  }
+
+  async revokeAllSessions(userId: string, currentRefreshToken?: string) {
+    let currentSessionId: string | null = null;
+    
+    if (currentRefreshToken) {
+      const activeTokens = await this.refreshTokenRepository.find({
+        where: { user: { id: userId }, isRevoked: false },
+        relations: ['session'],
+      });
+      const matchedToken = await this.findMatchingToken(activeTokens, currentRefreshToken);
+      if (matchedToken && matchedToken.session) {
+        currentSessionId = matchedToken.session.id;
+      }
+    }
+
+    const query = this.sessionRepository.createQueryBuilder()
+      .update(Session)
+      .set({ isRevoked: true })
+      .where('userId = :userId', { userId })
+      .andWhere('isRevoked = false');
+      
+    if (currentSessionId) {
+      query.andWhere('id != :currentSessionId', { currentSessionId });
+    }
+
+    await query.execute();
+  }
+
+  private async enforceMaxDevices(userId: string) {
+    const MAX_SESSIONS = 5;
+    const activeSessions = await this.sessionRepository.find({
+      where: { user: { id: userId }, isRevoked: false },
+      order: { lastUsedAt: 'ASC' }, // oldest first
+    });
+
+    if (activeSessions.length >= MAX_SESSIONS) {
+      const sessionsToRevoke = activeSessions.length - MAX_SESSIONS + 1;
+      const idsToRevoke = activeSessions.slice(0, sessionsToRevoke).map(s => s.id);
+      
+      await this.sessionRepository.update(
+        idsToRevoke,
+        { isRevoked: true },
+      );
+    }
   }
 
   private async findMatchingToken(

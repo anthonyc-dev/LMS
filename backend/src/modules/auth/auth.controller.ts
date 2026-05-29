@@ -10,6 +10,9 @@ import {
   UnauthorizedException,
   UseGuards,
   Ip,
+  Headers,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
@@ -58,6 +61,7 @@ export class AuthController {
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) response: Response,
     @Ip() ip: string,
+    @Headers('user-agent') userAgent: string,
   ) {
     const result = await this.authService.register(
       registerDto.schoolId,
@@ -67,6 +71,7 @@ export class AuthController {
       registerDto.password,
       registerDto.acceptedTerms,
       ip,
+      userAgent || 'Unknown Device',
     );
 
     setAuthCookies(response, result.accessToken, result.refreshToken);
@@ -85,10 +90,14 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
+    @Ip() ip: string,
+    @Headers('user-agent') userAgent: string,
   ) {
     const result = await this.authService.signIn(
       loginDto.email,
       loginDto.password,
+      ip,
+      userAgent || 'Unknown Device',
     );
 
     setAuthCookies(response, result.accessToken, result.refreshToken);
@@ -132,8 +141,12 @@ export class AuthController {
   async logout(
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) response: Response,
+    @Body('refreshToken') bodyRefreshToken?: string,
   ) {
-    await this.authService.logout(req.user.sub);
+    const refreshToken = bodyRefreshToken || req.cookies?.refreshToken;
+    if (refreshToken) {
+      await this.authService.logout(req.user.sub, refreshToken);
+    }
 
     response.clearCookie('accessToken');
     response.clearCookie('refreshToken');
@@ -149,6 +162,34 @@ export class AuthController {
     return {
       user,
     };
+  }
+
+  @Get('sessions')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 120, ttl: 60000 } })
+  async getSessions(@Req() req: AuthRequest) {
+    const sessions = await this.authService.getSessions(req.user.sub);
+    return { sessions };
+  }
+
+  @Delete('sessions/:id')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 60, ttl: 60000 } })
+  async revokeSession(@Req() req: AuthRequest, @Param('id') id: string) {
+    await this.authService.revokeSession(req.user.sub, id);
+    return { message: 'Session revoked successfully' };
+  }
+
+  @Delete('sessions')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  async revokeAllSessions(
+    @Req() req: AuthRequest,
+    @Body('refreshToken') bodyRefreshToken?: string,
+  ) {
+    const refreshToken = bodyRefreshToken || req.cookies?.refreshToken;
+    await this.authService.revokeAllSessions(req.user.sub, refreshToken);
+    return { message: 'All other sessions revoked successfully' };
   }
 
   @Public()
