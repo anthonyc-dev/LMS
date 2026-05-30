@@ -9,6 +9,7 @@ import {
   OneToMany,
   Index,
 } from 'typeorm';
+import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
 
 @Entity('users')
 @Index(['email'])
@@ -28,6 +29,20 @@ export class User {
 
   @Column({ unique: true })
   phoneNumber: string;
+
+  @Column({
+    type: 'enum',
+    enum: DepartmentEnum,
+    nullable: true,
+  })
+  department: DepartmentEnum;
+
+  @Column({
+    type: 'enum',
+    enum: YearLevelEnum,
+    nullable: true,
+  })
+  yearLevel: YearLevelEnum;
 
   @Column()
   password: string;

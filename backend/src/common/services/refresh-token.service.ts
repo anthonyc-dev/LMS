@@ -13,11 +13,7 @@ export class RefreshTokenService {
     private readonly refreshTokenRepository: Repository<RefreshToken>,
   ) {}
 
-  async saveRefreshToken(
-    user: User,
-    token: string,
-    session: Session,
-  ) {
+  async saveRefreshToken(user: User, token: string, session: Session) {
     return this.refreshTokenRepository.save({
       token,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days

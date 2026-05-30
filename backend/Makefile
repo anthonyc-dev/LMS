@@ -30,7 +30,7 @@ shell:
 	docker exec -it rest-api sh
 
 dev-up:
-	docker compose -f docker-compose.dev.yml up
+	docker compose -f docker-compose.dev.yml up --watch
 
 dev-build:
 	docker compose -f docker-compose.dev.yml up --build
@@ -48,7 +48,7 @@ logs:
 	docker compose logs -f
 
 restart:
-	docker compose -f docker-compose.yml down && docker compose -f docker-compose.yml up -d
+	docker compose -f docker-compose.dev.yml down --remove-orphans && docker compose -f docker-compose.dev.yml up --watch
 
 # Safe cleanup: prune all unused Docker objects and build cache
 cleanup:
