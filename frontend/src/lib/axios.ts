@@ -4,7 +4,7 @@ import { authEventBus } from "./authEventBus";
 
 const baseConfig = {
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
-  timeout: 10000, // 10 seconds timeout to prevent hanging requests
+  timeout: 60000, // 60 seconds timeout to handle third-party API cold starts
   headers: {
     "Content-Type": "application/json",
   },

@@ -37,6 +37,7 @@ import {
 import api from "@/lib/axios";
 import { useNavigate } from "react-router-dom";
 import { LoadingOverlay } from "@/components/commons/loading-overlay";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // Role-specific color configs (No gradients, solid colors)
 const roleConfig: Record<
@@ -73,6 +74,7 @@ const roleConfig: Record<
 };
 
 export function ProfilePage() {
+  usePageTitle("Profile");
   const { user, updateUser, logout } = useAuthStore();
   const navigate = useNavigate();
 

@@ -16,8 +16,10 @@ import {
 import api from "@/lib/axios";
 import { toast } from "sonner";
 import { resetPasswordSchema, type ResetPasswordSchema } from "@/lib/schemas";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function ResetPassword() {
+  usePageTitle("Reset Password");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 

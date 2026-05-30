@@ -19,8 +19,10 @@ import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
 import { loginSchema, type LoginSchema } from "@/lib/schemas";
 import { LoadingOverlay } from "@/components/commons/loading-overlay";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function LoginPage() {
+  usePageTitle("Login");
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();

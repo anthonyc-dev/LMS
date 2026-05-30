@@ -61,6 +61,7 @@ import { useNavigate } from "react-router-dom";
 import book1Img from "@/assets/dashboard/book1.png";
 import book2Img from "@/assets/dashboard/book2.png";
 import bookDark1Img from "@/assets/dashboard/book_dark1.png";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // ---------------------------------------------------------------------------
 // Types & seed data
@@ -452,6 +453,7 @@ function DeleteBookModal({
 // ---------------------------------------------------------------------------
 
 export function BooksPage() {
+  usePageTitle("Books");
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);

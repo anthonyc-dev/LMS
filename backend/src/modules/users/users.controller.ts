@@ -28,6 +28,7 @@ import { HttpCode } from '@nestjs/common';
 import { UserResponseDto } from './dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
@@ -62,7 +63,8 @@ export class UsersController {
   }
 
   // GET ENUMS FORMS
-  @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
+  @Public()
+  // @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
   @HttpCode(HttpStatus.OK)
   @Get('meta')
   getMeta() {

@@ -43,6 +43,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // Types for our events
 interface CalendarEvent {
@@ -56,6 +57,7 @@ interface CalendarEvent {
 }
 
 const SchedulePage = () => {
+  usePageTitle("Schedule");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);

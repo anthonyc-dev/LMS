@@ -16,6 +16,7 @@ import bannerImg from "@/assets/dashboard/banner.png";
 import book1Img from "@/assets/dashboard/book1.png";
 import book2Img from "@/assets/dashboard/book2.png";
 import author1Img from "@/assets/dashboard/author1.png";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const ON_LOAN_BOOKS = [
   {
@@ -110,6 +111,7 @@ const POPULAR_READS = [
 ];
 
 export function BorrowBooksPage() {
+  usePageTitle("Borrow Books");
   return (
     <div className="mx-auto max-w-[1600px] space-y-8 md:space-y-10">
       {/* ── Banner Section ────────────────────────────────────────── */}

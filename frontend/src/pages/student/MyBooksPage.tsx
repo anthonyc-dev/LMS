@@ -18,6 +18,7 @@ import { useAuthStore } from "@/store/authStore";
 
 import book1Img from "@/assets/dashboard/book1.png";
 import book2Img from "@/assets/dashboard/book2.png";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const MY_BOOKS = [
   {
@@ -53,6 +54,7 @@ const MY_BOOKS = [
 ];
 
 export function MyBooksPage() {
+  usePageTitle("My Books");
   const { user } = useAuthStore();
   const firstName = user?.fullName?.split(" ")[0] || "Reader";
 

@@ -14,15 +14,42 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { toast } from "sonner";
 import { registerSchema, type RegisterSchema } from "@/lib/schemas";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function RegisterPage() {
+  usePageTitle("Register");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const navigate = useNavigate();
+
+  const {
+    data: meta,
+    isLoading: isLoadingMeta,
+    isError: isMetaError,
+  } = useQuery({
+    queryKey: ["usersMeta"],
+    queryFn: async () => {
+      try {
+        const res = await api.get("/users/meta");
+        return res.data;
+      } catch (error) {
+        console.error("Failed to fetch meta:", error);
+        throw error;
+      }
+    },
+  });
 
   const form = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
@@ -31,6 +58,8 @@ export function RegisterPage() {
       fullName: "",
       email: "",
       phoneNumber: "",
+      department: "",
+      yearLevel: "",
       password: "",
       confirmPassword: "",
       acceptedTerms: false,
@@ -188,6 +217,107 @@ export function RegisterPage() {
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="department"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Department</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value || undefined}
+                    >
+                      <FormControl>
+                        <SelectTrigger
+                          disabled={isLoadingMeta || isMetaError}
+                          className="h-auto min-h-9 w-full text-left whitespace-normal [&>span]:line-clamp-none"
+                        >
+                          <SelectValue
+                            placeholder={
+                              isLoadingMeta
+                                ? "Loading..."
+                                : isMetaError
+                                  ? "Error loading"
+                                  : "Select Department"
+                            }
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {meta?.departments?.map(
+                          (dept: { value: string; label: string }) => (
+                            <SelectItem
+                              key={dept.value}
+                              value={dept.label}
+                              className="wrap-break-word whitespace-normal [&>span]:whitespace-normal"
+                            >
+                              {dept.label}
+                            </SelectItem>
+                          ),
+                        )}
+                        {!meta?.departments?.length && !isLoadingMeta && (
+                          <div className="text-muted-foreground p-2 text-center text-sm">
+                            No options available
+                          </div>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="yearLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Year Level</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value || undefined}
+                    >
+                      <FormControl>
+                        <SelectTrigger
+                          disabled={isLoadingMeta || isMetaError}
+                          className="h-auto min-h-9 w-full text-left whitespace-normal [&>span]:line-clamp-none"
+                        >
+                          <SelectValue
+                            placeholder={
+                              isLoadingMeta
+                                ? "Loading..."
+                                : isMetaError
+                                  ? "Error loading"
+                                  : "Select Year Level"
+                            }
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {meta?.yearLevels?.map(
+                          (yl: { value: string; label: string }) => (
+                            <SelectItem
+                              key={yl.value}
+                              value={yl.label}
+                              className="wrap-break-word whitespace-normal [&>span]:whitespace-normal"
+                            >
+                              {yl.label}
+                            </SelectItem>
+                          ),
+                        )}
+                        {!meta?.yearLevels?.length && !isLoadingMeta && (
+                          <div className="text-muted-foreground p-2 text-center text-sm">
+                            No options available
+                          </div>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="email"
@@ -234,6 +364,7 @@ export function RegisterPage() {
                         />
                         <button
                           type="button"
+                          aria-label="Toggle password visibility"
                           onClick={() => setShowPassword(!showPassword)}
                           className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
                         >
@@ -265,6 +396,7 @@ export function RegisterPage() {
                         />
                         <button
                           type="button"
+                          aria-label="Toggle password visibility"
                           onClick={() =>
                             setShowConfirmPassword(!showConfirmPassword)
                           }

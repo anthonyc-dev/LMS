@@ -22,8 +22,10 @@ import api from "@/lib/axios";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { forgotPasswordSchema, type ForgotPasswordSchema } from "@/lib/schemas";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function ForgotPassword() {
+  usePageTitle("Forgot Password");
   const [step, setStep] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");

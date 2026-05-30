@@ -2,8 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { ShieldAlert } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/axios";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function UnauthorizedPage() {
+  usePageTitle("Unauthorized");
   const navigate = useNavigate();
   const { logout } = useAuthStore();
 

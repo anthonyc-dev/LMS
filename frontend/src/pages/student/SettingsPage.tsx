@@ -30,6 +30,7 @@ import {
   RefreshCw,
   Trash2,
 } from "lucide-react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // Helper: reads the current theme from the DOM
 function getStoredTheme(): "light" | "dark" {
@@ -47,6 +48,7 @@ function applyTheme(theme: "light" | "dark") {
 }
 
 export function SettingsPage() {
+  usePageTitle("Settings");
   // ─── Theme ───────────────────────────────────────────────────
   const [theme, setTheme] = useState<"light" | "dark">(getStoredTheme);
 

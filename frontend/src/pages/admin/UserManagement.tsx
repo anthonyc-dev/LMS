@@ -63,6 +63,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // ---------------------------------------------------------------------------
 // Types & seed data
@@ -669,6 +670,7 @@ const ROLE_TABS: {
 // ---------------------------------------------------------------------------
 
 export function UserManagement() {
+  usePageTitle("User Management");
   const isMobile = useIsMobile();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>(INITIAL_USERS);
