@@ -37,6 +37,7 @@ import book1Img from "@/assets/dashboard/book1.png";
 import book2Img from "@/assets/dashboard/book2.png";
 import bookDark1Img from "@/assets/dashboard/book_dark1.png";
 import bookDark2Img from "@/assets/dashboard/book_dark2.png";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // Mock Data
 const readingStats = [
@@ -113,6 +114,7 @@ const recommendationBooks = [
 ];
 
 export function StudentDashboardPage() {
+  usePageTitle("Student Dashboard");
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");

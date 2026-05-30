@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const CATEGORIES = ["Fiction", "Science", "Biography", "Self-Help", "Productivity", "Mystery", "Technology", "History", "Philosophy"]
 const LANGUAGES  = ["English", "Filipino", "Spanish", "French", "German", "Japanese", "Chinese"]
@@ -73,6 +74,7 @@ function StepDot({ n, active, done }: { n: number; active: boolean; done: boolea
 // ---------------------------------------------------------------------------
 
 export function AddBookPage() {
+  usePageTitle("Add Book");
     const navigate = useNavigate()
 
     const [step, setStep] = useState(1)

@@ -59,6 +59,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { toast } from "sonner";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // ---------------------------------------------------------------------------
 // Types & Data
@@ -473,6 +474,7 @@ function AdjustStockModal({ book, open, onClose, onSave }: AdjustModalProps) {
 // ---------------------------------------------------------------------------
 
 export function InventoryPage() {
+  usePageTitle("Inventory");
   const isMobile = useIsMobile();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [books, setBooks] = useState<InventoryBook[]>(SAMPLE_BOOKS);

@@ -36,6 +36,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { toast } from "sonner";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // ---------------------------------------------------------------------------
 // Types & seed data
@@ -336,6 +337,7 @@ function DeleteConfirmModal({
 // ---------------------------------------------------------------------------
 
 export function CategoryPage() {
+  usePageTitle("Category");
   const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);

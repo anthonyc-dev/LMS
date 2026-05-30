@@ -27,7 +27,7 @@ import { HttpModule } from '@nestjs/axios';
     }),
     HttpModule.register({
       baseURL: process.env.DATA_INTIGRATION_API,
-      timeout: 5000,
+      timeout: 60000,
     }),
   ],
   controllers: [AuthController, RoleController],

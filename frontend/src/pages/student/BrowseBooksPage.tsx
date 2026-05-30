@@ -30,6 +30,7 @@ import book1Img from "@/assets/dashboard/book1.png";
 import book2Img from "@/assets/dashboard/book2.png";
 import bookDark1Img from "@/assets/dashboard/book_dark1.png";
 import bookDark2Img from "@/assets/dashboard/book_dark2.png";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const CATEGORIES = [
   "All Books",
@@ -134,6 +135,7 @@ const BOOKS = [
 ];
 
 export function BrowseBooksPage() {
+  usePageTitle("Browse Books");
   const [activeCategory, setActiveCategory] = useState("All Books");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<readonly string[]>(["grid"]);

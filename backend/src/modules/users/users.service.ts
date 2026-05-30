@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -20,6 +20,31 @@ export class UsersService {
   async create(userData: CreateUserDto): Promise<User> {
     this.logger.log(`Creating user: ${userData.email}`);
 
+    // Check if any user already exists with the same email, phone number, or school ID
+    const existingUser = await this.usersRepository.findOne({
+      where: [
+        { email: userData.email },
+        { phoneNumber: userData.phoneNumber },
+        { schoolId: userData.schoolId },
+      ],
+    });
+
+    if (existingUser) {
+      if (existingUser.email === userData.email) {
+        throw new ConflictException('Email already exists');
+      }
+
+      if (existingUser.phoneNumber === userData.phoneNumber) {
+        throw new ConflictException('Phone number already exists');
+      }
+
+      if (existingUser.schoolId === userData.schoolId) {
+        throw new ConflictException('School ID already exists');
+      }
+
+      throw new ConflictException('User already exists');
+    }
+
     const user = this.usersRepository.create(userData);
 
     return this.usersRepository.save(user);
@@ -30,6 +55,31 @@ export class UsersService {
     ipAddress: string,
   ): Promise<User> {
     this.logger.log(`Creating admin user: ${userData.email}`);
+
+    // Check if any user already exists with the same email, phone number, or school ID
+    const existingUser = await this.usersRepository.findOne({
+      where: [
+        { email: userData.email },
+        { phoneNumber: userData.phoneNumber },
+        { schoolId: userData.schoolId },
+      ],
+    });
+
+    if (existingUser) {
+      if (existingUser.email === userData.email) {
+        throw new ConflictException('Email already exists');
+      }
+
+      if (existingUser.phoneNumber === userData.phoneNumber) {
+        throw new ConflictException('Phone number already exists');
+      }
+
+      if (existingUser.schoolId === userData.schoolId) {
+        throw new ConflictException('School ID already exists');
+      }
+
+      throw new ConflictException('User already exists');
+    }
 
     const cleanIp = normalizeIp(ipAddress);
 

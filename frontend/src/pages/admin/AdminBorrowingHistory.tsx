@@ -46,6 +46,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // ---------------------------------------------------------------------------
 // Types & Seed Data
@@ -506,6 +507,7 @@ type SortDir = "asc" | "desc";
 // ---------------------------------------------------------------------------
 
 export function AdminBorrowingHistory() {
+  usePageTitle("Admin Borrowing History");
   const isMobile = useIsMobile();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [search, setSearch] = useState("");

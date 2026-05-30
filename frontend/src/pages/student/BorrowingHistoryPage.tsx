@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Can } from "@/components/commons/Can";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // ---------------------------------------------------------------------------
 // Data
@@ -187,6 +188,7 @@ const AVATAR_COLORS = [
 // ---------------------------------------------------------------------------
 
 export function BorrowingHistoryPage() {
+  usePageTitle("Borrowing History");
   const isMobile = useIsMobile();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [search, setSearch] = useState("");

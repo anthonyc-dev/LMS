@@ -36,6 +36,7 @@ import {
   Legend,
 } from "recharts";
 import { useNavigate } from "react-router-dom";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // Mock Data
 const borrowingTrendsData = [
@@ -109,6 +110,7 @@ const recentLogs = [
 ];
 
 export function AdminDashboardPage() {
+  usePageTitle("Admin Dashboard");
   const { user } = useAuthStore();
   const navigate = useNavigate();
   // HUD simulation states for interactive visual metrics

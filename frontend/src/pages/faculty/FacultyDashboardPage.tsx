@@ -27,6 +27,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // Mock Data
 const engagementData = [
@@ -42,6 +43,7 @@ const mockAcquisitions = [
 ];
 
 export function FacultyDashboardPage() {
+  usePageTitle("Faculty Dashboard");
   const { user } = useAuthStore();
   // Acquisition Request Form state
   const [reqTitle, setReqTitle] = useState("");

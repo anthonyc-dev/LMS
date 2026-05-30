@@ -58,6 +58,7 @@ import {
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // ---------------------------------------------------------------------------
 // Types & seed data
@@ -618,6 +619,7 @@ function DeleteShelfModal({
 // ---------------------------------------------------------------------------
 
 export function ShelfPage() {
+  usePageTitle("Shelf");
   const isMobile = useIsMobile();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [shelves, setShelves] = useState<Shelf[]>(INITIAL_SHELVES);
