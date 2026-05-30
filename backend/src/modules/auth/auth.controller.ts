@@ -69,6 +69,8 @@ export class AuthController {
       registerDto.email,
       registerDto.phoneNumber,
       registerDto.password,
+      registerDto.yearLevel,
+      registerDto.department,
       registerDto.acceptedTerms,
       ip,
       userAgent || 'Unknown Device',

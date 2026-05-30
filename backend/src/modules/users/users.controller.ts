@@ -7,10 +7,14 @@ import {
   Body,
   Param,
   ParseUUIDPipe,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
+  Ip,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
@@ -23,6 +27,7 @@ import { HttpStatus } from '@nestjs/common';
 import { HttpCode } from '@nestjs/common';
 import { UserResponseDto } from './dto/user-response.dto';
 import { plainToInstance } from 'class-transformer';
+import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
@@ -34,12 +39,44 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @Post()
-  async create(@Body() userData: CreateUserDto): Promise<UserResponseDto> {
-    const user = await this.usersService.create(userData);
+  async create(
+    @Body() userData: CreateAdminUserDto,
+    @Ip() ip: string,
+  ): Promise<UserResponseDto> {
+    const user = await this.usersService.createAdminUser(userData, ip);
 
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
     });
+  }
+
+  // GET ALL USERS (PAGINATED)
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @Get()
+  async findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.usersService.findAll(page, limit);
+  }
+
+  // GET ENUMS FORMS
+  @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
+  @HttpCode(HttpStatus.OK)
+  @Get('meta')
+  getMeta() {
+    return {
+      departments: Object.entries(DepartmentEnum).map(([key, value]) => ({
+        value: key,
+        label: value,
+      })),
+
+      yearLevels: Object.entries(YearLevelEnum).map(([key, value]) => ({
+        value: key,
+        label: value,
+      })),
+    };
   }
 
   // GET USER BY ID
@@ -62,11 +99,15 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Put(':id')
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() userData: UpdateUserDto,
-  ): Promise<User | null> {
-    return this.usersService.update(id, userData);
+  ): Promise<UserResponseDto> {
+    const user = await this.usersService.update(id, userData);
+
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
   // DELETE USER

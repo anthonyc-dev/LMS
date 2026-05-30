@@ -22,7 +22,7 @@ import { randomInt } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-
+import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 
@@ -63,6 +63,8 @@ export class AuthService {
     email: string,
     phoneNumber: string,
     password: string,
+    yearLevel: YearLevelEnum | undefined,
+    department: DepartmentEnum,
     acceptedTerms: boolean,
     ipAddress: string,
     deviceInfo: string,
@@ -86,6 +88,8 @@ export class AuthService {
       fullName,
       email,
       phoneNumber,
+      yearLevel,
+      department,
       password: hashedPassword,
       acceptedTerms,
       ipAddress: cleanIp,
@@ -114,7 +118,12 @@ export class AuthService {
     };
   }
 
-  async signIn(email: string, pass: string, ipAddress: string, deviceInfo: string) {
+  async signIn(
+    email: string,
+    pass: string,
+    ipAddress: string,
+    deviceInfo: string,
+  ) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -267,8 +276,11 @@ export class AuthService {
       where: { user: { id: userId }, isRevoked: false },
       relations: ['session'],
     });
-    
-    const matchedToken = await this.findMatchingToken(activeTokens, refreshToken);
+
+    const matchedToken = await this.findMatchingToken(
+      activeTokens,
+      refreshToken,
+    );
     if (matchedToken && matchedToken.session) {
       await this.sessionRepository.update(
         { id: matchedToken.session.id },
@@ -289,7 +301,7 @@ export class AuthService {
       order: { lastUsedAt: 'DESC' },
     });
 
-    return sessions.map(s => ({
+    return sessions.map((s) => ({
       id: s.id,
       deviceInfo: s.deviceInfo || 'Unknown Device',
       ipAddress: s.ipAddress || 'Unknown IP',
@@ -312,24 +324,28 @@ export class AuthService {
 
   async revokeAllSessions(userId: string, currentRefreshToken?: string) {
     let currentSessionId: string | null = null;
-    
+
     if (currentRefreshToken) {
       const activeTokens = await this.refreshTokenRepository.find({
         where: { user: { id: userId }, isRevoked: false },
         relations: ['session'],
       });
-      const matchedToken = await this.findMatchingToken(activeTokens, currentRefreshToken);
+      const matchedToken = await this.findMatchingToken(
+        activeTokens,
+        currentRefreshToken,
+      );
       if (matchedToken && matchedToken.session) {
         currentSessionId = matchedToken.session.id;
       }
     }
 
-    const query = this.sessionRepository.createQueryBuilder()
+    const query = this.sessionRepository
+      .createQueryBuilder()
       .update(Session)
       .set({ isRevoked: true })
       .where('userId = :userId', { userId })
       .andWhere('isRevoked = false');
-      
+
     if (currentSessionId) {
       query.andWhere('id != :currentSessionId', { currentSessionId });
     }
@@ -346,12 +362,11 @@ export class AuthService {
 
     if (activeSessions.length >= MAX_SESSIONS) {
       const sessionsToRevoke = activeSessions.length - MAX_SESSIONS + 1;
-      const idsToRevoke = activeSessions.slice(0, sessionsToRevoke).map(s => s.id);
-      
-      await this.sessionRepository.update(
-        idsToRevoke,
-        { isRevoked: true },
-      );
+      const idsToRevoke = activeSessions
+        .slice(0, sessionsToRevoke)
+        .map((s) => s.id);
+
+      await this.sessionRepository.update(idsToRevoke, { isRevoked: true });
     }
   }
 

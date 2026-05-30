@@ -23,7 +23,9 @@ export class RefreshToken {
   @Column({ default: false })
   isRevoked: boolean;
 
-  @ManyToOne(() => Session, (session) => session.refreshTokens, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Session, (session) => session.refreshTokens, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'sessionId' })
   session: Session;
 

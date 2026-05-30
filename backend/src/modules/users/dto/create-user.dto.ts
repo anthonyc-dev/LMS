@@ -9,6 +9,7 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
+import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
 import { Role } from 'src/common/enums/role.enum';
 
 export class CreateUserDto {
@@ -34,6 +35,24 @@ export class CreateUserDto {
       'Phone number must be a valid PH format (09XXXXXXXXX or +639XXXXXXXXX)',
   })
   phoneNumber: string;
+
+  @ApiProperty({
+    example: DepartmentEnum.EECS,
+    required: true,
+    description: 'Department of the user',
+  })
+  @IsNotEmpty()
+  @IsEnum(DepartmentEnum)
+  department: DepartmentEnum;
+
+  @ApiProperty({
+    example: YearLevelEnum.FIRST_YEAR,
+    required: false,
+    description: 'Year level of the user',
+  })
+  @IsOptional()
+  @IsEnum(YearLevelEnum)
+  yearLevel?: YearLevelEnum;
 
   @ApiProperty({ example: 'strongpassword123' })
   @IsString()

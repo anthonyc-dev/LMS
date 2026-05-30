@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateAdminUserDto } from './dto/create-admin-user.dto';
+import * as bcrypt from 'bcrypt';
+import { normalizeIp } from 'src/common/utils/normalizedIp.util';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +25,27 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
+  async createAdminUser(
+    userData: CreateAdminUserDto,
+    ipAddress: string,
+  ): Promise<User> {
+    this.logger.log(`Creating admin user: ${userData.email}`);
+
+    const cleanIp = normalizeIp(ipAddress);
+
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+    const user = this.usersRepository.create({
+      ...userData,
+      ipAddress: cleanIp,
+      password: hashedPassword,
+      acceptedTerms: true,
+      acceptedAt: new Date(),
+    });
+
+    return this.usersRepository.save(user);
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     this.logger.log(`Finding user by email: ${email}`);
     return this.usersRepository.findOne({ where: { email } });
@@ -32,9 +56,35 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { id } });
   }
 
+  async findAll(page: number = 1, limit: number = 10) {
+    this.logger.log(`Fetching all users: page ${page}, limit ${limit}`);
+    const [data, total] = await this.usersRepository.findAndCount({
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   async update(id: string, userData: UpdateUserDto) {
     this.logger.log(`Updating user: ${id}`);
-    await this.usersRepository.update(id, userData);
+
+    const updateData = { ...userData };
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    await this.usersRepository.update(id, updateData);
     return this.findById(id);
   }
 

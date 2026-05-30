@@ -7,9 +7,15 @@ import {
   Matches,
   IsBoolean,
   IsOptional,
+  IsEnum,
 } from 'class-validator';
+import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
 
 export class RegisterDto {
+  @ApiProperty({
+    example: '21-0123',
+    required: true,
+  })
   @IsNotEmpty()
   @IsString()
   @Matches(/^\d{2}-\d{4}$/, {
@@ -17,14 +23,26 @@ export class RegisterDto {
   })
   schoolId: string;
 
+  @ApiProperty({
+    example: 'John Doe',
+    required: true,
+  })
   @IsNotEmpty()
   @IsString()
   fullName: string;
 
+  @ApiProperty({
+    example: 'user@example.com',
+    required: true,
+  })
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
+  @ApiProperty({
+    example: '09123456789',
+    required: true,
+  })
   @IsNotEmpty()
   @IsString()
   @Matches(/^(09|\+639)\d{9}$/, {
@@ -33,6 +51,28 @@ export class RegisterDto {
   })
   phoneNumber: string;
 
+  @ApiProperty({
+    example: DepartmentEnum.EECS,
+    required: true,
+    description: 'Department of the user',
+  })
+  @IsNotEmpty()
+  @IsEnum(DepartmentEnum)
+  department: DepartmentEnum;
+
+  @ApiProperty({
+    example: YearLevelEnum.FIRST_YEAR,
+    required: false,
+    description: 'Year level of the user',
+  })
+  @IsOptional()
+  @IsEnum(YearLevelEnum)
+  yearLevel?: YearLevelEnum;
+
+  @ApiProperty({
+    example: 'strongpassword123',
+    required: true,
+  })
   @IsNotEmpty()
   @IsString()
   @MinLength(8)
