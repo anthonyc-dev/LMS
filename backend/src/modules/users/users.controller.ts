@@ -32,11 +32,11 @@ import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
-@Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // CREATE USER
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @Post()
@@ -52,6 +52,7 @@ export class UsersController {
   }
 
   // GET ALL USERS (PAGINATED)
+  @Throttle({ default: { limit: 60, ttl: 60000 } }) //for development only
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Get()
@@ -81,15 +82,8 @@ export class UsersController {
     };
   }
 
-  // GET USER BY ID
-  @Roles(Role.ADMIN)
-  @HttpCode(HttpStatus.OK)
-  @Get(':id')
-  findById(@Param('id', new ParseUUIDPipe()) id: string): Promise<User | null> {
-    return this.usersService.findById(id);
-  }
-
   // GET USER BY EMAIL
+  @Throttle({ default: { limit: 30, ttl: 60000 } }) //for development only
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Get('email/:email')
@@ -97,7 +91,17 @@ export class UsersController {
     return this.usersService.findByEmail(email);
   }
 
+  // GET USER BY ID
+  @Throttle({ default: { limit: 60, ttl: 60000 } }) //for development only
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @Get(':id')
+  findById(@Param('id', new ParseUUIDPipe()) id: string): Promise<User | null> {
+    return this.usersService.findById(id);
+  }
+
   // UPDATE USER
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
   @Put(':id')
@@ -113,8 +117,9 @@ export class UsersController {
   }
 
   // DELETE USER
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
   @Roles(Role.ADMIN)
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     return this.usersService.delete(id);
