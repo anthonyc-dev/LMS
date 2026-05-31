@@ -9,7 +9,7 @@ import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import * as bcrypt from 'bcrypt';
 import { normalizeIp } from 'src/common/utils/normalizedIp.util';
 import * as nodemailer from 'nodemailer';
-import { randomBytes, randomInt } from 'crypto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class UsersService {

@@ -53,7 +53,10 @@ export class CreateAdminUserDto {
   @IsEnum(YearLevelEnum)
   yearLevel?: YearLevelEnum;
 
-  @ApiProperty({ required: false, description: 'Optional. Auto-generated if not provided' })
+  @ApiProperty({
+    required: false,
+    description: 'Optional. Auto-generated if not provided',
+  })
   @IsOptional()
   @IsString()
   @MinLength(6)
