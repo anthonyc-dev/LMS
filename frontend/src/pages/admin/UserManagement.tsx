@@ -4,7 +4,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  Filter,
   Users,
   AlertCircle,
   MoreHorizontal,
@@ -12,18 +11,10 @@ import {
   ChevronRight,
   X,
   Hash,
-  UserCheck,
-  UserX,
   GraduationCap,
   BookOpen,
   Crown,
-  Mail,
-  Phone,
   Calendar,
-  Lock,
-  Eye,
-  EyeOff,
-  CheckCircle2,
   Clock,
   ChevronDown,
 } from "lucide-react";
@@ -46,15 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+
 import {
   Select,
   SelectContent,
@@ -64,21 +47,33 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import {
+  useUsers,
+  useUsersMeta,
+  useCreateUser,
+  useUpdateUser,
+  useDeleteUser,
+  type Role,
+  type ApiUser,
+} from "@/lib/api/users";
+import { UserModal } from "@/components/admin/UserModal";
+import { DeleteUserModal } from "@/components/admin/DeleteUserModal";
+import { TableSkeleton } from "@/components/commons/TableSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ---------------------------------------------------------------------------
-// Types & seed data
+// Types & display helpers
 // ---------------------------------------------------------------------------
 
-type Role = "admin" | "faculty" | "student";
-type Status = "active" | "inactive" | "suspended";
-
-interface User {
+export interface User {
   id: string;
+  schoolId: string;
   fullName: string;
   email: string;
+  department: string;
+  yearLevel: string;
   phone?: string;
   role: Role;
-  status: Status;
   joinedAt: string;
   lastActive: string;
   borrowedBooks: number;
@@ -98,165 +93,48 @@ const AVATAR_COLORS = [
 
 const ROWS_PER_PAGE = 8;
 
-const INITIAL_USERS: User[] = [
-  {
-    id: "1",
-    fullName: "Alexander Mitchell",
-    email: "a.mitchell@lms.edu",
-    phone: "+1 (555) 012-3456",
-    role: "admin",
-    status: "active",
-    joinedAt: "Jan 12, 2024",
-    lastActive: "2 mins ago",
-    borrowedBooks: 0,
-    avatarColor: "bg-violet-500",
-  },
-  {
-    id: "2",
-    fullName: "Dr. Sarah Chen",
-    email: "s.chen@lms.edu",
-    phone: "+1 (555) 234-5678",
-    role: "faculty",
-    status: "active",
-    joinedAt: "Mar 5, 2024",
-    lastActive: "1 hour ago",
-    borrowedBooks: 4,
-    avatarColor: "bg-blue-500",
-  },
-  {
-    id: "3",
-    fullName: "Marcus Johnson",
-    email: "m.johnson@student.lms.edu",
-    phone: "+1 (555) 345-6789",
-    role: "student",
-    status: "active",
-    joinedAt: "Aug 20, 2024",
-    lastActive: "3 hours ago",
-    borrowedBooks: 2,
-    avatarColor: "bg-emerald-500",
-  },
-  {
-    id: "4",
-    fullName: "Emily Watson",
-    email: "e.watson@student.lms.edu",
-    phone: "+1 (555) 456-7890",
-    role: "student",
-    status: "inactive",
-    joinedAt: "Sep 1, 2024",
-    lastActive: "5 days ago",
-    borrowedBooks: 1,
-    avatarColor: "bg-amber-500",
-  },
-  {
-    id: "5",
-    fullName: "Prof. David Vance",
-    email: "d.vance@lms.edu",
-    phone: "+1 (555) 567-8901",
-    role: "faculty",
-    status: "active",
-    joinedAt: "Feb 14, 2024",
-    lastActive: "Yesterday",
-    borrowedBooks: 6,
-    avatarColor: "bg-indigo-500",
-  },
-  {
-    id: "6",
-    fullName: "Sofia Martinez",
-    email: "s.martinez@student.lms.edu",
-    phone: "+1 (555) 678-9012",
-    role: "student",
-    status: "suspended",
-    joinedAt: "Jul 30, 2024",
-    lastActive: "2 weeks ago",
-    borrowedBooks: 0,
-    avatarColor: "bg-rose-500",
-  },
-  {
-    id: "7",
-    fullName: "James Lee",
-    email: "j.lee@student.lms.edu",
-    phone: "+1 (555) 789-0123",
-    role: "student",
-    status: "active",
-    joinedAt: "Oct 5, 2024",
-    lastActive: "Just now",
-    borrowedBooks: 3,
-    avatarColor: "bg-cyan-500",
-  },
-  {
-    id: "8",
-    fullName: "Dr. Priya Patel",
-    email: "p.patel@lms.edu",
-    phone: "+1 (555) 890-1234",
-    role: "faculty",
-    status: "active",
-    joinedAt: "Apr 18, 2024",
-    lastActive: "4 hours ago",
-    borrowedBooks: 8,
-    avatarColor: "bg-pink-500",
-  },
-  {
-    id: "9",
-    fullName: "Ryan Thompson",
-    email: "r.thompson@student.lms.edu",
-    phone: "+1 (555) 901-2345",
-    role: "student",
-    status: "active",
-    joinedAt: "Nov 2, 2024",
-    lastActive: "30 mins ago",
-    borrowedBooks: 1,
-    avatarColor: "bg-violet-500",
-  },
-  {
-    id: "10",
-    fullName: "Isabella Brown",
-    email: "i.brown@student.lms.edu",
-    phone: "+1 (555) 012-3456",
-    role: "student",
-    status: "inactive",
-    joinedAt: "Jun 22, 2024",
-    lastActive: "3 weeks ago",
-    borrowedBooks: 0,
-    avatarColor: "bg-blue-500",
-  },
-  {
-    id: "11",
-    fullName: "Prof. Nathan Clark",
-    email: "n.clark@lms.edu",
-    role: "faculty",
-    status: "active",
-    joinedAt: "Jan 30, 2024",
-    lastActive: "2 days ago",
-    borrowedBooks: 5,
-    avatarColor: "bg-emerald-500",
-  },
-  {
-    id: "12",
-    fullName: "Olivia Davis",
-    email: "o.davis@student.lms.edu",
-    role: "student",
-    status: "active",
-    joinedAt: "Dec 1, 2024",
-    lastActive: "10 mins ago",
-    borrowedBooks: 2,
-    avatarColor: "bg-amber-500",
-  },
-];
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
+function pickAvatarColor(): string {
+  return AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
 }
 
-function roleConfig(role: Role) {
+function mapApiUser(u: ApiUser): User {
+  return {
+    id: u._id,
+    schoolId: u.schoolId,
+    fullName: u.fullName,
+    email: u.email,
+    department: u.department,
+    yearLevel: u.yearLevel,
+    phone: u.phoneNumber,
+    role: u.Role,
+    joinedAt: new Date(u.createdAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+    lastActive: formatRelativeTime(u.updatedAt),
+    borrowedBooks: 0,
+    avatarColor: pickAvatarColor(),
+  };
+}
+
+function formatRelativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins} min${mins > 1 ? "s" : ""} ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} hour${hrs > 1 ? "s" : ""} ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+export function roleConfig(role: Role) {
   switch (role) {
     case "admin":
       return {
@@ -282,378 +160,23 @@ function roleConfig(role: Role) {
   }
 }
 
-function statusConfig(status: Status) {
-  switch (status) {
-    case "active":
-      return {
-        label: "Active",
-        cls: "bg-emerald-100 text-emerald-700 border-emerald-200",
-        dot: "bg-emerald-500",
-      };
-    case "inactive":
-      return {
-        label: "Inactive",
-        cls: "bg-slate-100 text-slate-500 border-slate-200",
-        dot: "bg-slate-400",
-      };
-    case "suspended":
-      return {
-        label: "Suspended",
-        cls: "bg-rose-100 text-rose-700 border-rose-200",
-        dot: "bg-rose-500",
-      };
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Add / Edit Modal
 // ---------------------------------------------------------------------------
 
-interface UserFormData {
+export interface UserFormData {
+  schoolId: string;
   fullName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
+  department: string;
+  yearLevel: string;
   role: Role;
-  status: Status;
-  password: string;
-}
-
-const EMPTY_FORM: UserFormData = {
-  fullName: "",
-  email: "",
-  phone: "",
-  role: "student",
-  status: "active",
-  password: "",
-};
-
-interface UserModalProps {
-  open: boolean;
-  onClose: () => void;
-  onSave: (data: UserFormData) => void;
-  editUser: User | null;
-}
-
-function UserModal({ open, onClose, onSave, editUser }: UserModalProps) {
-  const isEdit = !!editUser;
-  const [form, setForm] = useState<UserFormData>(
-    editUser
-      ? {
-          fullName: editUser.fullName,
-          email: editUser.email,
-          phone: editUser.phone ?? "",
-          role: editUser.role,
-          status: editUser.status,
-          password: "",
-        }
-      : EMPTY_FORM,
-  );
-  const [showPass, setShowPass] = useState(false);
-
-  const set = (key: keyof UserFormData) => (val: string) =>
-    setForm((p) => ({ ...p, [key]: val }));
-
-  const handleSave = () => {
-    if (!form.fullName.trim() || !form.email.trim()) {
-      toast.error("Full name and email are required.");
-      return;
-    }
-    if (!isEdit && !form.password.trim()) {
-      toast.error("Password is required for new users.");
-      return;
-    }
-    onSave(form);
-  };
-
-  const roleIcon = roleConfig(form.role);
-  const RoleIcon = roleIcon.icon;
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden rounded-3xl border-none p-0 shadow-2xl sm:max-w-[580px]">
-        {/* Gradient Header */}
-        <div
-          className={`relative overflow-hidden p-6 text-white ${
-            form.role === "admin"
-              ? "bg-linear-to-br from-violet-600 to-purple-700"
-              : form.role === "faculty"
-                ? "bg-linear-to-br from-blue-600 to-indigo-700"
-                : "bg-linear-to-br from-emerald-500 to-teal-600"
-          }`}
-        >
-          <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/5" />
-          <div className="absolute top-6 right-8 opacity-10">
-            <Users size={90} className="-rotate-12" />
-          </div>
-          <DialogHeader className="relative z-10 space-y-1">
-            <DialogTitle className="flex items-center gap-2.5 text-xl font-black text-white">
-              {isEdit ? (
-                <>
-                  <Edit className="size-5" />
-                  Edit User Account
-                </>
-              ) : (
-                <>
-                  <Plus className="size-5" />
-                  Add New User
-                </>
-              )}
-            </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-white/70">
-              {isEdit
-                ? `Updating information for ${editUser?.fullName}`
-                : "Create a new LMS user account with role assignment."}
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Role Pill in header */}
-          <div className="relative z-10 mt-4 flex items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
-              <RoleIcon className="size-3.5" />
-              {roleConfig(form.role).label}
-            </div>
-          </div>
-        </div>
-
-        {/* Form Body */}
-        <div className="space-y-5 bg-white p-6">
-          {/* Name + Email row */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-sm font-bold text-slate-700">
-                Full Name <span className="text-rose-500">*</span>
-              </Label>
-              <div className="relative">
-                <Users className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  value={form.fullName}
-                  onChange={(e) => set("fullName")(e.target.value)}
-                  placeholder="John Doe"
-                  className="rounded-xl border-slate-200 pl-9 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-                />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-bold text-slate-700">
-                Email <span className="text-rose-500">*</span>
-              </Label>
-              <div className="relative">
-                <Mail className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => set("email")(e.target.value)}
-                  placeholder="user@lms.edu"
-                  className="rounded-xl border-slate-200 pl-9 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Phone + Password */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-sm font-bold text-slate-700">
-                Phone Number
-              </Label>
-              <div className="relative">
-                <Phone className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  value={form.phone}
-                  onChange={(e) => set("phone")(e.target.value)}
-                  placeholder="+1 (555) 000-0000"
-                  className="rounded-xl border-slate-200 pl-9 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-                />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-bold text-slate-700">
-                Password {!isEdit && <span className="text-rose-500">*</span>}
-                {isEdit && (
-                  <span className="font-normal text-slate-400">
-                    (leave blank to keep)
-                  </span>
-                )}
-              </Label>
-              <div className="relative">
-                <Lock className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  type={showPass ? "text" : "password"}
-                  value={form.password}
-                  onChange={(e) => set("password")(e.target.value)}
-                  placeholder="••••••••"
-                  className="rounded-xl border-slate-200 pr-10 pl-9 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass((p) => !p)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
-                >
-                  {showPass ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Role + Status */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-sm font-bold text-slate-700">
-                Role <span className="text-rose-500">*</span>
-              </Label>
-              <Select
-                value={form.role}
-                onValueChange={(v) => set("role")(v as Role)}
-              >
-                <SelectTrigger className="h-10 rounded-xl border-slate-200 focus:ring-indigo-500/20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                  <SelectItem value="admin">
-                    <div className="flex items-center gap-2">
-                      <Crown className="size-4 text-violet-500" />
-                      <span className="font-semibold">Admin</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="faculty">
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="size-4 text-blue-500" />
-                      <span className="font-semibold">Faculty</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="student">
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="size-4 text-emerald-500" />
-                      <span className="font-semibold">Student</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm font-bold text-slate-700">
-                Account Status
-              </Label>
-              <Select
-                value={form.status}
-                onValueChange={(v) => set("status")(v as Status)}
-              >
-                <SelectTrigger className="h-10 rounded-xl border-slate-200 focus:ring-indigo-500/20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                  <SelectItem value="active">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4 text-emerald-500" />
-                      <span className="font-semibold">Active</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="inactive">
-                    <div className="flex items-center gap-2">
-                      <Clock className="size-4 text-slate-400" />
-                      <span className="font-semibold">Inactive</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="suspended">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="size-4 text-rose-500" />
-                      <span className="font-semibold">Suspended</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="flex gap-3 border-t border-slate-100 bg-slate-50 p-5">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="flex-1 rounded-xl font-bold text-slate-600"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            className={`flex-1 rounded-xl font-bold text-white shadow-md transition-all hover:scale-[1.02] active:scale-95 ${
-              form.role === "admin"
-                ? "bg-violet-600 shadow-violet-200 hover:bg-violet-700"
-                : form.role === "faculty"
-                  ? "bg-blue-600 shadow-blue-200 hover:bg-blue-700"
-                  : "bg-emerald-600 shadow-emerald-200 hover:bg-emerald-700"
-            }`}
-          >
-            {isEdit ? "Save Changes" : "Create User"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Delete Modal
-// ---------------------------------------------------------------------------
-
-function DeleteUserModal({
-  user,
-  open,
-  onClose,
-  onConfirm,
-}: {
-  user: User | null;
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  if (!user) return null;
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden rounded-3xl border-none p-0 shadow-2xl sm:max-w-sm">
-        <div className="space-y-5 p-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-100">
-            <AlertCircle size={32} className="text-rose-500" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-black text-slate-900">Delete User?</h3>
-            <p className="text-sm font-medium text-slate-500">
-              Are you sure you want to permanently remove{" "}
-              <span className="font-bold text-slate-800">
-                "{user.fullName}"
-              </span>{" "}
-              from the system? This cannot be undone.
-            </p>
-          </div>
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="h-11 flex-1 rounded-xl font-bold"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={onConfirm}
-              className="h-11 flex-1 rounded-xl bg-rose-500 font-bold text-white shadow-md shadow-rose-200 hover:bg-rose-600"
-            >
-              Delete User
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 // ---------------------------------------------------------------------------
 // Role Tab Filter
 // ---------------------------------------------------------------------------
-
 const ROLE_TABS: {
   value: "all" | Role;
   label: string;
@@ -673,10 +196,8 @@ export function UserManagement() {
   usePageTitle("User Management");
   const isMobile = useIsMobile();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
   const [search, setSearch] = useState("");
   const [roleTab, setRoleTab] = useState<"all" | Role>("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
   const [page, setPage] = useState(1);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -684,13 +205,20 @@ export function UserManagement() {
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
+  // API hooks
+  const { data: apiUsers, isLoading, isError, error } = useUsers();
+  const { data: meta, isLoading: isLoadingMeta } = useUsersMeta();
+  const createMutation = useCreateUser();
+  const updateMutation = useUpdateUser();
+  const deleteMutation = useDeleteUser();
+
+  const users = useMemo(() => (apiUsers ?? []).map(mapApiUser), [apiUsers]);
+
   // Derived stats
   const totalUsers = users.length;
-  const activeUsers = users.filter((u) => u.status === "active").length;
   const adminCount = users.filter((u) => u.role === "admin").length;
   const facultyCount = users.filter((u) => u.role === "faculty").length;
   const studentCount = users.filter((u) => u.role === "student").length;
-  const suspendedCount = users.filter((u) => u.status === "suspended").length;
 
   // Filtered list
   const filtered = useMemo(() => {
@@ -701,10 +229,9 @@ export function UserManagement() {
         u.email.toLowerCase().includes(q) ||
         (u.phone ?? "").includes(q);
       const matchRole = roleTab === "all" || u.role === roleTab;
-      const matchStatus = statusFilter === "all" || u.status === statusFilter;
-      return matchSearch && matchRole && matchStatus;
+      return matchSearch && matchRole;
     });
-  }, [users, search, roleTab, statusFilter]);
+  }, [users, search, roleTab]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
   const paginated = filtered.slice(
@@ -719,12 +246,6 @@ export function UserManagement() {
   const onRoleTab = (v: "all" | Role) => {
     setRoleTab(v);
     setPage(1);
-  };
-  const onStatus = (v: string | null) => {
-    if (v) {
-      setStatusFilter(v as "all" | Status);
-      setPage(1);
-    }
   };
 
   const openAddModal = () => {
@@ -742,50 +263,141 @@ export function UserManagement() {
 
   const handleSave = (data: UserFormData) => {
     if (editUser) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editUser.id
-            ? {
-                ...u,
-                fullName: data.fullName,
-                email: data.email,
-                phone: data.phone,
-                role: data.role,
-                status: data.status,
-              }
-            : u,
-        ),
+      updateMutation.mutate(
+        {
+          id: editUser.id,
+          data: {
+            schoolId: data.schoolId,
+            fullName: data.fullName,
+            email: data.email,
+            department: data.department,
+            yearLevel: data.yearLevel,
+            phoneNumber: data.phoneNumber,
+            role: data.role,
+          },
+        },
+        {
+          onSuccess: () => {
+            toast.success("User updated successfully");
+            setModalOpen(false);
+          },
+          onError: (err: unknown) => {
+            const msg =
+              err instanceof Error ? err.message : "Failed to update user";
+            toast.error(msg);
+          },
+        },
       );
-      toast.success("User updated successfully");
     } else {
-      const newUser: User = {
-        id: String(Date.now()),
-        fullName: data.fullName,
-        email: data.email,
-        phone: data.phone || undefined,
-        role: data.role,
-        status: data.status,
-        joinedAt: new Date().toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-        lastActive: "Just now",
-        borrowedBooks: 0,
-        avatarColor:
-          AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
-      };
-      setUsers((prev) => [newUser, ...prev]);
-      toast.success("New user created successfully");
+      createMutation.mutate(
+        {
+          schoolId: data.schoolId,
+          fullName: data.fullName,
+          email: data.email,
+          department: data.department,
+          yearLevel: data.yearLevel,
+          phoneNumber: data.phoneNumber,
+          role: data.role,
+        },
+        {
+          onSuccess: () => {
+            toast.success("New user created successfully");
+            setModalOpen(false);
+          },
+          onError: (err: unknown) => {
+            const msg =
+              err instanceof Error ? err.message : "Failed to create user";
+            toast.error(msg);
+          },
+        },
+      );
     }
-    setModalOpen(false);
   };
 
   const handleDeleteConfirm = () => {
-    setUsers((prev) => prev.filter((u) => u.id !== deleteUser?.id));
-    toast.success("User removed from the system");
-    setDeleteOpen(false);
+    if (!deleteUser) return;
+    deleteMutation.mutate(deleteUser.id, {
+      onSuccess: () => {
+        toast.success("User removed from the system");
+        setDeleteOpen(false);
+      },
+      onError: (err: unknown) => {
+        const msg =
+          err instanceof Error ? err.message : "Failed to delete user";
+        toast.error(msg);
+      },
+    });
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1600px] space-y-6 duration-700">
+        {/* Header Skeleton */}
+        <div className="relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64 rounded-xl" />
+            <Skeleton className="h-4 w-80 max-w-full rounded-lg" />
+          </div>
+          <Skeleton className="h-11 w-40 rounded-xl" />
+        </div>
+
+        {/* Stats Skeleton */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
+            >
+              <Skeleton className="h-12 w-12 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-20 rounded" />
+                <Skeleton className="h-7 w-12 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Table Skeleton */}
+        <TableSkeleton columns={6} rows={ROWS_PER_PAGE} />
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="mx-auto flex max-w-[1600px] items-center justify-center py-32">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <AlertCircle className="size-12 text-rose-500" />
+          <p className="text-lg font-bold text-slate-800">
+            Failed to load users
+          </p>
+          <p className="text-sm text-slate-500">
+            {error instanceof Error
+              ? error.message
+              : "An unexpected error occurred."}
+          </p>
+          <Button
+            variant="outline"
+            className="mt-2 rounded-xl font-bold"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  function getInitials(name: string) {
+    return name
+      .split(" ")
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase();
+  }
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1600px] space-y-6 duration-700">
@@ -818,7 +430,7 @@ export function UserManagement() {
       </div>
 
       {/* ── KPI Stats ── */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {/* Total */}
         <div className="group col-span-1 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md">
           <div className="shrink-0 rounded-xl bg-indigo-50 p-3 text-indigo-600 transition-transform group-hover:scale-110">
@@ -829,21 +441,6 @@ export function UserManagement() {
               Total Users
             </p>
             <h3 className="text-2xl font-black text-slate-900">{totalUsers}</h3>
-          </div>
-        </div>
-
-        {/* Active */}
-        <div className="group col-span-1 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-emerald-200 hover:shadow-md">
-          <div className="shrink-0 rounded-xl bg-emerald-50 p-3 text-emerald-600 transition-transform group-hover:scale-110">
-            <UserCheck className="size-5" />
-          </div>
-          <div>
-            <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
-              Active
-            </p>
-            <h3 className="text-2xl font-black text-emerald-700">
-              {activeUsers}
-            </h3>
           </div>
         </div>
 
@@ -888,21 +485,6 @@ export function UserManagement() {
             </p>
             <h3 className="text-2xl font-black text-emerald-700">
               {studentCount}
-            </h3>
-          </div>
-        </div>
-
-        {/* Suspended */}
-        <div className="group col-span-1 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-rose-200 hover:shadow-md">
-          <div className="shrink-0 rounded-xl bg-rose-50 p-3 text-rose-600 transition-transform group-hover:scale-110">
-            <UserX className="size-5" />
-          </div>
-          <div>
-            <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
-              Suspended
-            </p>
-            <h3 className="text-2xl font-black text-rose-600">
-              {suspendedCount}
             </h3>
           </div>
         </div>
@@ -1009,7 +591,7 @@ export function UserManagement() {
             )}
 
             {/* Status filter */}
-            <Select value={statusFilter} onValueChange={onStatus}>
+            {/* <Select value={statusFilter} onValueChange={onStatus}>
               <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 sm:w-44">
                 <Filter className="mr-1.5 size-3.5 text-slate-400" />
                 <SelectValue placeholder="Status" />
@@ -1020,7 +602,7 @@ export function UserManagement() {
                 <SelectItem value="inactive">Inactive</SelectItem>
                 <SelectItem value="suspended">Suspended</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
           </div>
         </div>
 
@@ -1036,9 +618,6 @@ export function UserManagement() {
                   <>
                     <TableHead className="py-4 text-xs font-bold tracking-wider text-slate-500 uppercase">
                       Role
-                    </TableHead>
-                    <TableHead className="py-4 text-xs font-bold tracking-wider text-slate-500 uppercase">
-                      Status
                     </TableHead>
                   </>
                 )}
@@ -1085,7 +664,6 @@ export function UserManagement() {
               ) : (
                 paginated.map((user) => {
                   const rc = roleConfig(user.role);
-                  const sc = statusConfig(user.status);
                   const RoleIcon = rc.icon;
                   const isExpanded = isMobile && expandedRow === user.id;
                   return (
@@ -1101,15 +679,10 @@ export function UserManagement() {
                         {/* User cell */}
                         <TableCell className="py-3.5 pl-5">
                           <div className="flex items-center gap-3">
-                            {/* Avatar */}
                             <div
                               className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-black text-white shadow-sm ring-2 ring-white transition-all group-hover:scale-110 ${user.avatarColor}`}
                             >
                               {getInitials(user.fullName)}
-                              {/* Online dot */}
-                              {user.status === "active" && (
-                                <span className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
-                              )}
                             </div>
                             <div className="min-w-0">
                               <p className="max-w-[160px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
@@ -1144,18 +717,6 @@ export function UserManagement() {
                                 <RoleIcon className="size-3" />
                                 {rc.label}
                               </Badge>
-                            </TableCell>
-
-                            {/* Status */}
-                            <TableCell>
-                              <div
-                                className={`flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold ${sc.cls}`}
-                              >
-                                <span
-                                  className={`h-1.5 w-1.5 rounded-full ${sc.dot} ${user.status === "active" ? "animate-pulse" : ""}`}
-                                />
-                                {sc.label}
-                              </div>
                             </TableCell>
                           </>
                         )}
@@ -1219,45 +780,6 @@ export function UserManagement() {
                                   <Edit className="size-4" />
                                   Edit User
                                 </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setUsers((prev) =>
-                                      prev.map((u) =>
-                                        u.id === user.id
-                                          ? {
-                                              ...u,
-                                              status:
-                                                u.status === "active"
-                                                  ? "suspended"
-                                                  : "active",
-                                            }
-                                          : u,
-                                      ),
-                                    );
-                                    toast.success(
-                                      user.status === "active"
-                                        ? "User suspended"
-                                        : "User reactivated",
-                                    );
-                                  }}
-                                  className={`gap-2 rounded-lg font-semibold focus:bg-amber-50 focus:text-amber-700 ${
-                                    user.status === "active"
-                                      ? "text-amber-600"
-                                      : "text-emerald-600"
-                                  }`}
-                                >
-                                  {user.status === "active" ? (
-                                    <>
-                                      <UserX className="size-4" />
-                                      Suspend
-                                    </>
-                                  ) : (
-                                    <>
-                                      <UserCheck className="size-4" />
-                                      Reactivate
-                                    </>
-                                  )}
-                                </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-slate-100" />
                                 <DropdownMenuItem
                                   onClick={() => openDeleteModal(user)}
@@ -1288,19 +810,6 @@ export function UserManagement() {
                                   <RoleIcon className="size-3" />
                                   {rc.label}
                                 </Badge>
-                              </div>
-                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                                <span className="font-medium text-slate-500">
-                                  Status
-                                </span>
-                                <div
-                                  className={`flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold ${sc.cls}`}
-                                >
-                                  <span
-                                    className={`h-1.5 w-1.5 rounded-full ${sc.dot} ${user.status === "active" ? "animate-pulse" : ""}`}
-                                  />
-                                  {sc.label}
-                                </div>
                               </div>
                               <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
                                 <span className="font-medium text-slate-500">
@@ -1398,12 +907,16 @@ export function UserManagement() {
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
         editUser={editUser}
+        meta={meta}
+        isLoadingMeta={isLoadingMeta}
+        isPending={createMutation.isPending || updateMutation.isPending}
       />
       <DeleteUserModal
         user={deleteUser}
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleDeleteConfirm}
+        isPending={deleteMutation.isPending}
       />
     </div>
   );

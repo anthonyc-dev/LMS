@@ -9,6 +9,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
+import { Role } from 'src/common/enums/role.enum';
 
 export class CreateAdminUserDto {
   @ApiProperty({ example: 'ADM-0001' })
@@ -52,10 +53,21 @@ export class CreateAdminUserDto {
   @IsEnum(YearLevelEnum)
   yearLevel?: YearLevelEnum;
 
-  @ApiProperty({ example: 'adminpassword123' })
+  @ApiProperty({ required: false, description: 'Optional. Auto-generated if not provided' })
+  @IsOptional()
   @IsString()
   @MinLength(6)
-  password: string;
+  password?: string;
+
+  @ApiProperty({
+    enum: Role,
+    example: Role.STUDENT,
+    required: false,
+    default: Role.STUDENT,
+  })
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
 
   @ApiProperty({
     type: 'string',

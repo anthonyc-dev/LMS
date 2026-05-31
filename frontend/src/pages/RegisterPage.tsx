@@ -226,8 +226,7 @@ export function RegisterPage() {
                     <FormLabel>Department</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value || undefined}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger
@@ -276,8 +275,7 @@ export function RegisterPage() {
                     <FormLabel>Year Level</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value || undefined}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger

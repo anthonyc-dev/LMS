@@ -17,8 +17,8 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 
-import { SidebarContentInner } from "@/components/admin.component/Sidebar";
-import { MobileNav } from "@/components/admin.component/MobileNav";
+import { SidebarContentInner } from "@/components/commons/Sidebar";
+import { MobileNav } from "@/components/commons/MobileNav";
 
 const menuItems = [
   {
