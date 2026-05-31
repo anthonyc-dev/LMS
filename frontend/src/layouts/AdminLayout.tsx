@@ -57,12 +57,6 @@ const menuItems = [
     roles: ["admin"],
   },
   {
-    icon: Layers,
-    label: "Shelves",
-    path: "/admin/shelves",
-    roles: ["admin"],
-  },
-  {
     icon: Tag,
     label: "Categories",
     path: "/admin/categories",
@@ -72,6 +66,12 @@ const menuItems = [
     icon: Book,
     label: "Books",
     path: "/admin/books",
+    roles: ["admin"],
+  },
+  {
+    icon: Layers,
+    label: "Shelves",
+    path: "/admin/shelves",
     roles: ["admin"],
   },
   {

@@ -6,9 +6,10 @@ import { Category } from './entities/category.entity';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { JwtStrategy } from 'src/common/guard/jwt.strategy';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { Book } from '../books/entities/book.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Category])],
+  imports: [TypeOrmModule.forFeature([Category, Book])],
   controllers: [CategoriesController],
   providers: [CategoriesService, RolesGuard, JwtStrategy, ThrottlerGuard],
 })

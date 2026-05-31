@@ -1,5 +1,12 @@
 import { useState, useMemo } from "react";
 import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+  type Category,
+} from "@/lib/api/categories";
+import {
   Plus,
   Search,
   Edit3,
@@ -7,24 +14,17 @@ import {
   Tag,
   BookOpen,
   MoreHorizontal,
-  AlertCircle,
   BarChart3,
   Layers,
   TrendingUp,
   X,
-  Check,
 } from "lucide-react";
+import { CategoryModal } from "@/components/admin/category/CategoryModal";
+import { DeleteCategoryModal } from "@/components/admin/category/DeleteCategoryModal";
+import { CategoryPageSkeleton } from "@/components/admin/category/CategoryPageSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,8 +32,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { toast } from "sonner";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -42,10 +40,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 // Types & seed data
 // ---------------------------------------------------------------------------
 
-interface Category {
-  id: string;
-  name: string;
-  description: string;
+interface UICategory extends Category {
   color: string;
   bookCount: number;
   createdAt: string;
@@ -66,284 +61,39 @@ const PALETTE = [
   "#a855f7",
 ];
 
-const INITIAL_CATEGORIES: Category[] = [
-  {
-    id: "1",
-    name: "Fiction",
-    description: "Novels and short stories drawn from imagination.",
-    color: "#6366f1",
-    bookCount: 148,
-    createdAt: "2024-01-10",
-  },
-  {
-    id: "2",
-    name: "Science",
-    description: "Natural sciences, physics, biology and chemistry.",
-    color: "#10b981",
-    bookCount: 94,
-    createdAt: "2024-01-12",
-  },
-  {
-    id: "3",
-    name: "Technology",
-    description: "Computing, programming and digital innovation.",
-    color: "#3b82f6",
-    bookCount: 112,
-    createdAt: "2024-01-14",
-  },
-  {
-    id: "4",
-    name: "Biography",
-    description: "Life stories of notable historical figures.",
-    color: "#f59e0b",
-    bookCount: 57,
-    createdAt: "2024-02-01",
-  },
-  {
-    id: "5",
-    name: "Self-Help",
-    description: "Personal growth, productivity and wellness.",
-    color: "#8b5cf6",
-    bookCount: 83,
-    createdAt: "2024-02-10",
-  },
-  {
-    id: "6",
-    name: "History",
-    description: "World history, civilizations and events.",
-    color: "#ec4899",
-    bookCount: 76,
-    createdAt: "2024-02-15",
-  },
-  {
-    id: "7",
-    name: "Philosophy",
-    description: "Ethics, logic and critical thinking.",
-    color: "#14b8a6",
-    bookCount: 42,
-    createdAt: "2024-03-01",
-  },
-  {
-    id: "8",
-    name: "Mystery",
-    description: "Crime fiction, thrillers and detective stories.",
-    color: "#f97316",
-    bookCount: 69,
-    createdAt: "2024-03-05",
-  },
-];
-
-// ---------------------------------------------------------------------------
-// Category Form Modal
-// ---------------------------------------------------------------------------
-
-interface FormModalProps {
-  open: boolean;
-  initial: Category | null;
-  onClose: () => void;
-  onSave: (data: { name: string; description: string; color: string }) => void;
-}
-
-function CategoryFormModal({ open, initial, onClose, onSave }: FormModalProps) {
-  const [name, setName] = useState(initial?.name ?? "");
-  const [desc, setDesc] = useState(initial?.description ?? "");
-  const [color, setColor] = useState(initial?.color ?? PALETTE[0]);
-  const [nameErr, setNameErr] = useState(false);
-
-  // Sync when editing different category
-  useState(() => {
-    setName(initial?.name ?? "");
-    setDesc(initial?.description ?? "");
-    setColor(initial?.color ?? PALETTE[0]);
-    setNameErr(false);
-  });
-
-  const handleSave = () => {
-    if (!name.trim()) {
-      setNameErr(true);
-      return;
-    }
-    onSave({ name: name.trim(), description: desc.trim(), color });
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-w-md">
-        {/* Header */}
-        <div
-          className="relative overflow-hidden p-6 text-white"
-          style={{
-            background: `linear-gradient(135deg, ${color}dd, ${color})`,
-          }}
-        >
-          <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/10" />
-          <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-white/10" />
-          <DialogHeader className="relative z-10 space-y-1">
-            <DialogTitle className="flex items-center gap-2 text-xl font-black text-white">
-              <Tag className="size-5" />
-              {initial ? "Edit Category" : "New Category"}
-            </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-white/70">
-              {initial
-                ? "Update this category's details."
-                : "Add a new book category to your library."}
-            </DialogDescription>
-          </DialogHeader>
-        </div>
-
-        <div className="space-y-5 bg-white p-6">
-          {/* Name */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-slate-700">
-              Category Name <span className="text-rose-500">*</span>
-            </Label>
-            <Input
-              id="cat-name"
-              placeholder="e.g. Science Fiction"
-              className={`rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20 ${nameErr ? "border-rose-400 focus-visible:border-rose-500" : ""}`}
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setNameErr(false);
-              }}
-            />
-            {nameErr && (
-              <p className="text-xs font-medium text-rose-500">
-                Name is required.
-              </p>
-            )}
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-slate-700">
-              Description
-            </Label>
-            <Textarea
-              id="cat-desc"
-              placeholder="Brief description of this category…"
-              className="h-20 resize-none rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-            />
-          </div>
-
-          {/* Color picker */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-slate-700">
-              Label Color
-            </Label>
-            <div className="flex flex-wrap gap-2.5">
-              {PALETTE.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setColor(c)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full transition-transform hover:scale-110"
-                  style={{ backgroundColor: c }}
-                  aria-label={c}
-                >
-                  {color === c && (
-                    <Check className="size-4 stroke-3 text-white" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="flex gap-3 border-t border-slate-100 bg-slate-50 p-4">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="flex-1 rounded-xl font-bold text-slate-600"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            className="flex-1 rounded-xl font-bold text-white shadow-md"
-            style={{ backgroundColor: color }}
-          >
-            {initial ? "Save Changes" : "Create Category"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Delete Confirm Modal
-// ---------------------------------------------------------------------------
-
-function DeleteConfirmModal({
-  open,
-  category,
-  onClose,
-  onConfirm,
-}: {
-  open: boolean;
-  category: Category | null;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  if (!category) return null;
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-w-sm">
-        <div className="space-y-5 p-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-500">
-            <AlertCircle size={32} />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-black text-slate-900">
-              Delete Category?
-            </h3>
-            <p className="text-sm font-medium text-slate-500">
-              Are you sure you want to delete{" "}
-              <span className="font-bold text-slate-800">
-                "{category.name}"
-              </span>
-              ? This may affect{" "}
-              <span className="font-bold text-rose-600">
-                {category.bookCount}
-              </span>{" "}
-              books linked to it.
-            </p>
-          </div>
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="h-11 flex-1 rounded-xl font-bold"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={onConfirm}
-              className="h-11 flex-1 rounded-xl bg-rose-500 font-bold text-white shadow-md shadow-rose-200 hover:bg-rose-600"
-            >
-              Delete
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Main Page
 // ---------------------------------------------------------------------------
 
 export function CategoryPage() {
   usePageTitle("Category");
-  const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
+
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<Category | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+  const [editTarget, setEditTarget] = useState<UICategory | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UICategory | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  // Queries & Mutations
+  const { data: serverCategories = [], isLoading } = useCategories();
+
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
+
+  // Map server data to UI model
+  const categories: UICategory[] = useMemo(() => {
+    return serverCategories.map((c: Category, index: number) => ({
+      id: c.id,
+      name: c.name,
+      description: c.description || "",
+      color: PALETTE[index % PALETTE.length],
+      bookCount: c.books?.length || 0,
+      createdAt: c.createdAt
+        ? new Date(c.createdAt).toISOString().slice(0, 10)
+        : "N/A",
+    }));
+  }, [serverCategories]);
 
   // Derived
   const filtered = useMemo(
@@ -372,44 +122,64 @@ export function CategoryPage() {
     setEditTarget(null);
     setFormOpen(true);
   };
-  const openEdit = (c: Category) => {
+  const openEdit = (c: UICategory) => {
     setEditTarget(c);
     setFormOpen(true);
   };
-  const openDelete = (c: Category) => {
+  const openDelete = (c: UICategory) => {
     setDeleteTarget(c);
     setDeleteOpen(true);
   };
 
-  const handleSave = (data: {
-    name: string;
-    description: string;
-    color: string;
-  }) => {
+  const handleSave = (data: { name: string; description: string }) => {
     if (editTarget) {
-      setCategories((prev) =>
-        prev.map((c) => (c.id === editTarget.id ? { ...c, ...data } : c)),
+      updateMutation.mutate(
+        { id: editTarget.id, ...data },
+        {
+          onSuccess: () => {
+            toast.success("Category updated successfully");
+            setFormOpen(false);
+          },
+          onError: (error: any) => {
+            toast.error(
+              error.response?.data?.message || "Failed to update category",
+            );
+          },
+        },
       );
-      toast.success("Category updated successfully");
     } else {
-      const newCat: Category = {
-        id: Math.random().toString(36).slice(2, 9),
-        bookCount: 0,
-        createdAt: new Date().toISOString().slice(0, 10),
-        ...data,
-      };
-      setCategories((prev) => [newCat, ...prev]);
-      toast.success("Category created successfully");
+      createMutation.mutate(data, {
+        onSuccess: () => {
+          toast.success("Category created successfully");
+          setFormOpen(false);
+        },
+        onError: (error: any) => {
+          toast.error(
+            error.response?.data?.message || "Failed to create category",
+          );
+        },
+      });
     }
-    setFormOpen(false);
   };
 
   const handleDelete = () => {
     if (!deleteTarget) return;
-    setCategories((prev) => prev.filter((c) => c.id !== deleteTarget.id));
-    toast.success("Category deleted");
-    setDeleteOpen(false);
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        toast.success("Category deleted");
+        setDeleteOpen(false);
+      },
+      onError: (error: any) => {
+        toast.error(
+          error.response?.data?.message || "Failed to delete category",
+        );
+      },
+    });
   };
+
+  if (isLoading) {
+    return <CategoryPageSkeleton />;
+  }
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1600px] space-y-6 duration-700">
@@ -437,7 +207,7 @@ export function CategoryPage() {
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Card className="group transition-all hover:border-violet-200 hover:shadow-md">
+        <Card className="group border-slate-100 bg-white transition-all hover:border-violet-200 hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
             <div className="shrink-0 rounded-xl bg-violet-50 p-3 text-violet-600 transition-transform group-hover:scale-110">
               <Tag className="size-5" />
@@ -453,7 +223,7 @@ export function CategoryPage() {
           </CardContent>
         </Card>
 
-        <Card className="group transition-all hover:border-indigo-200 hover:shadow-md">
+        <Card className="group border-slate-100 bg-white transition-all hover:border-indigo-200 hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
             <div className="shrink-0 rounded-xl bg-indigo-50 p-3 text-indigo-600 transition-transform group-hover:scale-110">
               <BookOpen className="size-5" />
@@ -469,7 +239,7 @@ export function CategoryPage() {
           </CardContent>
         </Card>
 
-        <Card className="group transition-all hover:border-emerald-200 hover:shadow-md">
+        <Card className="group border-slate-100 bg-white transition-all hover:border-emerald-200 hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
             <div className="shrink-0 rounded-xl bg-emerald-50 p-3 text-emerald-600 transition-transform group-hover:scale-110">
               <TrendingUp className="size-5" />
@@ -488,7 +258,7 @@ export function CategoryPage() {
           </CardContent>
         </Card>
 
-        <Card className="group transition-all hover:border-amber-200 hover:shadow-md">
+        <Card className="group border-slate-100 bg-white transition-all hover:border-amber-200 hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
             <div className="shrink-0 rounded-xl bg-amber-50 p-3 text-amber-600 transition-transform group-hover:scale-110">
               <BarChart3 className="size-5" />
@@ -649,7 +419,7 @@ export function CategoryPage() {
         </div>
 
         {/* Distribution chart — 1/3 */}
-        <Card className="sticky top-4 h-fit shadow-xs transition-shadow hover:shadow-md">
+        <Card className="sticky top-4 h-fit border-slate-100 bg-white shadow-xs transition-shadow hover:shadow-md">
           <CardHeader className="border-b border-slate-50 pb-4">
             <CardTitle className="flex items-center gap-2 text-base font-black text-slate-800">
               <Layers className="size-4 text-violet-500" /> Distribution
@@ -717,16 +487,18 @@ export function CategoryPage() {
 
       {/* ── Modals ── */}
       {formOpen && (
-        <CategoryFormModal
+        <CategoryModal
           open={formOpen}
           initial={editTarget}
+          isLoading={createMutation.isPending || updateMutation.isPending}
           onClose={() => setFormOpen(false)}
           onSave={handleSave}
         />
       )}
-      <DeleteConfirmModal
+      <DeleteCategoryModal
         open={deleteOpen}
         category={deleteTarget}
+        isLoading={deleteMutation.isPending}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleDelete}
       />

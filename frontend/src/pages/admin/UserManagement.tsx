@@ -56,8 +56,8 @@ import {
   type Role,
   type ApiUser,
 } from "@/lib/api/users";
-import { UserModal } from "@/components/admin/UserModal";
-import { DeleteUserModal } from "@/components/admin/DeleteUserModal";
+import { UserModal } from "@/components/admin/userManagement/UserModal";
+import { DeleteUserModal } from "@/components/admin/userManagement/DeleteUserModal";
 import { TableSkeleton } from "@/components/commons/TableSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 
