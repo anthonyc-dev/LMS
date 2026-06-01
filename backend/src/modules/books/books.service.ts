@@ -2,21 +2,21 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
-import { DataSource, Repository, ILike, FindManyOptions } from 'typeorm';
+import { Repository, ILike, FindManyOptions } from 'typeorm';
 import {
   deleteImageFromCloudinary,
   uploadImageToCloudinary,
 } from 'src/common/utils/cloudinaryUpload';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class BooksService {
   private readonly logger = new Logger(BooksService.name);
 
-  private bookRepository: Repository<Book>;
-
-  constructor(private readonly dataSource: DataSource) {
-    this.bookRepository = this.dataSource.getRepository(Book);
-  }
+  constructor(
+    @InjectRepository(Book)
+    private readonly bookRepository: Repository<Book>,
+  ) {}
   async create(createBookDto: CreateBookDto, file?: Express.Multer.File) {
     this.logger.log('Creating book', createBookDto);
 
@@ -62,7 +62,6 @@ export class BooksService {
       order: { createdAt: 'DESC' },
       relations: {
         category: true,
-        shelf: true,
       },
     };
 
@@ -73,11 +72,6 @@ export class BooksService {
         { isbn: ILike(`%${search}%`) },
         {
           category: {
-            name: ILike(`%${search}%`),
-          },
-        },
-        {
-          shelf: {
             name: ILike(`%${search}%`),
           },
         },
@@ -99,17 +93,36 @@ export class BooksService {
     this.logger.log('Finding book with id', id);
     return this.bookRepository.findOne({
       where: { id },
-      relations: ['category', 'shelf'],
+      relations: ['category'],
     });
   }
 
-  async update(id: string, updateBookDto: UpdateBookDto) {
+  async update(
+    id: string,
+    updateBookDto: UpdateBookDto,
+    file?: Express.Multer.File,
+  ) {
     this.logger.log('Updating book with id', id);
     const book = await this.findOne(id);
     if (!book) {
       throw new NotFoundException(`Book with ID ${id} not found`);
     }
-    return this.bookRepository.update(id, updateBookDto);
+
+    if (file) {
+      const coverImageUrl = await uploadImageToCloudinary(file, 'book-covers');
+      if (book.coverImage) {
+        deleteImageFromCloudinary(book.coverImage).catch((err) =>
+          this.logger.error(
+            'Failed to delete old cover image from Cloudinary',
+            err,
+          ),
+        );
+      }
+      updateBookDto.coverImage = coverImageUrl;
+    }
+
+    await this.bookRepository.update(id, updateBookDto);
+    return this.findOne(id);
   }
 
   async remove(id: string) {

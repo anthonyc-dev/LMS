@@ -7,8 +7,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsDateString,
-  IsNumber,
-  IsUUID,
+  // IsUUID,
 } from 'class-validator';
 
 export class CreateBookDto {
@@ -78,16 +77,6 @@ export class CreateBookDto {
   })
   pages?: number;
 
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  @IsNotEmpty()
-  @ApiProperty({
-    description: 'The stock of the book',
-    example: 5,
-  })
-  stock: number;
-
   @IsString()
   @IsOptional()
   @ApiProperty({
@@ -96,36 +85,26 @@ export class CreateBookDto {
   })
   coverImage?: string;
 
-  @Type(() => Number)
-  @IsNumber()
+  @IsString()
   @IsOptional()
   @ApiProperty({
-    description: 'The rating of the book',
-    example: 5,
+    description: 'The edition of the book',
+    example: '1st edition',
   })
-  rating?: number;
-
-  @Type(() => Number)
-  @IsNumber()
-  @IsOptional()
-  @ApiProperty({
-    description: 'The review count of the book',
-    example: 5,
-  })
-  reviewCount?: number;
+  edition?: string;
 
   @IsString()
   @IsOptional()
   @ApiProperty({
-    description: 'The status of the book',
-    example: 'available',
+    description: 'The language of the book',
+    example: 'English',
   })
-  status?: string;
+  language?: string;
 
-  @ApiProperty({
-    description: 'The id of the shelf',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @IsUUID()
-  shelfId: string;
+  // @ApiProperty({
+  //   description: 'The id of the shelf',
+  //   example: '123e4567-e89b-12d3-a456-426614174000',
+  // })
+  // @IsUUID()
+  // shelfId: string;
 }

@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Borrowing } from 'src/modules/borrowings/entities/borrowing.entity';
 import { Category } from 'src/modules/categories/entities/category.entity';
 import { Inventory } from 'src/modules/inventory/entities/inventory.entity';
-import { Shelf } from 'src/modules/shelves/entities/shelf.entity';
 import {
   Column,
   CreateDateColumn,
@@ -34,9 +33,9 @@ export class Book {
   @Column({ nullable: true })
   author?: string;
 
-  @ApiPropertyOptional()
-  @Column({ nullable: true })
-  isbn?: string;
+  @ApiProperty()
+  @Column({ nullable: false, unique: true })
+  isbn: string;
 
   @ApiPropertyOptional()
   @Column({ nullable: true })
@@ -56,23 +55,27 @@ export class Book {
 
   @ApiPropertyOptional()
   @Column({ nullable: true })
-  stock?: number;
-
-  @ApiPropertyOptional()
-  @Column({ nullable: true })
   coverImage?: string;
 
   @ApiPropertyOptional()
-  @Column({ nullable: true }) // soom relationnal tabl
-  rating?: number;
+  @Column({ nullable: true })
+  edition?: string;
 
   @ApiPropertyOptional()
-  @Column({ nullable: true }) // soom relationnal tabl
-  reviewCount?: number;
+  @Column({ nullable: true })
+  language?: string;
 
-  @ApiProperty()
-  @Column({ nullable: false, default: 'Available' }) // soom relationnal table
-  status: string;
+  // @ApiPropertyOptional()
+  // @Column({ nullable: true }) // soom relationnal tabl
+  // rating?: number;
+
+  // @ApiPropertyOptional()
+  // @Column({ nullable: true }) // soom relationnal tabl
+  // reviewCount?: number;
+
+  // @ApiProperty()
+  // @Column({ nullable: false, default: 'Available' }) // soom relationnal table
+  // status: string;
 
   // @ApiProperty()
   // @Column({ nullable: false, default: 0 })
@@ -100,10 +103,10 @@ export class Book {
   @OneToOne(() => Inventory, (inventory) => inventory.book)
   inventory: Inventory;
 
-  @ManyToOne(() => Shelf, (shelf) => shelf.books)
-  @JoinColumn({ name: 'shelfId' })
-  shelf: Shelf;
+  // @ManyToOne(() => Shelf, (shelf) => shelf.books)
+  // @JoinColumn({ name: 'shelfId' })
+  // shelf: Shelf;
 
-  @Column()
-  shelfId: string;
+  // @Column()
+  // shelfId: string;
 }

@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
@@ -13,6 +12,7 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Put,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
@@ -27,7 +27,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('books')
 @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
-@Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
@@ -35,6 +34,7 @@ export class BooksController {
   @Post()
   @UseInterceptors(FileInterceptor('coverImage'))
   @Roles(Role.ADMIN)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @HttpCode(HttpStatus.CREATED)
   create(
     @Body() createBookDto: CreateBookDto,
@@ -46,6 +46,7 @@ export class BooksController {
   // GET ALL
   @Get()
   @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
+  @Throttle({ default: { limit: 60, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   findAll(
     @Query('page') page?: string,
@@ -60,25 +61,30 @@ export class BooksController {
   // GET ONE
   @Get(':id')
   @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
+  @Throttle({ default: { limit: 120, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.booksService.findOne(id);
   }
 
-  // UPDATE (PATCH)
-  @Patch(':id')
+  // UPDATE
+  @Put(':id')
+  @UseInterceptors(FileInterceptor('coverImage'))
   @Roles(Role.ADMIN)
+  @Throttle({ default: { limit: 15, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateBookDto: UpdateBookDto,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.booksService.update(id, updateBookDto);
+    return this.booksService.update(id, updateBookDto, file);
   }
 
   // DELETE
   @Delete(':id')
   @Roles(Role.ADMIN)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.booksService.remove(id);

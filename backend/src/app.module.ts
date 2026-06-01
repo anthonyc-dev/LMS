@@ -22,6 +22,7 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { AppHealthIndicator } from './app.health.indicator';
 import { TerminusModule } from '@nestjs/terminus';
 import { ShelvesModule } from './modules/shelves/shelves.module';
+import { BookCopiesModule } from './modules/book-copies/book-copies.module';
 import dns from 'dns';
 
 dns.setDefaultResultOrder('ipv4first');
@@ -54,6 +55,7 @@ dns.setDefaultResultOrder('ipv4first');
     CategoriesModule,
     InventoryModule,
     ShelvesModule,
+    BookCopiesModule,
   ],
   controllers: [AppController],
   providers: [

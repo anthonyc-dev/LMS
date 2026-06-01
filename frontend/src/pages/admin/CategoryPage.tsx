@@ -140,9 +140,10 @@ export function CategoryPage() {
             toast.success("Category updated successfully");
             setFormOpen(false);
           },
-          onError: (error: any) => {
+          onError: (error: Error) => {
             toast.error(
-              error.response?.data?.message || "Failed to update category",
+              (error as { response?: { data?: { message?: string } } }).response
+                ?.data?.message || "Failed to update category",
             );
           },
         },
@@ -153,9 +154,10 @@ export function CategoryPage() {
           toast.success("Category created successfully");
           setFormOpen(false);
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
           toast.error(
-            error.response?.data?.message || "Failed to create category",
+            (error as { response?: { data?: { message?: string } } }).response
+                ?.data?.message || "Failed to create category",
           );
         },
       });
@@ -169,9 +171,10 @@ export function CategoryPage() {
         toast.success("Category deleted");
         setDeleteOpen(false);
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         toast.error(
-          error.response?.data?.message || "Failed to delete category",
+          (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message || "Failed to delete category",
         );
       },
     });
