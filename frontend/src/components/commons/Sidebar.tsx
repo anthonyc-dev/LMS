@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { LoadingOverlay } from "@/components/commons/loading-overlay";
 import {
   SidebarMenu,
@@ -65,18 +65,20 @@ function CollapsibleSidebarItem({
     !!item.items?.some((subItem) => location.pathname === subItem.path);
   const isActive = location.pathname === item.path || isSubItemActive;
 
-  const [isOpen, setIsOpen] = useState(isSubItemActive || false);
+  const [userOpen, setUserOpen] = useState(false);
 
-  useEffect(() => {
-    if (isSubItemActive) {
-      setIsOpen(true);
+  const isOpen = isSubItemActive || userOpen;
+
+  const handleOpenChange = (open: boolean) => {
+    if (!isSubItemActive) {
+      setUserOpen(open);
     }
-  }, [isSubItemActive]);
+  };
 
   return (
     <Collapsible
       open={isOpen}
-      onOpenChange={setIsOpen}
+      onOpenChange={handleOpenChange}
       className="group/collapsible"
     >
       <SidebarMenuItem>

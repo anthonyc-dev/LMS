@@ -8,7 +8,7 @@ export interface Category {
   color?: string;
   bookCount?: number;
   createdAt?: string;
-  books?: any[]; // if backend sends books relation
+  books?: unknown[];
 }
 
 export interface UICategory extends Category {

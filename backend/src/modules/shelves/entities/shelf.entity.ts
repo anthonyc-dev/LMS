@@ -25,6 +25,6 @@ export class Shelf {
   @Column({ default: 100 })
   capacity: number;
 
-  @OneToMany(() => Book, (book) => book.shelf)
-  books: Book[];
+  // @OneToMany(() => Book, (book) => book.shelf)
+  // books: Book[];
 }

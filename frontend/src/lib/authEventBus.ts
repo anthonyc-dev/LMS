@@ -1,6 +1,6 @@
 type AuthEventType = 'logout' | 'session_expired' | 'token_refresh';
 
-type AuthEventCallback = (payload?: any) => void;
+type AuthEventCallback = (payload?: unknown) => void;
 
 class AuthEventBus {
   private listeners: Record<string, AuthEventCallback[]> = {};
@@ -19,7 +19,7 @@ class AuthEventBus {
     };
   }
 
-  publish(event: AuthEventType, payload?: any) {
+  publish(event: AuthEventType, payload?: unknown) {
     if (!this.listeners[event]) return;
     this.listeners[event].forEach((callback) => callback(payload));
   }

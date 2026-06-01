@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Users,
   Edit,
@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { type Role, type UsersMeta as UsersMetaType } from "@/lib/api/users";
+import { type UsersMeta as UsersMetaType } from "@/lib/api/users";
 import {
   type User,
   type UserFormData,
@@ -84,26 +84,8 @@ export function UserModal({
       : EMPTY_FORM,
   );
 
-  useEffect(() => {
-    if (open) {
-      setForm(
-        editUser
-          ? {
-              schoolId: editUser.schoolId,
-              fullName: editUser.fullName,
-              email: editUser.email,
-              phoneNumber: editUser.phone ?? "",
-              department: editUser.department,
-              yearLevel: editUser.yearLevel,
-              role: editUser.role,
-            }
-          : EMPTY_FORM,
-      );
-    }
-  }, [open, editUser]);
-
-  const set = (key: keyof UserFormData) => (val: string) =>
-    setForm((p) => ({ ...p, [key]: val }));
+  const set = (key: keyof UserFormData) => (val: string | null) =>
+    setForm((p) => ({ ...p, [key]: (val ?? "") as never }));
 
   const handleSave = () => {
     if (!form.fullName.trim() || !form.email.trim() || !form.schoolId.trim()) {
@@ -117,7 +99,7 @@ export function UserModal({
   const RoleIcon = roleIcon.icon;
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog key={open ? (editUser?.id ?? "create") : "closed"} open={open} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] w-[95vw] overflow-x-hidden overflow-y-auto rounded-3xl border-none p-0 shadow-2xl sm:max-w-[580px]">
         {/* Gradient Header */}
         <div
@@ -307,7 +289,7 @@ export function UserModal({
                 <Shield className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Select
                   value={form.role}
-                  onValueChange={(v) => set("role")(v as Role)}
+                   onValueChange={(v) => set("role")((v ?? "") as string)}
                 >
                   <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 pl-9 focus:ring-indigo-500/20">
                     <SelectValue />

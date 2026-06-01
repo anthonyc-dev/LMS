@@ -22,10 +22,10 @@ const authClient = axios.create(baseConfig);
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: unknown) => void;
-  reject: (reason?: any) => void;
+  reject: (reason?: unknown) => void;
 }> = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   // Capture current queue and immediately clear it to prevent race conditions
   // if another request fails while we are resolving these promises.
   const queueToProcess = [...failedQueue];
