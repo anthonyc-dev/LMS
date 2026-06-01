@@ -1,16 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Book } from 'src/modules/books/entities/book.entity';
-import { Borrowing } from 'src/modules/borrowings/entities/borrowing.entity';
-import { Shelf } from 'src/modules/shelves/entities/shelf.entity';
+// import { Book } from 'src/modules/books/entities/book.entity';
+// import { Borrowing } from 'src/modules/borrowings/entities/borrowing.entity';
+// import { Shelf } from 'src/modules/shelves/entities/shelf.entity';
 
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
+  // JoinColumn,
+  // ManyToOne,
+  // OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Index,

@@ -1,9 +1,8 @@
-import { Book } from 'src/modules/books/entities/book.entity';
 import {
   Column,
   Entity,
   Index,
-  OneToMany,
+  // OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 

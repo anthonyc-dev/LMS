@@ -97,7 +97,11 @@ export class BooksService {
     });
   }
 
-  async update(id: string, updateBookDto: UpdateBookDto, file?: Express.Multer.File) {
+  async update(
+    id: string,
+    updateBookDto: UpdateBookDto,
+    file?: Express.Multer.File,
+  ) {
     this.logger.log('Updating book with id', id);
     const book = await this.findOne(id);
     if (!book) {
@@ -107,8 +111,11 @@ export class BooksService {
     if (file) {
       const coverImageUrl = await uploadImageToCloudinary(file, 'book-covers');
       if (book.coverImage) {
-        deleteImageFromCloudinary(book.coverImage).catch(err => 
-          this.logger.error('Failed to delete old cover image from Cloudinary', err)
+        deleteImageFromCloudinary(book.coverImage).catch((err) =>
+          this.logger.error(
+            'Failed to delete old cover image from Cloudinary',
+            err,
+          ),
         );
       }
       updateBookDto.coverImage = coverImageUrl;

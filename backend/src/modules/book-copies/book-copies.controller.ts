@@ -1,8 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { BookCopiesService } from './book-copies.service';
 import { CreateBookCopyDto } from './dto/create-book-copy.dto';
 import { UpdateBookCopyDto } from './dto/update-book-copy.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('book-copies')
 @Controller('book-copies')
 export class BookCopiesController {
   constructor(private readonly bookCopiesService: BookCopiesService) {}
@@ -19,16 +29,19 @@ export class BookCopiesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.bookCopiesService.findOne(+id);
+    return this.bookCopiesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookCopyDto: UpdateBookCopyDto) {
-    return this.bookCopiesService.update(+id, updateBookCopyDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateBookCopyDto: UpdateBookCopyDto,
+  ) {
+    return this.bookCopiesService.update(id, updateBookCopyDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.bookCopiesService.remove(+id);
+    return this.bookCopiesService.remove(id);
   }
 }

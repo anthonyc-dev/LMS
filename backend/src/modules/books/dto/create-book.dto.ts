@@ -7,7 +7,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsDateString,
-  IsUUID,
+  // IsUUID,
 } from 'class-validator';
 
 export class CreateBookDto {
