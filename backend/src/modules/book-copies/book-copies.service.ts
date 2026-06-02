@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBookCopyDto } from './dto/create-book-copy.dto';
 import { UpdateBookCopyDto } from './dto/update-book-copy.dto';
-import { BookCopy } from './entities/book-copy.entity';
+import { BookCopy, BookCopyStatus } from './entities/book-copy.entity';
 
 @Injectable()
 export class BookCopiesService {
@@ -27,16 +27,26 @@ export class BookCopiesService {
       );
     }
 
-    const bookCopy = this.bookCopyRepository.create(createBookCopyDto);
+    const bookCopy = this.bookCopyRepository.create({
+      ...createBookCopyDto,
+      status: BookCopyStatus.AVAILABLE,
+      acquiredAt: new Date(),
+    });
     return await this.bookCopyRepository.save(bookCopy);
   }
 
   async findAll(): Promise<BookCopy[]> {
-    return await this.bookCopyRepository.find();
+    const bookCopies = await this.bookCopyRepository.find({
+      relations: { book: true, shelf: true },
+    });
+    return bookCopies;
   }
 
   async findOne(id: string): Promise<BookCopy> {
-    const bookCopy = await this.bookCopyRepository.findOne({ where: { id } });
+    const bookCopy = await this.bookCopyRepository.findOne({
+      where: { id },
+      relations: { book: true, shelf: true },
+    });
     if (!bookCopy) {
       throw new NotFoundException(`Book copy with ID ${id} not found`);
     }

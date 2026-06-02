@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateShelfDto {
   @IsString()
@@ -24,21 +24,29 @@ export class CreateShelfDto {
     description: 'The location of the shelf',
     example: 'First Floor',
   })
-  location: string;
+  floor: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({
     description: 'The description of the shelf',
     example: 'A shelf for fiction books',
   })
-  description: string;
+  description?: string;
 
-  @IsNumber()
-  @IsNotEmpty()
+  @IsString()
+  @IsOptional()
   @ApiProperty({
-    description: 'The capacity of the shelf',
-    example: 100,
+    description: 'The section of the shelf',
+    example: 'Fiction',
   })
-  capacity: number;
+  section?: string;
+
+  // @IsNumber()
+  // @IsNotEmpty()
+  // @ApiProperty({
+  //   description: 'The capacity of the shelf',
+  //   example: 100,
+  // })
+  // capacity: number;
 }

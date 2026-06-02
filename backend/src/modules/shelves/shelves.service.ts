@@ -20,7 +20,7 @@ export class ShelvesService {
 
   async findAll(): Promise<Shelf[]> {
     const shelves = await this.shelfRepository.find({
-      // relations: { books: true },
+      relations: { bookCopies: true },
     });
     if (!shelves) {
       throw new Error('No shelves found');
@@ -31,7 +31,7 @@ export class ShelvesService {
   async findOne(id: string): Promise<Shelf> {
     const shelf = await this.shelfRepository.findOne({
       where: { id },
-      // relations: { books: true },
+      relations: { bookCopies: true },
     });
     if (!shelf) {
       throw new Error(`Shelf with ID ${id} not found`);

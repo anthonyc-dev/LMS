@@ -157,7 +157,7 @@ export function CategoryPage() {
         onError: (error: Error) => {
           toast.error(
             (error as { response?: { data?: { message?: string } } }).response
-                ?.data?.message || "Failed to create category",
+              ?.data?.message || "Failed to create category",
           );
         },
       });
@@ -174,7 +174,7 @@ export function CategoryPage() {
       onError: (error: Error) => {
         toast.error(
           (error as { response?: { data?: { message?: string } } }).response
-              ?.data?.message || "Failed to delete category",
+            ?.data?.message || "Failed to delete category",
         );
       },
     });
@@ -454,7 +454,9 @@ export function CategoryPage() {
                     borderRadius: "10px",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
                   }}
-                  formatter={((v: number) => [`${v} books`, ""]) as never}
+                  formatter={
+                    ((v: number, n: string) => [`${v} books`, n]) as never
+                  }
                 />
               </PieChart>
             </ResponsiveContainer>

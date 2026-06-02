@@ -1,42 +1,80 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { BookCondition, BookCopyStatus } from '../entities/book-copy.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateBookCopyDto {
-  @ApiProperty()
+  @ApiProperty({
+    example: '123456789012',
+    description: 'Barcode of the book copy',
+    required: true,
+  })
   @IsString()
+  @IsNotEmpty()
   barcode: string;
 
   @ApiProperty({
     enum: BookCopyStatus,
+    default: BookCopyStatus.AVAILABLE,
+    required: true,
   })
   @IsEnum(BookCopyStatus)
-  @IsOptional()
-  status?: BookCopyStatus;
+  @IsNotEmpty()
+  status: BookCopyStatus;
 
   @ApiProperty({
     enum: BookCondition,
+    default: BookCondition.GOOD,
+    required: false,
   })
   @IsEnum(BookCondition)
   @IsOptional()
   condition?: BookCondition;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: 'notes',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   notes?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: '7452f42f-996b-40d0-8a5b-70c0a8354fca',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   shelfId?: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    example: '7452f42f-996b-40d0-8a5b-70c0a8354fca',
+    required: true,
+    description: 'ID of the book',
+  })
   @IsString()
   bookId: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: 100,
+    required: false,
+  })
   @IsNumber()
   @IsOptional()
   purchasePrice?: number;
+
+  @ApiPropertyOptional({
+    example: '2025-01-01',
+  })
+  @Type(() => Date)
+  @IsDate()
+  @IsOptional()
+  acquiredAt?: Date;
 }
