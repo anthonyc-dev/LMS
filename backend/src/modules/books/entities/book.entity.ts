@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BookCopy } from 'src/modules/book-copies/entities/book-copy.entity';
 import { Borrowing } from 'src/modules/borrowings/entities/borrowing.entity';
 import { Category } from 'src/modules/categories/entities/category.entity';
 import { Inventory } from 'src/modules/inventory/entities/inventory.entity';
@@ -102,6 +103,9 @@ export class Book {
 
   @OneToOne(() => Inventory, (inventory) => inventory.book)
   inventory: Inventory;
+
+  @OneToMany(() => BookCopy, (copy) => copy.book)
+  bookCopies: BookCopy;
 
   // @ManyToOne(() => Shelf, (shelf) => shelf.books)
   // @JoinColumn({ name: 'shelfId' })

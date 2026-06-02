@@ -1,19 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-// import { Book } from 'src/modules/books/entities/book.entity';
-// import { Borrowing } from 'src/modules/borrowings/entities/borrowing.entity';
-// import { Shelf } from 'src/modules/shelves/entities/shelf.entity';
+import { Book } from 'src/modules/books/entities/book.entity';
+import { Shelf } from 'src/modules/shelves/entities/shelf.entity';
 
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  // JoinColumn,
-  // ManyToOne,
-  // OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   Index,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 export enum BookCopyStatus {
@@ -97,30 +95,30 @@ export class BookCopy {
   })
   purchasePrice?: number;
 
-  //   // Book Relation
-  //   @ApiProperty()
-  //   @Column('uuid')
-  //   bookId: string;
+  // Book Relation
+  @ApiProperty()
+  @Column('uuid')
+  bookId: string;
 
-  //   @ManyToOne(() => Book, (book) => book.copies, {
-  //     onDelete: 'CASCADE',
-  //   })
-  //   @JoinColumn({ name: 'bookId' })
-  //   book: Book;
+  @ManyToOne(() => Book, (book) => book.bookCopies, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'bookId' })
+  book: Book;
 
-  //   // Shelf Relation
-  //   @ApiPropertyOptional()
-  //   @Column('uuid', {
-  //     nullable: true,
-  //   })
-  //   shelfId?: string;
+  // Shelf Relation
+  @ApiPropertyOptional()
+  @Column('uuid', {
+    nullable: true,
+  })
+  shelfId?: string;
 
-  //   @ManyToOne(() => Shelf, (shelf) => shelf.bookCopies, {
-  //     nullable: true,
-  //     onDelete: 'SET NULL',
-  //   })
-  //   @JoinColumn({ name: 'shelfId' })
-  //   shelf: Shelf;
+  @ManyToOne(() => Shelf, (shelf) => shelf.bookCopies, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'shelfId' })
+  shelf: Shelf;
 
   //   // Borrow History
   //   @OneToMany(() => Borrowing, (borrowing) => borrowing.bookCopy)

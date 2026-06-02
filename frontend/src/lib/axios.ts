@@ -128,8 +128,30 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
+      let currentCsrf = useAuthStore.getState().csrfToken;
+      if (!currentCsrf) {
+        if (!csrfPromise) {
+          csrfPromise = authClient
+            .get("/auth/csrf")
+            .then((res) => {
+              const fetchedToken = res.data.csrfToken;
+              useAuthStore.getState().setCsrfToken(fetchedToken);
+              return fetchedToken;
+            })
+            .catch(() => "")
+            .finally(() => {
+              csrfPromise = null;
+            });
+        }
+        currentCsrf = await csrfPromise;
+      }
+
       // Use authClient for pure refresh call (no interceptors)
-      const refreshResponse = await authClient.post("/auth/refresh");
+      const refreshResponse = await authClient.post(
+        "/auth/refresh",
+        {},
+        { headers: currentCsrf ? { "x-csrf-token": currentCsrf } : undefined },
+      );
 
       const newToken =
         refreshResponse.data.result?.accessToken ||
