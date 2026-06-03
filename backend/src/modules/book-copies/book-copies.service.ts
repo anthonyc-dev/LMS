@@ -1,13 +1,10 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBookCopyDto } from './dto/create-book-copy.dto';
 import { UpdateBookCopyDto } from './dto/update-book-copy.dto';
 import { BookCopy, BookCopyStatus } from './entities/book-copy.entity';
+import * as bwipjs from 'bwip-js';
 
 @Injectable()
 export class BookCopiesService {
@@ -17,18 +14,26 @@ export class BookCopiesService {
   ) {}
 
   async create(createBookCopyDto: CreateBookCopyDto): Promise<BookCopy> {
-    const existingCopy = await this.bookCopyRepository.findOne({
-      where: { barcode: createBookCopyDto.barcode },
-    });
+    let barcode = '';
+    let isUnique = false;
 
-    if (existingCopy) {
-      throw new ConflictException(
-        `Book copy with barcode ${createBookCopyDto.barcode} already exists`,
-      );
+    while (!isUnique) {
+      barcode =
+        'BC' +
+        Math.floor(Math.random() * 10000000000)
+          .toString()
+          .padStart(10, '0');
+      const existing = await this.bookCopyRepository.findOne({
+        where: { barcode },
+      });
+      if (!existing) {
+        isUnique = true;
+      }
     }
 
     const bookCopy = this.bookCopyRepository.create({
       ...createBookCopyDto,
+      barcode,
       status: BookCopyStatus.AVAILABLE,
       acquiredAt: new Date(),
     });
@@ -58,21 +63,6 @@ export class BookCopiesService {
     updateBookCopyDto: UpdateBookCopyDto,
   ): Promise<BookCopy> {
     const bookCopy = await this.findOne(id);
-
-    if (
-      updateBookCopyDto.barcode &&
-      updateBookCopyDto.barcode !== bookCopy.barcode
-    ) {
-      const existingCopy = await this.bookCopyRepository.findOne({
-        where: { barcode: updateBookCopyDto.barcode },
-      });
-      if (existingCopy) {
-        throw new ConflictException(
-          `Book copy with barcode ${updateBookCopyDto.barcode} already exists`,
-        );
-      }
-    }
-
     Object.assign(bookCopy, updateBookCopyDto);
     return await this.bookCopyRepository.save(bookCopy);
   }
@@ -80,5 +70,18 @@ export class BookCopiesService {
   async remove(id: string): Promise<void> {
     const bookCopy = await this.findOne(id);
     await this.bookCopyRepository.softRemove(bookCopy);
+  }
+
+  async getBarcodeImage(id: string): Promise<Buffer> {
+    const bookCopy = await this.findOne(id);
+    const png = await bwipjs.toBuffer({
+      bcid: 'code128',
+      text: bookCopy.barcode,
+      scale: 3,
+      height: 10,
+      includetext: true,
+      textxalign: 'center',
+    });
+    return png;
   }
 }
