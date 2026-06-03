@@ -8,7 +8,9 @@ import {
   UseGuards,
   ParseUUIDPipe,
   Put,
+  Res,
 } from '@nestjs/common';
+import express from 'express';
 import { BookCopiesService } from './book-copies.service';
 import { CreateBookCopyDto } from './dto/create-book-copy.dto';
 import { UpdateBookCopyDto } from './dto/update-book-copy.dto';
@@ -65,5 +67,17 @@ export class BookCopiesController {
   @Delete(':id')
   remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.bookCopiesService.remove(id);
+  }
+
+  @Roles(Role.ADMIN, Role.STUDENT, Role.FACULTY)
+  @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
+  @Throttle({ default: { limit: 60, ttl: 60000 } })
+  @Get(':id/barcode')
+  async getBarcode(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: express.Response,
+  ) {
+    const buffer = await this.bookCopiesService.getBarcodeImage(id);
+    res.type('image/png').send(buffer);
   }
 }

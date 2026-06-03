@@ -1,4 +1,20 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateBookCopyDto } from './create-book-copy.dto';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { BookCondition, BookCopyStatus } from '../entities/book-copy.entity';
 
-export class UpdateBookCopyDto extends PartialType(CreateBookCopyDto) {}
+export class UpdateBookCopyDto {
+  @IsEnum(BookCondition)
+  @IsOptional()
+  condition?: BookCondition;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @IsString()
+  @IsOptional()
+  shelfId?: string;
+
+  @IsEnum(BookCopyStatus)
+  @IsOptional()
+  status?: BookCopyStatus;
+}

@@ -9,7 +9,6 @@ import {
   CalendarIcon,
   HomeIcon,
   Book,
-  Package,
   Tag,
   Layers,
   Users,
@@ -80,12 +79,12 @@ const menuItems = [
     path: "/admin/book-copies",
     roles: ["admin"],
   },
-  {
-    icon: Package,
-    label: "Inventory",
-    path: "/admin/inventory",
-    roles: ["admin"],
-  },
+  // {
+  //   icon: Package,
+  //   label: "Inventory",
+  //   path: "/admin/inventory",
+  //   roles: ["admin"],
+  // },
   {
     icon: ClipboardList,
     label: "Borrowing History",

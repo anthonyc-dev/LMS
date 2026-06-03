@@ -49,7 +49,6 @@ function Field({
 }
 
 const EMPTY_FORM = {
-  barcode: "",
   status: "AVAILABLE" as BookCopyStatus,
   condition: "GOOD" as BookCondition,
   notes: "",
@@ -77,7 +76,6 @@ export function BookCopyFormModal({
   const [form, setForm] = useState(() =>
     initial
       ? {
-          barcode: initial.barcode,
           status: initial.status,
           condition: initial.condition,
           notes: initial.notes || "",
@@ -99,7 +97,6 @@ export function BookCopyFormModal({
       setForm(
         initial
           ? {
-              barcode: initial.barcode,
               status: initial.status,
               condition: initial.condition,
               notes: initial.notes || "",
@@ -144,7 +141,6 @@ export function BookCopyFormModal({
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.barcode.trim()) e.barcode = "Barcode is required.";
     if (!form.bookId) e.bookId = "Book selection is required.";
     if (
       form.purchasePrice &&
@@ -158,7 +154,6 @@ export function BookCopyFormModal({
   const handleSave = () => {
     if (!validate()) return;
     onSave({
-      barcode: form.barcode.trim(),
       status: form.status,
       condition: form.condition,
       notes: form.notes.trim() || undefined,
@@ -190,9 +185,9 @@ export function BookCopyFormModal({
           </DialogHeader>
         </div>
 
-        <div className="max-h-[50vh] space-y-4 bg-white p-6 md:max-h-[60vh]">
+        <div className="max-h-[50vh] space-y-4 overflow-y-auto bg-white p-6 md:max-h-[60vh]">
           <Field id="book-id" label="Book *" err={errors.bookId}>
-            <Select value={form.bookId} onValueChange={(v) => set("bookId")(v)}>
+            <Select value={form.bookId} onValueChange={(v) => set("bookId")(v)} disabled={!!initial}>
               <SelectTrigger className="w-full rounded-xl border-slate-200">
                 <SelectValue placeholder="Select a book">
                   <span className="block truncate pr-4">
@@ -209,15 +204,16 @@ export function BookCopyFormModal({
             </Select>
           </Field>
 
-          <Field id="barcode" label="Barcode *" err={errors.barcode}>
-            <Input
-              id="barcode"
-              placeholder="e.g. BC-2026-0001"
-              className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-              value={form.barcode}
-              onChange={(e) => set("barcode")(e.target.value)}
-            />
-          </Field>
+          {initial && initial.barcode && (
+            <Field id="barcode" label="Barcode">
+              <Input
+                id="barcode"
+                className="cursor-not-allowed rounded-xl border-slate-200 bg-slate-50"
+                value={initial.barcode}
+                disabled
+              />
+            </Field>
+          )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field id="status" label="Status">
@@ -285,9 +281,10 @@ export function BookCopyFormModal({
               <Input
                 id="acquired-at"
                 type="date"
-                className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20 disabled:cursor-not-allowed disabled:bg-slate-50"
                 value={form.acquiredAt}
                 onChange={(e) => set("acquiredAt")(e.target.value)}
+                disabled={!!initial}
               />
             </Field>
 
@@ -301,9 +298,10 @@ export function BookCopyFormModal({
                 type="number"
                 step="0.01"
                 min="0"
-                className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20 disabled:cursor-not-allowed disabled:bg-slate-50"
                 value={form.purchasePrice}
                 onChange={(e) => set("purchasePrice")(e.target.value)}
+                disabled={!!initial}
               />
             </Field>
           </div>

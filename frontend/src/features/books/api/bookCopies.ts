@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { BookCopy } from "../types/bookCopy";
 
 export interface CreateBookCopyPayload {
-  barcode: string;
   status: string;
   condition: string;
   notes?: string;
@@ -71,5 +70,21 @@ export function useDeleteBookCopy() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["book-copies"] });
     },
+  });
+}
+
+async function fetchBookCopyBarcode(id: string): Promise<Blob> {
+  const response = await api.get(`/book-copies/${id}/barcode`, {
+    responseType: "blob",
+  });
+  return response.data;
+}
+
+export function useBookCopyBarcode(id?: string) {
+  return useQuery({
+    queryKey: ["book-copy-barcode", id],
+    queryFn: () => fetchBookCopyBarcode(id!),
+    enabled: !!id,
+    staleTime: Infinity,
   });
 }

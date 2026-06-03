@@ -11,14 +11,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreateBookCopyDto {
-  @ApiProperty({
-    example: '123456789012',
-    description: 'Barcode of the book copy',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  barcode: string;
+
 
   @ApiProperty({
     enum: BookCopyStatus,

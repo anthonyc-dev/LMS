@@ -1,5 +1,5 @@
 import { useState, useMemo, Fragment } from "react";
-import { Plus, Search, Edit3, Trash2, BookCopy as BookCopyIcon, Layers, MoreHorizontal, ChevronDown } from "lucide-react";
+import { Plus, Search, Edit3, Trash2, BookCopy as BookCopyIcon, Layers, MoreHorizontal, ChevronDown, Barcode } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
@@ -29,6 +29,7 @@ import {
 } from "@/features/books/api/bookCopies";
 import { BookCopyFormModal } from "@/features/books/components/BookCopyFormModal";
 import { DeleteBookCopyModal } from "@/features/books/components/DeleteBookCopyModal";
+import { ViewBarcodeModal } from "@/features/books/components/ViewBarcodeModal";
 import { type BookCopy, type BookCopyStatus } from "@/features/books/types/bookCopy";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
@@ -55,6 +56,8 @@ export function BookCopiesPage() {
   const [editTarget, setEditTarget] = useState<BookCopy | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<BookCopy | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [barcodeTarget, setBarcodeTarget] = useState<BookCopy | null>(null);
+  const [barcodeOpen, setBarcodeOpen] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -79,6 +82,10 @@ export function BookCopiesPage() {
   const openDelete = (bc: BookCopy) => {
     setDeleteTarget(bc);
     setDeleteOpen(true);
+  };
+  const openBarcode = (bc: BookCopy) => {
+    setBarcodeTarget(bc);
+    setBarcodeOpen(true);
   };
 
   const handleSave = async (data: any) => {
@@ -304,6 +311,9 @@ export function BookCopiesPage() {
                           <DropdownMenuItem onClick={() => openEdit(bc)} className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
                             <Edit3 className="size-3.5" /> Edit
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openBarcode(bc)} className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100">
+                            <Barcode className="size-3.5" /> View Barcode
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator className="my-1 bg-slate-100" />
                           <DropdownMenuItem onClick={() => openDelete(bc)} className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50">
                             <Trash2 className="size-3.5" /> Delete
@@ -367,6 +377,11 @@ export function BookCopiesPage() {
         isPending={deleteMutation.isPending}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleDelete}
+      />
+      <ViewBarcodeModal
+        open={barcodeOpen}
+        bookCopy={barcodeTarget}
+        onClose={() => setBarcodeOpen(false)}
       />
     </div>
   );
