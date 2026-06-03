@@ -1,15 +1,15 @@
 export enum DepartmentEnum {
-  BS_HOSPITALITY_MANAGEMENT = 'Bachelor of Science in Hospitality Management',
-  EECS = 'Electrical Engineering and Computer Science',
-  BS_CRIMINOLOGY = 'Bachelor of Science in Criminology',
-  BS_SOCIAL_WORK = 'Bachelor of Science in Social Work',
-  BS_ACCOUNTANCY = 'Bachelor of Science in Accountancy',
-  PARAMED = 'PARAMED',
-  BS_NURSING = 'Bachelor of Science in Nursing',
-  BS_BUSINESS_ADMINISTRATION = 'Bachelor of Science in Business Administration',
-  BA_POLITICAL_SCIENCE = 'Bachelor of Arts in Political Science',
-  CEDCAS = 'CEDCAS',
-  ALL_DEPARTMENTS = 'All Departments',
+  BS_HOSPITALITY_MANAGEMENT = 'Bachelor of Science in Hospitality Management (BSHM)',
+  EECS = 'Electrical Engineering and Computer Science (CECS)',
+  BS_CRIMINOLOGY = 'Bachelor of Science in Criminology (BSCR)',
+  BS_SOCIAL_WORK = 'Bachelor of Science in Social Work (BSW)',
+  BS_ACCOUNTANCY = 'Bachelor of Science in Accountancy (BSA)',
+  PARAMED = 'Paramedical (PARAMED)',
+  BS_NURSING = 'Bachelor of Science in Nursing (BSN)',
+  BS_BUSINESS_ADMINISTRATION = 'Bachelor of Science in Business Administration (BSBA)',
+  BA_POLITICAL_SCIENCE = 'Bachelor of Arts in Political Science (BAPS)',
+  CEDCAS = 'College of Education and College of Arts and Sciences (CEDCAS)',
+  TESDA = 'Tesda Diploma programs (TESDA)',
 }
 
 export enum YearLevelEnum {

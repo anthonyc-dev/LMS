@@ -140,12 +140,18 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | null> {
     this.logger.log(`Finding user by email: ${email}`);
-    return this.usersRepository.findOne({ where: { email } });
+    return this.usersRepository.findOne({
+      where: { email },
+      relations: ['borrowings'],
+    });
   }
 
   async findById(id: string): Promise<User | null> {
     this.logger.log(`Finding user by id: ${id}`);
-    return this.usersRepository.findOne({ where: { id } });
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: ['borrowings'],
+    });
   }
 
   async findAll(page: number = 1, limit: number = 10) {
@@ -154,6 +160,7 @@ export class UsersService {
       order: { createdAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
+      relations: ['borrowings'],
     });
 
     return {
