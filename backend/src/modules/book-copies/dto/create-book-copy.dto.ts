@@ -11,8 +11,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreateBookCopyDto {
-
-
   @ApiProperty({
     enum: BookCopyStatus,
     default: BookCopyStatus.AVAILABLE,
