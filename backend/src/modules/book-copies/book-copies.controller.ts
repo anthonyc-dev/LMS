@@ -9,10 +9,12 @@ import {
   ParseUUIDPipe,
   Put,
   Res,
+  Query,
 } from '@nestjs/common';
 import express from 'express';
 import { BookCopiesService } from './book-copies.service';
 import { CreateBookCopyDto } from './dto/create-book-copy.dto';
+import { BulkCreateBookCopyDto } from './dto/bulk-create-book-copy.dto';
 import { UpdateBookCopyDto } from './dto/update-book-copy.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -36,10 +38,26 @@ export class BookCopiesController {
 
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('bulk')
+  bulkCreate(@Body() bulkDto: BulkCreateBookCopyDto) {
+    return this.bookCopiesService.bulkCreate(bulkDto);
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
   @Throttle({ default: { limit: 60, ttl: 60000 } })
   @Get()
-  findAll() {
-    return this.bookCopiesService.findAll();
+  findAll(@Query('search') search?: string) {
+    return this.bookCopiesService.findAll(search);
+  }
+
+  @Roles(Role.ADMIN, Role.STUDENT, Role.FACULTY)
+  @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
+  @Throttle({ default: { limit: 60, ttl: 60000 } })
+  @Get('barcode/:barcode')
+  findByBarcode(@Param('barcode') barcode: string) {
+    return this.bookCopiesService.findByBarcode(barcode);
   }
 
   @Roles(Role.ADMIN, Role.STUDENT, Role.FACULTY)

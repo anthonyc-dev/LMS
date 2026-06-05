@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBookCopyDto } from './dto/create-book-copy.dto';
+import { BulkCreateBookCopyDto } from './dto/bulk-create-book-copy.dto';
 import { UpdateBookCopyDto } from './dto/update-book-copy.dto';
 import { BookCopy, BookCopyStatus } from './entities/book-copy.entity';
 import * as bwipjs from 'bwip-js';
@@ -34,17 +35,48 @@ export class BookCopiesService {
     const bookCopy = this.bookCopyRepository.create({
       ...createBookCopyDto,
       barcode,
-      status: BookCopyStatus.AVAILABLE,
       acquiredAt: new Date(),
     });
-    return await this.bookCopyRepository.save(bookCopy);
+    const saved = await this.bookCopyRepository.save(bookCopy);
+    return await this.findOne(saved.id);
   }
 
-  async findAll(): Promise<BookCopy[]> {
-    const bookCopies = await this.bookCopyRepository.find({
+  async bulkCreate(bulkDto: BulkCreateBookCopyDto): Promise<BookCopy[]> {
+    const { count, ...createDto } = bulkDto;
+    const copies: BookCopy[] = [];
+    
+    // Create multiple copies iteratively
+    for (let i = 0; i < count; i++) {
+      const copy = await this.create(createDto);
+      copies.push(copy);
+    }
+    
+    return copies;
+  }
+
+  async findAll(search?: string): Promise<BookCopy[]> {
+    const query = this.bookCopyRepository
+      .createQueryBuilder('bookCopy')
+      .leftJoinAndSelect('bookCopy.book', 'book')
+      .leftJoinAndSelect('bookCopy.shelf', 'shelf');
+
+    if (search) {
+      query.where('bookCopy.barcode ILIKE :search', { search: `%${search}%` })
+        .orWhere('book.title ILIKE :search', { search: `%${search}%` });
+    }
+
+    return await query.getMany();
+  }
+
+  async findByBarcode(barcode: string): Promise<BookCopy> {
+    const bookCopy = await this.bookCopyRepository.findOne({
+      where: { barcode },
       relations: { book: true, shelf: true },
     });
-    return bookCopies;
+    if (!bookCopy) {
+      throw new NotFoundException(`Book copy with barcode ${barcode} not found`);
+    }
+    return bookCopy;
   }
 
   async findOne(id: string): Promise<BookCopy> {

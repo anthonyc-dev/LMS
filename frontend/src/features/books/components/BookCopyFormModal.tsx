@@ -1,5 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
-import { BookCopy as BookCopyIcon, Loader2 } from "lucide-react";
+import {
+  BookCopy as BookCopyIcon,
+  Loader2,
+  CheckIcon,
+  ChevronsUpDownIcon,
+} from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import {
@@ -17,7 +22,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
 import { Label } from "@/shared/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/shared/components/ui/command";
+import { cn } from "@/shared/lib/utils";
 import {
   type BookCopy,
   type BookCopyStatus,
@@ -61,6 +81,7 @@ const EMPTY_FORM = {
 export interface BookCopyFormProps {
   open: boolean;
   initial: BookCopy | null;
+  defaultBookId?: string;
   isPending?: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
@@ -69,6 +90,7 @@ export interface BookCopyFormProps {
 export function BookCopyFormModal({
   open,
   initial,
+  defaultBookId,
   isPending,
   onClose,
   onSave,
@@ -92,6 +114,10 @@ export function BookCopyFormModal({
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const [mode, setMode] = useState<"single" | "multiple">("single");
+  const [count, setCount] = useState("2");
+  const [bookPopoverOpen, setBookPopoverOpen] = useState(false);
+
   useEffect(() => {
     if (open) {
       setForm(
@@ -109,11 +135,13 @@ export function BookCopyFormModal({
               bookId: initial.bookId,
               shelfId: initial.shelfId || "",
             }
-          : { ...EMPTY_FORM },
+          : { ...EMPTY_FORM, bookId: defaultBookId || "" },
       );
       setErrors({});
+      setMode("single");
+      setCount("2");
     }
-  }, [open, initial]);
+  }, [open, initial, defaultBookId]);
 
   const { data: paginatedBooks } = useBooks({ limit: 1000 });
   const books = paginatedBooks?.data || [];
@@ -122,11 +150,24 @@ export function BookCopyFormModal({
 
   const bookItems = useMemo(() => {
     return books.map((b) => (
-      <SelectItem key={b.id} value={b.id}>
+      <CommandItem
+        key={b.id}
+        value={`${b.title} ${b.isbn || ""} ${b.id}`}
+        onSelect={() => {
+          set("bookId")(b.id);
+          setBookPopoverOpen(false);
+        }}
+      >
+        <CheckIcon
+          className={cn(
+            "mr-2 h-4 w-4",
+            form.bookId === b.id ? "opacity-100" : "opacity-0",
+          )}
+        />
         {b.title} {b.isbn ? `(${b.isbn})` : ""}
-      </SelectItem>
+      </CommandItem>
     ));
-  }, [books]);
+  }, [books, form.bookId]);
 
   const shelfItems = useMemo(() => {
     return shelves.map((s) => (
@@ -147,6 +188,14 @@ export function BookCopyFormModal({
       (isNaN(+form.purchasePrice) || +form.purchasePrice < 0)
     )
       e.purchasePrice = "Enter a valid purchase price.";
+
+    if (!initial && mode === "multiple") {
+      const parsedCount = parseInt(count, 10);
+      if (isNaN(parsedCount) || parsedCount < 2) {
+        e.count = "Enter a valid count (min 2).";
+      }
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -163,6 +212,9 @@ export function BookCopyFormModal({
       purchasePrice: form.purchasePrice ? +form.purchasePrice : undefined,
       bookId: form.bookId,
       shelfId: form.shelfId || undefined,
+      ...(mode === "multiple" && !initial
+        ? { count: parseInt(count, 10) }
+        : {}),
     });
   };
 
@@ -186,33 +238,136 @@ export function BookCopyFormModal({
         </div>
 
         <div className="max-h-[50vh] space-y-4 overflow-y-auto bg-white p-6 md:max-h-[60vh]">
-          <Field id="book-id" label="Book *" err={errors.bookId}>
-            <Select value={form.bookId} onValueChange={(v) => set("bookId")(v)} disabled={!!initial}>
-              <SelectTrigger className="w-full rounded-xl border-slate-200">
-                <SelectValue placeholder="Select a book">
-                  <span className="block truncate pr-4">
+          {initial && (
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+              <h4 className="mb-3 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                Copy Details
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2 sm:col-span-1">
+                  <div className="text-xs font-medium text-slate-500">Book</div>
+                  <div className="mt-1 text-sm font-bold text-slate-900">
                     {books.find((b) => b.id === form.bookId)?.title ||
-                      (initial && initial.bookId === form.bookId
-                        ? initial.book?.title
-                        : "Select a book")}
-                  </span>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                {bookItems}
-              </SelectContent>
-            </Select>
-          </Field>
+                      initial.book?.title ||
+                      "Unknown Book"}
+                  </div>
+                </div>
+                {initial.barcode && (
+                  <div className="col-span-2 sm:col-span-1">
+                    <div className="text-xs font-medium text-slate-500">
+                      Barcode
+                    </div>
+                    <div className="mt-1 text-sm font-bold text-slate-900">
+                      {initial.barcode}
+                    </div>
+                  </div>
+                )}
+                <div className="col-span-2 sm:col-span-1">
+                  <div className="text-xs font-medium text-slate-500">
+                    Acquired Date
+                  </div>
+                  <div className="mt-1 text-sm font-bold text-slate-900">
+                    {form.acquiredAt || "N/A"}
+                  </div>
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <div className="text-xs font-medium text-slate-500">
+                    Purchase Price
+                  </div>
+                  <div className="mt-1 text-sm font-bold text-slate-900">
+                    {form.purchasePrice
+                      ? `$${Number(form.purchasePrice).toFixed(2)}`
+                      : "N/A"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-          {initial && initial.barcode && (
-            <Field id="barcode" label="Barcode">
-              <Input
-                id="barcode"
-                className="cursor-not-allowed rounded-xl border-slate-200 bg-slate-50"
-                value={initial.barcode}
-                disabled
-              />
+          {!initial && (
+            <Field id="book-id" label="Book *" err={errors.bookId}>
+              <Popover open={bookPopoverOpen} onOpenChange={setBookPopoverOpen}>
+                <PopoverTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={bookPopoverOpen}
+                      className="w-full justify-between rounded-xl border-slate-200 bg-white font-normal"
+                    />
+                  }
+                >
+                  <span className="truncate pr-4 text-slate-700">
+                    {form.bookId
+                      ? books.find((b) => b.id === form.bookId)?.title ||
+                        "Unknown Book"
+                      : "Search and select a book..."}
+                  </span>
+                  <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 text-slate-500 opacity-50" />
+                </PopoverTrigger>
+                <PopoverContent className="w-(--anchor-width) min-w-[200px] rounded-xl border-slate-100 p-0 shadow-xl">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search books by title or ISBN..."
+                      className="h-9 outline-none"
+                    />
+                    <CommandList>
+                      <CommandEmpty>No books found.</CommandEmpty>
+                      <CommandGroup>{bookItems}</CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </Field>
+          )}
+
+          {!initial && (
+            <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field id="mode" label="Mode">
+                <RadioGroup
+                  value={mode}
+                  onValueChange={(v) => setMode(v as "single" | "multiple")}
+                  className="flex h-10 items-center gap-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="single" id="mode-single" />
+                    <Label
+                      htmlFor="mode-single"
+                      className="cursor-pointer font-medium text-slate-700"
+                    >
+                      Single Copy
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="multiple" id="mode-multiple" />
+                    <Label
+                      htmlFor="mode-multiple"
+                      className="cursor-pointer font-medium text-slate-700"
+                    >
+                      Multiple Copies
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </Field>
+
+              {mode === "multiple" ? (
+                <Field id="count" label="Number of Copies" err={errors.count}>
+                  <Input
+                    id="count"
+                    type="number"
+                    min="2"
+                    className="h-10 rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                    value={count}
+                    onChange={(e) => {
+                      setCount(e.target.value);
+                      setErrors((er) => ({ ...er, count: "" }));
+                    }}
+                  />
+                </Field>
+              ) : (
+                <div className="hidden sm:block"></div>
+              )}
+            </div>
           )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -276,35 +431,35 @@ export function BookCopyFormModal({
             </Select>
           </Field>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field id="acquired-at" label="Acquired Date">
-              <Input
-                id="acquired-at"
-                type="date"
-                className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20 disabled:cursor-not-allowed disabled:bg-slate-50"
-                value={form.acquiredAt}
-                onChange={(e) => set("acquiredAt")(e.target.value)}
-                disabled={!!initial}
-              />
-            </Field>
+          {!initial && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field id="acquired-at" label="Acquired Date">
+                <Input
+                  id="acquired-at"
+                  type="date"
+                  className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  value={form.acquiredAt}
+                  onChange={(e) => set("acquiredAt")(e.target.value)}
+                />
+              </Field>
 
-            <Field
-              id="purchase-price"
-              label="Purchase Price"
-              err={errors.purchasePrice}
-            >
-              <Input
+              <Field
                 id="purchase-price"
-                type="number"
-                step="0.01"
-                min="0"
-                className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20 disabled:cursor-not-allowed disabled:bg-slate-50"
-                value={form.purchasePrice}
-                onChange={(e) => set("purchasePrice")(e.target.value)}
-                disabled={!!initial}
-              />
-            </Field>
-          </div>
+                label="Purchase Price"
+                err={errors.purchasePrice}
+              >
+                <Input
+                  id="purchase-price"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  value={form.purchasePrice}
+                  onChange={(e) => set("purchasePrice")(e.target.value)}
+                />
+              </Field>
+            </div>
+          )}
 
           <Field id="notes" label="Notes">
             <Input

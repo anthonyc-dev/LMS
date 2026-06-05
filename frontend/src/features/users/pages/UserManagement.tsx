@@ -848,7 +848,7 @@ export function UserManagement() {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {totalPages > 0 && (
           <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:flex-row">
             <p className="order-2 text-xs font-medium text-slate-500 sm:order-1">
               Showing{" "}

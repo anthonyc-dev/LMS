@@ -16,8 +16,8 @@ export interface UpdateBookCopyPayload extends Partial<CreateBookCopyPayload> {
   id: string;
 }
 
-async function fetchBookCopies(): Promise<BookCopy[]> {
-  const response = await api.get("/book-copies");
+async function fetchBookCopies(search?: string): Promise<BookCopy[]> {
+  const response = await api.get("/book-copies", { params: { search } });
   return response.data;
 }
 
@@ -36,10 +36,31 @@ async function deleteBookCopy(id: string): Promise<void> {
   await api.delete(`/book-copies/${id}`);
 }
 
-export function useBookCopies() {
+export function useBookCopies(search?: string) {
   return useQuery({
-    queryKey: ["book-copies"],
-    queryFn: fetchBookCopies,
+    queryKey: ["book-copies", search],
+    queryFn: () => fetchBookCopies(search),
+  });
+}
+
+export interface BulkCreateBookCopyPayload extends CreateBookCopyPayload {
+  count: number;
+}
+
+async function bulkCreateBookCopy(
+  data: BulkCreateBookCopyPayload,
+): Promise<BookCopy[]> {
+  const response = await api.post("/book-copies/bulk", data);
+  return response.data;
+}
+
+export function useBulkCreateBookCopy() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: bulkCreateBookCopy,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["book-copies"] });
+    },
   });
 }
 
