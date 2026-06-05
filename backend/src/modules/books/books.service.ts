@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
@@ -19,6 +24,16 @@ export class BooksService {
   ) {}
   async create(createBookDto: CreateBookDto, file?: Express.Multer.File) {
     this.logger.log('Creating book', createBookDto);
+
+    const existingBook = await this.bookRepository.findOne({
+      where: { isbn: createBookDto.isbn },
+    });
+
+    if (existingBook) {
+      throw new ConflictException(
+        `Book with ISBN ${createBookDto.isbn} already exists`,
+      );
+    }
 
     try {
       // Upload cover image if provided

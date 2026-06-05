@@ -13,6 +13,8 @@ import {
   ImageIcon,
   X,
   Type,
+  CheckIcon,
+  ChevronsUpDownIcon,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -26,11 +28,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/shared/components/ui/command";
+import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { useCreateBook } from "@/features/books/hooks/useBooks";
 import { useCategories } from "@/features/books/api/categories";
+import {
+  useCreateBookCopy,
+  useBulkCreateBookCopy,
+} from "@/features/books/api/bookCopies";
+import { BookCopyFormModal } from "@/features/books/components/BookCopyFormModal";
+import { ViewBarcodeModal } from "@/features/books/components/ViewBarcodeModal";
+import { ViewMultipleBarcodesModal } from "@/features/books/components/ViewMultipleBarcodesModal";
+import type { BookCopy } from "@/features/books/types/bookCopy";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/shared/components/ui/dialog";
 
 const LANGUAGES = [
   "English",
@@ -118,7 +150,21 @@ export function AddBookPage() {
   usePageTitle("Add Metadata");
   const navigate = useNavigate();
   const createBookMutation = useCreateBook();
-  const { data: categories, isLoading: isLoadingCategories } = useCategories();
+  const createCopyMutation = useCreateBookCopy();
+  const bulkCreateCopyMutation = useBulkCreateBookCopy();
+  const { data: categories = [], isLoading: isLoadingCategories } =
+    useCategories();
+
+  const [createdBookId, setCreatedBookId] = useState<string | null>(null);
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [createdBookCopy, setCreatedBookCopy] = useState<BookCopy | null>(null);
+  const [showBarcodeModal, setShowBarcodeModal] = useState(false);
+  const [multipleBarcodesTarget, setMultipleBarcodesTarget] = useState<
+    BookCopy[]
+  >([]);
+  const [multipleBarcodesOpen, setMultipleBarcodesOpen] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
 
   const [step, setStep] = useState(1);
 
@@ -182,12 +228,16 @@ export function AddBookPage() {
         coverImage: coverFile || undefined,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           toast.success("Book metadata added to catalog successfully!");
-          navigate("/admin/books");
+          setCreatedBookId(data.id);
+          setShowPromptModal(true);
         },
-        onError: () => {
-          toast.error("Failed to add book metadata. Please try again.");
+        onError: (err: any) => {
+          const errMsg =
+            err?.response?.data?.message ||
+            "Failed to add book metadata. Please try again.";
+          toast.error(errMsg);
         },
       },
     );
@@ -382,37 +432,69 @@ export function AddBookPage() {
                   icon={Tag}
                   error={errors.categoryId}
                 >
-                  <Select
-                    value={formData.categoryId}
-                    onValueChange={(v) => {
-                      set("categoryId")(v);
-                      setErrors((er) => ({ ...er, categoryId: "" }));
-                    }}
+                  <Popover
+                    open={categoryPopoverOpen}
+                    onOpenChange={setCategoryPopoverOpen}
                   >
-                    <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 focus:ring-indigo-500/20">
-                      <SelectValue
-                        placeholder={
-                          isLoadingCategories
-                            ? "Loading categories..."
-                            : "Select a category"
-                        }
-                      >
-                        {categories?.find((c) => c.id === formData.categoryId)
-                          ?.name || "Select a category"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                      {categories?.map((cat) => (
-                        <SelectItem
-                          key={cat.id}
-                          value={cat.id}
-                          className="py-2 text-sm"
-                        >
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={categoryPopoverOpen}
+                          className="h-10 w-full justify-between rounded-xl border-slate-200 bg-white px-3 font-normal"
+                        />
+                      }
+                    >
+                      <span className="truncate pr-4 text-slate-700">
+                        {isLoadingCategories
+                          ? "Loading categories..."
+                          : formData.categoryId
+                            ? categories?.find(
+                                (c) => c.id === formData.categoryId,
+                              )?.name || "Unknown Category"
+                            : "Search and select a category..."}
+                      </span>
+                      <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 text-slate-500 opacity-50" />
+                    </PopoverTrigger>
+                    <PopoverContent className="w-(--anchor-width) min-w-[200px] rounded-xl border-slate-100 p-0 shadow-xl">
+                      <Command>
+                        <CommandInput
+                          placeholder="Search categories..."
+                          className="h-9 outline-none"
+                        />
+                        <CommandList>
+                          <CommandEmpty>No categories found.</CommandEmpty>
+                          <CommandGroup>
+                            {categories?.map((cat) => (
+                              <CommandItem
+                                key={cat.id}
+                                value={`${cat.name} ${cat.id}`}
+                                onSelect={() => {
+                                  set("categoryId")(cat.id);
+                                  setErrors((er) => ({
+                                    ...er,
+                                    categoryId: "",
+                                  }));
+                                  setCategoryPopoverOpen(false);
+                                }}
+                              >
+                                <CheckIcon
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formData.categoryId === cat.id
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {cat.name}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </Field>
               </div>
             </div>
@@ -674,6 +756,111 @@ export function AddBookPage() {
           </div>
         </div>
       )}
+
+      {/* ── Prompt Modal ── */}
+      <Dialog
+        open={showPromptModal}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowPromptModal(false);
+            navigate("/admin/books");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Would you like to add copies now?</DialogTitle>
+            <DialogDescription>
+              You have successfully registered the book metadata. You can add
+              physical copies now, or do it later.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPromptModal(false);
+                navigate("/admin/books");
+              }}
+            >
+              Later
+            </Button>
+            <Button
+              onClick={() => {
+                setShowPromptModal(false);
+                setShowCopyModal(true);
+              }}
+              className="bg-slate-900 text-white hover:bg-slate-800"
+            >
+              Add Copies
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Add Copies Modal ── */}
+      {showCopyModal && createdBookId && (
+        <BookCopyFormModal
+          open={showCopyModal}
+          initial={null}
+          defaultBookId={createdBookId}
+          isPending={
+            createCopyMutation.isPending || bulkCreateCopyMutation.isPending
+          }
+          onClose={() => {
+            setShowCopyModal(false);
+            navigate("/admin/books");
+          }}
+          onSave={(copyData) => {
+            if (copyData.count && copyData.count > 1) {
+              bulkCreateCopyMutation.mutate(copyData, {
+                onSuccess: (newCopies) => {
+                  toast.success(
+                    `${copyData.count} book copies added successfully!`,
+                  );
+                  setShowCopyModal(false);
+                  setMultipleBarcodesTarget(newCopies);
+                  setMultipleBarcodesOpen(true);
+                },
+                onError: () => {
+                  toast.error("Failed to add book copies.");
+                },
+              });
+            } else {
+              createCopyMutation.mutate(copyData, {
+                onSuccess: (data) => {
+                  toast.success("Book copy added successfully!");
+                  setShowCopyModal(false);
+                  setCreatedBookCopy(data);
+                  setShowBarcodeModal(true);
+                },
+                onError: () => {
+                  toast.error("Failed to add book copy.");
+                },
+              });
+            }
+          }}
+        />
+      )}
+
+      {/* ── Barcode Modal ── */}
+      <ViewBarcodeModal
+        open={showBarcodeModal}
+        bookCopy={createdBookCopy}
+        onClose={() => {
+          setShowBarcodeModal(false);
+          navigate("/admin/books");
+        }}
+      />
+
+      <ViewMultipleBarcodesModal
+        open={multipleBarcodesOpen}
+        bookCopies={multipleBarcodesTarget}
+        onClose={() => {
+          setMultipleBarcodesOpen(false);
+          navigate("/admin/books");
+        }}
+      />
     </div>
   );
 }

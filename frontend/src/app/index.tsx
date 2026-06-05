@@ -9,19 +9,29 @@ import LoadingSpinner from "@/shared/components/GlobalLoading";
 
 // Lazy load all pages
 const LoginPage = lazy(() =>
-  import("@/features/auth/pages/LoginPage").then((m) => ({ default: m.LoginPage })),
+  import("@/features/auth/pages/LoginPage").then((m) => ({
+    default: m.LoginPage,
+  })),
 );
 const RegisterPage = lazy(() =>
-  import("@/features/auth/pages/RegisterPage").then((m) => ({ default: m.RegisterPage })),
+  import("@/features/auth/pages/RegisterPage").then((m) => ({
+    default: m.RegisterPage,
+  })),
 );
 const ForgotPassword = lazy(() =>
-  import("@/features/auth/pages/ForgotPassword").then((m) => ({ default: m.ForgotPassword })),
+  import("@/features/auth/pages/ForgotPassword").then((m) => ({
+    default: m.ForgotPassword,
+  })),
 );
 const ResetPassword = lazy(() =>
-  import("@/features/auth/pages/ResetPassword").then((m) => ({ default: m.ResetPassword })),
+  import("@/features/auth/pages/ResetPassword").then((m) => ({
+    default: m.ResetPassword,
+  })),
 );
 const NotFoundPage = lazy(() =>
-  import("@/shared/components/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
+  import("@/shared/components/NotFoundPage").then((m) => ({
+    default: m.NotFoundPage,
+  })),
 );
 const UnauthorizedPage = lazy(() =>
   import("@/features/auth/pages/UnauthorizedPage").then((m) => ({
@@ -37,7 +47,9 @@ const BrowseBooksPage = lazy(() =>
   })),
 );
 const DashboardPage = lazy(() =>
-  import("@/features/books/pages/DashboardPage").then((m) => ({ default: m.DashboardPage })),
+  import("@/features/books/pages/DashboardPage").then((m) => ({
+    default: m.DashboardPage,
+  })),
 );
 const BorrowBooksPage = lazy(() =>
   import("@/features/books/pages/BorrowBooksPage").then((m) => ({
@@ -72,10 +84,14 @@ const SchedulePage = lazy(() =>
 
 // Admin pages
 const AdminBooksPage = lazy(() =>
-  import("@/features/books/pages/BooksPage").then((m) => ({ default: m.BooksPage })),
+  import("@/features/books/pages/BooksPage").then((m) => ({
+    default: m.BooksPage,
+  })),
 );
 const AdminAddBookPage = lazy(() =>
-  import("@/features/books/pages/AddBookPage").then((m) => ({ default: m.AddBookPage })),
+  import("@/features/books/pages/AddBookPage").then((m) => ({
+    default: m.AddBookPage,
+  })),
 );
 const AdminInventoryPage = lazy(() =>
   import("@/features/books/pages/InventoryPage").then((m) => ({
@@ -88,10 +104,14 @@ const AdminCategoryPage = lazy(() =>
   })),
 );
 const AdminShelfPage = lazy(() =>
-  import("@/features/books/pages/ShelfPage").then((m) => ({ default: m.ShelfPage })),
+  import("@/features/books/pages/ShelfPage").then((m) => ({
+    default: m.ShelfPage,
+  })),
 );
 const AdminBookCopiesPage = lazy(() =>
-  import("@/features/books/pages/BookCopiesPage").then((m) => ({ default: m.BookCopiesPage })),
+  import("@/features/books/pages/BookCopiesPage").then((m) => ({
+    default: m.BookCopiesPage,
+  })),
 );
 const AdminUserManagementPage = lazy(() =>
   import("@/features/users/pages/UserManagement").then((m) => ({
