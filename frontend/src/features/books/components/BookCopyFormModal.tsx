@@ -236,7 +236,6 @@ export function BookCopyFormModal({
             </DialogDescription>
           </DialogHeader>
         </div>
-
         <div className="max-h-[50vh] space-y-4 overflow-y-auto bg-white p-6 md:max-h-[60vh]">
           {initial && (
             <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
@@ -471,7 +470,7 @@ export function BookCopyFormModal({
             />
           </Field>
         </div>
-
+        {/* //modal */}
         <DialogFooter className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50 p-4 sm:flex-row">
           <Button
             variant="outline"
