@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateBookCopyDto } from './dto/create-book-copy.dto';
 import { BulkCreateBookCopyDto } from './dto/bulk-create-book-copy.dto';
 import { UpdateBookCopyDto } from './dto/update-book-copy.dto';
-import { BookCopy, BookCopyStatus } from './entities/book-copy.entity';
+import { BookCopy } from './entities/book-copy.entity';
 import * as bwipjs from 'bwip-js';
 
 @Injectable()
@@ -44,13 +44,13 @@ export class BookCopiesService {
   async bulkCreate(bulkDto: BulkCreateBookCopyDto): Promise<BookCopy[]> {
     const { count, ...createDto } = bulkDto;
     const copies: BookCopy[] = [];
-    
+
     // Create multiple copies iteratively
     for (let i = 0; i < count; i++) {
       const copy = await this.create(createDto);
       copies.push(copy);
     }
-    
+
     return copies;
   }
 
@@ -61,7 +61,8 @@ export class BookCopiesService {
       .leftJoinAndSelect('bookCopy.shelf', 'shelf');
 
     if (search) {
-      query.where('bookCopy.barcode ILIKE :search', { search: `%${search}%` })
+      query
+        .where('bookCopy.barcode ILIKE :search', { search: `%${search}%` })
         .orWhere('book.title ILIKE :search', { search: `%${search}%` });
     }
 
@@ -74,7 +75,9 @@ export class BookCopiesService {
       relations: { book: true, shelf: true },
     });
     if (!bookCopy) {
-      throw new NotFoundException(`Book copy with barcode ${barcode} not found`);
+      throw new NotFoundException(
+        `Book copy with barcode ${barcode} not found`,
+      );
     }
     return bookCopy;
   }
