@@ -18,7 +18,6 @@ import {
 } from "@/shared/components/ui/sidebar";
 import {
   SettingsIcon,
-  UserIcon,
   LogOutIcon,
   ChevronUpIcon,
   ChevronRightIcon,
@@ -39,6 +38,11 @@ import {
 import { useAuthStore } from "@/app/store/authStore";
 import api from "@/shared/lib/axios";
 import { toast } from "sonner";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 
 type MenuItem = {
   icon: LucideIcon;
@@ -289,9 +293,14 @@ export function SidebarContentInner({
                         <div
                           className={`flex shrink-0 items-center justify-center rounded-full bg-linear-to-tr from-blue-600 to-indigo-500 shadow-lg transition-all duration-300 ${isCollapsed ? "size-8" : "size-9"}`}
                         >
-                          <UserIcon
-                            className={`${isCollapsed ? "size-4" : "size-5"} text-white`}
-                          />
+                          <Avatar className="shadow ring-2 ring-slate-100">
+                            <AvatarImage src={user?.avatarUrl} />
+                            <AvatarFallback
+                              className={`${isCollapsed ? "size-4" : "size-5"} bg-amber-100 text-lg font-bold text-amber-700`}
+                            >
+                              {user?.fullName?.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
                         </div>
                         {!isCollapsed && (
                           <div className="flex min-w-0 flex-1 flex-col text-left">

@@ -41,4 +41,8 @@ export class UserResponseDto {
   @ApiProperty()
   @Expose()
   updatedAt: string;
+
+  @ApiProperty({ required: false, nullable: true })
+  @Expose()
+  avatarUrl: string;
 }

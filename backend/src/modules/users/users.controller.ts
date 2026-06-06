@@ -11,11 +11,15 @@ import {
   DefaultValuePipe,
   ParseIntPipe,
   Ip,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Throttle } from '@nestjs/throttler';
@@ -110,6 +114,28 @@ export class UsersController {
     @Body() userData: UpdateUserDto,
   ): Promise<UserResponseDto> {
     const user = await this.usersService.update(id, userData);
+
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  // UPDATE PROFILE
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
+  @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)
+  @HttpCode(HttpStatus.OK)
+  @Put('profile/:id')
+  @UseInterceptors(FileInterceptor('avatarUrl'))
+  async updateProfile(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() updateProfileDto: UpdateProfileDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ): Promise<UserResponseDto> {
+    const user = await this.usersService.updateProfile(
+      id,
+      updateProfileDto,
+      file,
+    );
 
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,

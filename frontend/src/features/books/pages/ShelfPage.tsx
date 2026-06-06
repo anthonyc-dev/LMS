@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Form,
 } from "lucide-react";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Button } from "@/shared/components/ui/button";
@@ -59,7 +60,11 @@ import {
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { ShelfFormModal } from "@/features/books/components/ShelfFormModal";
 import { DeleteShelfModal } from "@/features/books/components/DeleteShelfModal";
-import { type Shelf, type ShelfStatus, FLOORS } from "@/features/books/types/shelf";
+import {
+  type Shelf,
+  type ShelfStatus,
+  FLOORS,
+} from "@/features/books/types/shelf";
 
 // ---------------------------------------------------------------------------
 // Types & seed data
@@ -116,7 +121,7 @@ export function ShelfPage() {
     return apiShelves.map((s) => ({
       id: s.id,
       code: s.code,
-      label: s.name,
+      name: s.name,
       floor: s.floor || "Ground Floor",
       section: s.section || "Section A",
       category: "General",
@@ -146,7 +151,7 @@ export function ShelfPage() {
       shelves.filter((s) => {
         const matchSearch =
           s.code.toLowerCase().includes(search.toLowerCase()) ||
-          s.label.toLowerCase().includes(search.toLowerCase()) ||
+          s.name.toLowerCase().includes(search.toLowerCase()) ||
           s.category.toLowerCase().includes(search.toLowerCase());
         const matchFloor = floorFilter === "all" || s.floor === floorFilter;
         const matchStatus = statusFilter === "all" || s.status === statusFilter;
@@ -189,7 +194,7 @@ export function ShelfPage() {
     try {
       const payload = {
         code: data.code,
-        name: data.label,
+        name: data.name,
         description: data.notes,
         floor: data.floor,
         section: data.section,
@@ -559,7 +564,7 @@ export function ShelfPage() {
                               {isMobile && (
                                 <div className="mt-2">
                                   <p className="text-sm font-bold text-slate-800">
-                                    {shelf.label}
+                                    {shelf.name}
                                   </p>
                                   {shelf.notes && (
                                     <p className="max-w-[160px] truncate text-[11px] font-medium text-amber-600">
@@ -580,11 +585,12 @@ export function ShelfPage() {
                           <>
                             <TableCell>
                               <p className="text-sm font-bold text-slate-800">
-                                {shelf.label}
+                                {shelf.name}
                               </p>
                               {shelf.notes && (
-                                <p className="max-w-[160px] truncate text-[11px] font-medium text-amber-600">
-                                  ⚠ {shelf.notes}
+                                <p className="max-w-[160px] truncate text-[11px] font-medium text-emerald-600">
+                                  <Form className="mr-1 inline size-3" />{" "}
+                                  {shelf.notes}
                                 </p>
                               )}
                             </TableCell>
@@ -812,7 +818,7 @@ export function ShelfPage() {
 
                   <div>
                     <p className="text-sm font-bold text-slate-800">
-                      {shelf.label}
+                      {shelf.name}
                     </p>
                     <p className="text-[11px] font-medium text-slate-400">
                       {shelf.floor} · {shelf.section}
@@ -828,7 +834,8 @@ export function ShelfPage() {
 
                   {shelf.notes && (
                     <p className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-1 text-[10px] font-medium text-amber-700">
-                      ⚠ {shelf.notes}
+                      <Form />
+                      {shelf.notes}
                     </p>
                   )}
 
