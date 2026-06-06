@@ -53,6 +53,7 @@ import {
   useCreateUser,
   useUpdateUser,
   useDeleteUser,
+  useUpdateUserProfile,
   type Role,
   type ApiUser,
 } from "@/features/users/api/users";
@@ -60,6 +61,11 @@ import { UserModal } from "@/features/users/components/UserModal";
 import { DeleteUserModal } from "@/features/users/components/DeleteUserModal";
 import { TableSkeleton } from "@/shared/components/DataTable/TableSkeleton";
 import { Skeleton } from "@/shared/components/ui/skeleton";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 
 // ---------------------------------------------------------------------------
 // Types & display helpers
@@ -78,6 +84,7 @@ export interface User {
   lastActive: string;
   borrowedBooks: number;
   avatarColor: string;
+  avatarUrl?: string;
 }
 
 const AVATAR_COLORS = [
@@ -115,6 +122,7 @@ function mapApiUser(u: ApiUser): User {
     lastActive: formatRelativeTime(u.updatedAt),
     borrowedBooks: u.borrowings ? u.borrowings.length : 0,
     avatarColor: pickAvatarColor(),
+    avatarUrl: u.avatarUrl,
   };
 }
 
@@ -172,6 +180,7 @@ export interface UserFormData {
   department: string;
   yearLevel: string;
   role: Role;
+  avatarFile?: File | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -204,6 +213,7 @@ export function UserManagement() {
   const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // API hooks
   const { data: apiUsers, isLoading, isError, error } = useUsers();
@@ -211,6 +221,7 @@ export function UserManagement() {
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
   const deleteMutation = useDeleteUser();
+  const uploadAvatarMutation = useUpdateUserProfile();
 
   const users = useMemo(() => (apiUsers ?? []).map(mapApiUser), [apiUsers]);
 
@@ -261,10 +272,13 @@ export function UserManagement() {
     setDeleteOpen(true);
   };
 
-  const handleSave = (data: UserFormData) => {
-    if (editUser) {
-      updateMutation.mutate(
-        {
+  const handleSave = async (data: UserFormData) => {
+    setIsSaving(true);
+    try {
+      let userId = editUser?.id;
+
+      if (editUser) {
+        await updateMutation.mutateAsync({
           id: editUser.id,
           data: {
             schoolId: data.schoolId,
@@ -275,22 +289,9 @@ export function UserManagement() {
             phoneNumber: data.phoneNumber,
             role: data.role,
           },
-        },
-        {
-          onSuccess: () => {
-            toast.success("User updated successfully");
-            setModalOpen(false);
-          },
-          onError: (err: unknown) => {
-            const msg =
-              err instanceof Error ? err.message : "Failed to update user";
-            toast.error(msg);
-          },
-        },
-      );
-    } else {
-      createMutation.mutate(
-        {
+        });
+      } else {
+        const newUser = await createMutation.mutateAsync({
           schoolId: data.schoolId,
           fullName: data.fullName,
           email: data.email,
@@ -298,19 +299,28 @@ export function UserManagement() {
           yearLevel: data.yearLevel,
           phoneNumber: data.phoneNumber,
           role: data.role,
-        },
-        {
-          onSuccess: () => {
-            toast.success("New user created successfully");
-            setModalOpen(false);
-          },
-          onError: (err: unknown) => {
-            const msg =
-              err instanceof Error ? err.message : "Failed to create user";
-            toast.error(msg);
-          },
-        },
+        });
+        userId = newUser._id;
+      }
+
+      // If a file was selected, upload it
+      if (data.avatarFile && userId) {
+        const formData = new FormData();
+        formData.append("avatarUrl", data.avatarFile);
+        await uploadAvatarMutation.mutateAsync({ id: userId, data: formData });
+      }
+
+      toast.success(
+        editUser
+          ? "User updated successfully"
+          : "New user created successfully",
       );
+      setModalOpen(false);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to save user";
+      toast.error(msg);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -388,15 +398,6 @@ export function UserManagement() {
         </div>
       </div>
     );
-  }
-
-  function getInitials(name: string) {
-    return name
-      .split(" ")
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase();
   }
 
   return (
@@ -682,7 +683,12 @@ export function UserManagement() {
                             <div
                               className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-black text-white shadow-sm ring-2 ring-white transition-all group-hover:scale-110 ${user.avatarColor}`}
                             >
-                              {getInitials(user.fullName)}
+                              <Avatar className="h-10 w-10 shadow ring-2 ring-slate-100">
+                                <AvatarImage src={user?.avatarUrl} />
+                                <AvatarFallback className="bg-amber-100 text-lg font-bold text-amber-700">
+                                  {user?.fullName?.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
                             </div>
                             <div className="min-w-0">
                               <p className="max-w-[160px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
@@ -909,7 +915,7 @@ export function UserManagement() {
         editUser={editUser}
         meta={meta}
         isLoadingMeta={isLoadingMeta}
-        isPending={createMutation.isPending || updateMutation.isPending}
+        isPending={isSaving}
       />
       <DeleteUserModal
         user={deleteUser}

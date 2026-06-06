@@ -31,6 +31,7 @@ export interface ApiUser {
   department: string;
   yearLevel: string;
   phoneNumber?: string;
+  avatarUrl?: string;
   Role: Role;
   createdAt: string;
   updatedAt: string;
@@ -46,6 +47,7 @@ export function normalizeApiUser(raw: Record<string, unknown>): ApiUser {
     department: getField<string>(raw, "department") ?? "",
     yearLevel: getField<string>(raw, "yearLevel", "year_level") ?? "",
     phoneNumber: getField<string>(raw, "phoneNumber", "phone_number", "phone"),
+    avatarUrl: getField<string>(raw, "avatarUrl", "avatar_url"),
     Role: normalizeRole(getField(raw, "Role", "role")),
     createdAt:
       getField<string>(raw, "createdAt", "created_at", "createdAt") ??
@@ -74,6 +76,7 @@ export interface CreateUserPayload {
   department: string;
   yearLevel: string;
   phoneNumber: string;
+  avatarUrl?: string;
   role: Role;
 }
 
@@ -84,6 +87,7 @@ export interface UpdateUserPayload {
   department?: string;
   yearLevel?: string;
   phoneNumber?: string;
+  avatarUrl?: string;
   role?: Role;
 }
 
@@ -128,6 +132,22 @@ async function deleteUser(id: string): Promise<void> {
   await api.delete(`/users/${id}`);
 }
 
+export async function updateUserProfile(
+  id: string,
+  data: FormData,
+): Promise<ApiUser> {
+  const res = await api.put(`/users/profile/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  const raw = res.data;
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    return normalizeApiUser(raw as Record<string, unknown>);
+  }
+  return raw;
+}
+
 export function useUsers() {
   return useQuery({
     queryKey: ["users"],
@@ -167,6 +187,17 @@ export function useDeleteUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: deleteUser,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}
+
+export function useUpdateUserProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: FormData }) =>
+      updateUserProfile(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["users"] });
     },

@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -6,10 +11,12 @@ import { Session } from '../auth/entities/session.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as bcrypt from 'bcrypt';
 import { normalizeIp } from 'src/common/utils/normalizedIp.util';
 import * as nodemailer from 'nodemailer';
 import { randomBytes } from 'crypto';
+import cloudinary from 'src/config/cloudinary';
 
 @Injectable()
 export class UsersService {
@@ -66,6 +73,10 @@ export class UsersService {
 
     const user = this.usersRepository.create(userData);
 
+    if (!user.avatarUrl) {
+      user.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`;
+    }
+
     return this.usersRepository.save(user);
   }
 
@@ -107,6 +118,10 @@ export class UsersService {
       acceptedTerms: true,
       acceptedAt: new Date(),
     });
+
+    if (!user.avatarUrl) {
+      user.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`;
+    }
 
     const savedUser = await this.usersRepository.save(user);
 
@@ -181,6 +196,47 @@ export class UsersService {
 
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    await this.usersRepository.update(id, updateData);
+    return this.findById(id);
+  }
+
+  async updateProfile(
+    id: string,
+    updateProfileDto: UpdateProfileDto,
+    file?: Express.Multer.File,
+  ) {
+    this.logger.log(`Updating profile for user: ${id}`);
+
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updateData = { ...updateProfileDto };
+
+    if (file) {
+      try {
+        const base64Data = Buffer.from(file.buffer).toString('base64');
+        const dataURI = `data:${file.mimetype};base64,${base64Data}`;
+        const result = await cloudinary.uploader.upload(dataURI, {
+          folder: 'student-profile',
+        });
+        updateData.avatarUrl = result.secure_url;
+      } catch (error) {
+        this.logger.error('Error uploading avatar to Cloudinary', error);
+        // Continue with the rest of the update, or throw an error. Usually we want to throw.
+        throw new ConflictException('Failed to upload avatar image');
+      }
+    }
+
+    if (!updateData.avatarUrl && !user.avatarUrl) {
+      const nameForAvatar = updateData.fullName || user.fullName;
+      updateData.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=random`;
+    } else if (updateData.avatarUrl === '') {
+      const nameForAvatar = updateData.fullName || user.fullName;
+      updateData.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=random`;
     }
 
     await this.usersRepository.update(id, updateData);

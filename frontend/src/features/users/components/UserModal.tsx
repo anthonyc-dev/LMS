@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   Edit,
@@ -13,6 +13,7 @@ import {
   BookOpen,
   Loader2,
   Shield,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -32,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import { toast } from "sonner";
 import { type UsersMeta as UsersMetaType } from "@/features/users/api/users";
 import {
@@ -48,6 +50,7 @@ const EMPTY_FORM: UserFormData = {
   department: "",
   yearLevel: "",
   role: "student",
+  avatarFile: null,
 };
 
 export interface UserModalProps {
@@ -70,19 +73,26 @@ export function UserModal({
   isPending,
 }: UserModalProps) {
   const isEdit = !!editUser;
-  const [form, setForm] = useState<UserFormData>(
-    editUser
-      ? {
-          schoolId: editUser.schoolId,
-          fullName: editUser.fullName,
-          email: editUser.email,
-          phoneNumber: editUser.phone ?? "",
-          department: editUser.department,
-          yearLevel: editUser.yearLevel,
-          role: editUser.role,
-        }
-      : EMPTY_FORM,
-  );
+  const [form, setForm] = useState<UserFormData>(EMPTY_FORM);
+
+  useEffect(() => {
+    if (open) {
+      setForm(
+        editUser
+          ? {
+              schoolId: editUser.schoolId,
+              fullName: editUser.fullName,
+              email: editUser.email,
+              phoneNumber: editUser.phone ?? "",
+              department: editUser.department ?? "",
+              yearLevel: editUser.yearLevel ?? "",
+              role: editUser.role,
+              avatarFile: null,
+            }
+          : EMPTY_FORM
+      );
+    }
+  }, [open, editUser]);
 
   const set = (key: keyof UserFormData) => (val: string | null) =>
     setForm((p) => ({ ...p, [key]: (val ?? "") as never }));
@@ -147,6 +157,50 @@ export function UserModal({
 
         {/* Form Body */}
         <div className="space-y-5 bg-white p-6">
+          {/* Avatar Upload */}
+          <div className="flex flex-col items-center justify-center gap-3 pb-2">
+            <div className="group relative">
+              <Avatar className={`h-20 w-20 shadow-sm ring-2 ring-slate-100 transition-opacity ${isPending ? "opacity-50" : ""}`}>
+                <AvatarImage
+                  src={
+                    form.avatarFile
+                      ? URL.createObjectURL(form.avatarFile)
+                      : (editUser?.avatarUrl ?? undefined)
+                  }
+                />
+                <AvatarFallback className="bg-slate-100 text-xl font-bold text-slate-400">
+                  {form.fullName
+                    ? form.fullName.charAt(0).toUpperCase()
+                    : <Users className="size-8 opacity-20" />}
+                </AvatarFallback>
+              </Avatar>
+              
+              {isPending && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-slate-900/10 backdrop-blur-[1px]">
+                  <Loader2 className="size-6 animate-spin text-indigo-600" />
+                </div>
+              )}
+
+              <label className={`absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-white shadow-sm transition-transform ${isPending ? "bg-slate-400 cursor-not-allowed" : "bg-indigo-600 cursor-pointer hover:scale-110"}`}>
+                <Camera className="size-3.5" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={isPending}
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setForm((p) => ({ ...p, avatarFile: file }));
+                  }}
+                />
+              </label>
+            </div>
+            <div className="space-y-0.5 text-center">
+              <p className="text-xs font-semibold text-slate-700">Profile Picture</p>
+              <p className="text-[10px] text-slate-400">Optional. Image file only.</p>
+            </div>
+          </div>
+
           {/* School ID + Full Name */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">

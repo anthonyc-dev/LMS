@@ -55,6 +55,9 @@ export class User {
   })
   role: Role;
 
+  @Column({ nullable: true })
+  avatarUrl?: string;
+
   @Column({ default: false })
   acceptedTerms: boolean;
 

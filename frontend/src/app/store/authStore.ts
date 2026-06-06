@@ -6,6 +6,7 @@ interface User {
   fullName: string;
   role?: string;
   schoolId?: string;
+  avatarUrl?: string;
 }
 
 interface AuthState {

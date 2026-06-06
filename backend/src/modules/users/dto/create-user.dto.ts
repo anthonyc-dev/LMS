@@ -84,4 +84,13 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   ipAddress?: string;
+
+  @ApiProperty({
+    type: 'string',
+    example: 'https://example.com/avatar.png',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  avatarUrl?: string;
 }
