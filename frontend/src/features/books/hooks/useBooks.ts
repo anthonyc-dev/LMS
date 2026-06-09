@@ -31,7 +31,6 @@ export const useBook = (id: string) => {
     queryKey: BOOKS_QUERY_KEYS.detail(id),
     queryFn: () => booksApi.getBook(id),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
   });
 };
 

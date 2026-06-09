@@ -6,6 +6,8 @@ import { BulkCreateBookCopyDto } from './dto/bulk-create-book-copy.dto';
 import { UpdateBookCopyDto } from './dto/update-book-copy.dto';
 import { BookCopy } from './entities/book-copy.entity';
 import * as bwipjs from 'bwip-js';
+import { BookCopyStatus } from 'src/common/enums/enum.enums';
+import { BookCopyMapper } from './mapper/book-copy.mapper';
 
 @Injectable()
 export class BookCopiesService {
@@ -54,38 +56,74 @@ export class BookCopiesService {
     return copies;
   }
 
-  async findAll(search?: string): Promise<BookCopy[]> {
+  async findAll(
+    page = 1,
+    limit = 10,
+    search?: string,
+    status?: BookCopyStatus,
+  ) {
+    const skip = (page - 1) * limit;
+
     const query = this.bookCopyRepository
       .createQueryBuilder('bookCopy')
       .leftJoinAndSelect('bookCopy.book', 'book')
-      .leftJoinAndSelect('bookCopy.shelf', 'shelf');
+      .leftJoinAndSelect('bookCopy.shelfSection', 'shelfSection')
+      .leftJoinAndSelect('shelfSection.shelf', 'shelf')
+      .skip(skip)
+      .take(limit)
+      .orderBy('bookCopy.createdAt', 'DESC');
 
-    if (search) {
-      query
-        .where('bookCopy.barcode ILIKE :search', { search: `%${search}%` })
-        .orWhere('book.title ILIKE :search', { search: `%${search}%` });
+    if (search?.trim()) {
+      query.andWhere(
+        `(bookCopy.barcode ILIKE :search OR book.title ILIKE :search)`,
+        { search: `%${search}%` },
+      );
     }
 
-    return await query.getMany();
+    if (status) {
+      query.andWhere('bookCopy.status = :status', { status });
+    }
+
+    const [data, total] = await query.getManyAndCount();
+
+    return {
+      data: BookCopyMapper.toResponseList(data),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findByBarcode(barcode: string): Promise<BookCopy> {
     const bookCopy = await this.bookCopyRepository.findOne({
       where: { barcode },
-      relations: { book: true, shelf: true },
+      relations: {
+        book: true,
+        shelfSection: {
+          shelf: true,
+        },
+      },
     });
+
     if (!bookCopy) {
       throw new NotFoundException(
         `Book copy with barcode ${barcode} not found`,
       );
     }
+
     return bookCopy;
   }
 
   async findOne(id: string): Promise<BookCopy> {
     const bookCopy = await this.bookCopyRepository.findOne({
       where: { id },
-      relations: { book: true, shelf: true },
+      relations: {
+        book: true,
+        shelfSection: {
+          shelf: true,
+        },
+      },
     });
     if (!bookCopy) {
       throw new NotFoundException(`Book copy with ID ${id} not found`);

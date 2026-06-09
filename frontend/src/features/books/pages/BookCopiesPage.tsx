@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import {
   Plus,
   Search,
@@ -24,6 +24,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,12 +83,25 @@ export function BookCopiesPage() {
     return () => clearTimeout(handler);
   }, [search]);
 
-  const { data: bookCopies = [], isLoading } = useBookCopies(debouncedSearch);
+  const [page, setPage] = useState(1);
+  const [status, setStatus] = useState<string>("ALL");
+
+  const { data: response, isLoading } = useBookCopies(
+    page,
+    ROWS_PER_PAGE,
+    debouncedSearch,
+    status === "ALL" ? undefined : status,
+  );
+  const bookCopies = response?.data || [];
+  const total = response?.total || 0;
+  const totalPages = response?.totalPages || 1;
+  const filtered = bookCopies;
+  const paginated = bookCopies;
+
   const createMutation = useCreateBookCopy();
   const bulkCreateMutation = useBulkCreateBookCopy();
   const updateMutation = useUpdateBookCopy();
   const deleteMutation = useDeleteBookCopy();
-
 
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<BookCopy | null>(null);
@@ -89,23 +109,19 @@ export function BookCopiesPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [barcodeTarget, setBarcodeTarget] = useState<BookCopy | null>(null);
   const [barcodeOpen, setBarcodeOpen] = useState(false);
-  const [multipleBarcodesTarget, setMultipleBarcodesTarget] = useState<BookCopy[]>([]);
+  const [multipleBarcodesTarget, setMultipleBarcodesTarget] = useState<
+    BookCopy[]
+  >([]);
   const [multipleBarcodesOpen, setMultipleBarcodesOpen] = useState(false);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-
-  const filtered = useMemo(() => {
-    return bookCopies;
-  }, [bookCopies]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
-  const paginated = filtered.slice(
-    (page - 1) * ROWS_PER_PAGE,
-    page * ROWS_PER_PAGE,
-  );
 
   const onSearch = (v: string) => {
     setSearch(v);
+    setPage(1);
+  };
+
+  const onStatusChange = (v: string | null) => {
+    setStatus(v ?? "ALL");
     setPage(1);
   };
 
@@ -129,21 +145,78 @@ export function BookCopiesPage() {
   const handleSave = async (data: any) => {
     try {
       if (editTarget) {
-        await updateMutation.mutateAsync({ id: editTarget.id, ...data });
+        const { shelfSectionIds, ...rest } = data;
+        await updateMutation.mutateAsync({
+          id: editTarget.id,
+          ...rest,
+          shelfSectionId: shelfSectionIds?.[0] || undefined,
+        });
         toast.success("Book copy updated successfully");
         setFormOpen(false);
       } else {
-        if (data.count && data.count > 1) {
-          const newCopies = await bulkCreateMutation.mutateAsync(data);
-          toast.success(`${data.count} book copies created successfully`);
-          setFormOpen(false);
-          setMultipleBarcodesTarget(newCopies);
-          setMultipleBarcodesOpen(true);
+        const { shelfSectionIds: sectionIds = [], ...rest } = data;
+        if (sectionIds.length === 0) {
+          if (data.count && data.count > 1) {
+            const newCopies = await bulkCreateMutation.mutateAsync({
+              ...rest,
+              shelfSectionId: undefined,
+            });
+            toast.success(`${data.count} book copies created successfully`);
+            setFormOpen(false);
+            setMultipleBarcodesTarget(newCopies);
+            setMultipleBarcodesOpen(true);
+          } else {
+            const newCopy = await createMutation.mutateAsync({
+              ...rest,
+              shelfSectionId: undefined,
+            });
+            toast.success("Book copy created successfully");
+            setFormOpen(false);
+            openBarcode(newCopy);
+          }
         } else {
-          const newCopy = await createMutation.mutateAsync(data);
-          toast.success("Book copy created successfully");
-          setFormOpen(false);
-          openBarcode(newCopy);
+          if (data.count && data.count > 1) {
+            const totalCount = data.count;
+            const numSections = sectionIds.length;
+            const base = Math.floor(totalCount / numSections);
+            const remainder = totalCount % numSections;
+
+            const results = await Promise.all(
+              sectionIds.map((sectionId: string, i: number) => {
+                const sectionCount = base + (i < remainder ? 1 : 0);
+                if (sectionCount > 0) {
+                  return bulkCreateMutation.mutateAsync({
+                    ...rest,
+                    shelfSectionId: sectionId,
+                    count: sectionCount,
+                  });
+                }
+                return Promise.resolve([]);
+              })
+            );
+            const allNewCopies = results.flat();
+            toast.success(`${totalCount} book copies created successfully across ${numSections} sections`);
+            setFormOpen(false);
+            setMultipleBarcodesTarget(allNewCopies);
+            setMultipleBarcodesOpen(true);
+          } else {
+            const createdCopies = await Promise.all(
+              sectionIds.map((sectionId: string) =>
+                createMutation.mutateAsync({
+                  ...rest,
+                  shelfSectionId: sectionId,
+                })
+              )
+            );
+            toast.success(`${createdCopies.length} book copies created successfully`);
+            setFormOpen(false);
+            if (createdCopies.length > 1) {
+              setMultipleBarcodesTarget(createdCopies);
+              setMultipleBarcodesOpen(true);
+            } else {
+              openBarcode(createdCopies[0]);
+            }
+          }
         }
       }
     } catch (error: any) {
@@ -221,9 +294,7 @@ export function BookCopiesPage() {
                 <p className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
                   Total Copies
                 </p>
-                <h3 className="text-xl font-black text-slate-900">
-                  {bookCopies.length}
-                </h3>
+                <h3 className="text-xl font-black text-slate-900">{total}</h3>
               </div>
             </CardContent>
           </Card>
@@ -232,8 +303,8 @@ export function BookCopiesPage() {
 
       {/* ── Toolbar & Table ── */}
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-        <div className="border-b border-slate-100 p-4">
-          <div className="relative w-64 max-w-full">
+        <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center">
+          <div className="relative w-full max-w-full sm:w-64">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
             <Input
               placeholder="Search copies (barcode, title)..."
@@ -242,6 +313,29 @@ export function BookCopiesPage() {
               onChange={(e) => onSearch(e.target.value)}
             />
           </div>
+
+          <Select value={status} onValueChange={onStatusChange}>
+            <SelectTrigger className="h-9 w-full rounded-xl border-slate-200 text-sm focus:ring-slate-400 focus-visible:ring-slate-400 sm:w-40">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+              <SelectItem
+                value="ALL"
+                className="rounded-lg text-sm font-medium"
+              >
+                All Statuses
+              </SelectItem>
+              {Object.entries(statusCfg).map(([key, cfg]) => (
+                <SelectItem
+                  key={key}
+                  value={key}
+                  className="rounded-lg text-sm font-medium"
+                >
+                  {cfg.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="overflow-x-auto">
@@ -255,10 +349,10 @@ export function BookCopiesPage() {
                   Book
                 </TableHead>
                 <TableHead className="hidden py-4 font-bold text-slate-500 md:table-cell">
-                  Status & Condition
+                  Status | Condition
                 </TableHead>
                 <TableHead className="hidden py-4 font-bold text-slate-500 md:table-cell">
-                  Shelf
+                  Shelf | Section
                 </TableHead>
                 <TableHead className="hidden py-4 font-bold text-slate-500 lg:table-cell">
                   Notes
@@ -269,202 +363,205 @@ export function BookCopiesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading
-                ? Array.from({ length: 5 }).map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="py-4 pl-5">
-                        <Skeleton className="h-6 w-28 rounded-md" />
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-[200px] rounded-md" />
-                          <Skeleton className="h-3 w-[100px] rounded-md" />
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-16 rounded-md" />
-                          <Skeleton className="h-3 w-12 rounded-md" />
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <div className="space-y-2">
-                          <Skeleton className="h-4 w-12 rounded-md" />
-                          <Skeleton className="h-3 w-20 rounded-md" />
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        <Skeleton className="h-4 w-[150px] rounded-md" />
-                      </TableCell>
-                      <TableCell className="pr-5 text-right">
-                        <Skeleton className="ml-auto h-8 w-8 rounded-lg" />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                : paginated.map((bc) => {
-                    const isExpanded = isMobile && expandedRow === bc.id;
-                    return (
-                      <Fragment key={bc.id}>
-                        <TableRow
-                          className="group cursor-pointer transition-colors hover:bg-slate-50/60"
-                          onClick={() => {
-                            if (isMobile) {
-                              setExpandedRow(isExpanded ? null : bc.id);
-                            }
-                          }}
-                        >
-                          <TableCell className="py-4 pl-5">
-                            <span className="rounded-lg bg-slate-100 px-2 py-0.5 font-mono text-sm font-black text-slate-800">
-                              {bc.barcode}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="max-w-xs">
-                                <p
-                                  className="truncate font-bold text-slate-800"
-                                  title={bc.book?.title}
-                                >
-                                  {bc.book?.title || "Unknown Book"}
-                                </p>
-                                <p className="text-xs text-slate-500">
-                                  {bc.book?.isbn || ""}
-                                </p>
-                              </div>
-                              {isMobile && (
-                                <ChevronDown
-                                  className={`size-4 text-slate-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
-                                />
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <div className="flex flex-col items-start gap-1">
-                              <Badge
-                                className={`border-none px-2 py-0.5 text-[10px] font-bold ${statusCfg[bc.status]?.cls || "bg-slate-100 text-slate-600"}`}
-                              >
-                                {statusCfg[bc.status]?.label || bc.status}
-                              </Badge>
-                              <span className="text-[10px] font-semibold text-slate-500">
-                                Cond: {bc.condition}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {bc.shelf ? (
-                              <div className="flex flex-col">
-                                <span className="text-sm font-bold text-slate-700">
-                                  {bc.shelf.code}
-                                </span>
-                                <span className="text-[11px] text-slate-500">
-                                  {bc.shelf.name}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-xs text-slate-400 italic">
-                                Unassigned
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell className="hidden lg:table-cell">
-                            <div className="max-w-[200px] truncate text-xs text-slate-600">
-                              {bc.notes || "-"}
-                            </div>
-                          </TableCell>
-                          <TableCell className="pr-5 text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger
-                                render={
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className={`h-8 w-8 rounded-lg text-slate-400 transition-opacity hover:bg-slate-100 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-                                  >
-                                    <MoreHorizontal className="size-4" />
-                                  </Button>
-                                }
-                              />
-                              <DropdownMenuContent
-                                align="end"
-                                className="w-36 rounded-xl border-slate-100 p-1.5 shadow-xl"
-                              >
-                                <DropdownMenuItem
-                                  onClick={() => openEdit(bc)}
-                                  className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
-                                >
-                                  <Edit3 className="size-3.5" /> Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => openBarcode(bc)}
-                                  className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100"
-                                >
-                                  <Barcode className="size-3.5" /> View Barcode
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator className="my-1 bg-slate-100" />
-                                <DropdownMenuItem
-                                  onClick={() => openDelete(bc)}
-                                  className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50"
-                                >
-                                  <Trash2 className="size-3.5" /> Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                        {isExpanded && (
-                          <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                            <TableCell
-                              colSpan={6}
-                              className="border-b border-slate-100 p-0"
-                            >
-                              <div className="flex flex-col gap-3 px-5 py-4 text-sm">
-                                <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                                  <span className="font-medium text-slate-500">
-                                    Status & Cond.
-                                  </span>
-                                  <div className="flex items-center gap-2">
-                                    <Badge
-                                      className={`border-none px-2 py-0.5 text-[10px] font-bold ${statusCfg[bc.status]?.cls || "bg-slate-100 text-slate-600"}`}
-                                    >
-                                      {statusCfg[bc.status]?.label || bc.status}
-                                    </Badge>
-                                    <span className="text-xs font-semibold text-slate-600">
-                                      {bc.condition}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                                  <span className="font-medium text-slate-500">
-                                    Shelf Location
-                                  </span>
-                                  <span className="text-sm font-bold text-slate-700">
-                                    {bc.shelf ? bc.shelf.code : "Unassigned"}
-                                  </span>
-                                </div>
-                                <div className="flex flex-col gap-1 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                                  <span className="font-medium text-slate-500">
-                                    Notes
-                                  </span>
-                                  <span className="text-sm text-slate-700">
-                                    {bc.notes || "—"}
-                                  </span>
-                                </div>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </Fragment>
-                    );
-                  })}
-              {filtered.length === 0 && (
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell className="py-4 pl-5">
+                      <Skeleton className="h-6 w-28 rounded-md" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-[200px] rounded-md" />
+                        <Skeleton className="h-3 w-[100px] rounded-md" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-16 rounded-md" />
+                        <Skeleton className="h-3 w-12 rounded-md" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-12 rounded-md" />
+                        <Skeleton className="h-3 w-20 rounded-md" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <Skeleton className="h-4 w-[150px] rounded-md" />
+                    </TableCell>
+                    <TableCell className="pr-5 text-right">
+                      <Skeleton className="ml-auto h-8 w-8 rounded-lg" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : filtered.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
-                    className="h-32 text-center text-slate-400"
+                    colSpan={isMobile ? 2 : 6}
+                    className="py-10 text-center text-slate-500"
                   >
-                    No book copies found.
+                    No book copies found. Try adjusting your search.
                   </TableCell>
                 </TableRow>
+              ) : (
+                paginated.map((bc) => {
+                  const isExpanded = isMobile && expandedRow === bc.id;
+                  return (
+                    <Fragment key={bc.id}>
+                      <TableRow
+                        className="group cursor-pointer transition-colors hover:bg-slate-50/60"
+                        onClick={() => {
+                          if (isMobile) {
+                            setExpandedRow(isExpanded ? null : bc.id);
+                          }
+                        }}
+                      >
+                        <TableCell className="py-4 pl-5">
+                          <span className="rounded-lg bg-slate-100 px-2 py-0.5 font-mono text-sm font-black text-slate-800">
+                            {bc.barcode}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="max-w-xs">
+                              <p
+                                className="truncate font-bold text-slate-800"
+                                title={bc.book?.title}
+                              >
+                                {bc.book?.title || "Unknown Book"}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {bc.book?.isbn || ""}
+                              </p>
+                            </div>
+                            {isMobile && (
+                              <ChevronDown
+                                className={`size-4 text-slate-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                              />
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <div className="flex flex-col items-start gap-1">
+                            <Badge
+                              className={`min-w-22 justify-center border-none px-2 py-0.5 text-center text-[10px] font-bold ${statusCfg[bc.status]?.cls || "bg-slate-100 text-slate-600"}`}
+                            >
+                              {statusCfg[bc.status]?.label || bc.status}
+                            </Badge>
+                            <span className="text-[10px] font-semibold text-slate-500">
+                              Cond: {bc.condition}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {bc.location?.shelfId ? (
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold text-slate-700">
+                                {bc.location.shelfName}
+                              </span>
+                              <span className="text-[11px] text-slate-500">
+                                {bc.location.sectionName}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">
+                              Unassigned
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell">
+                          <div className="max-w-[200px] truncate text-xs text-slate-600">
+                            {bc.notes || "-"}
+                          </div>
+                        </TableCell>
+                        <TableCell className="pr-5 text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              render={
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className={`h-8 w-8 rounded-lg text-slate-400 transition-opacity hover:bg-slate-100 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                                >
+                                  <MoreHorizontal className="size-4" />
+                                </Button>
+                              }
+                            />
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-36 rounded-xl border-slate-100 p-1.5 shadow-xl"
+                            >
+                              <DropdownMenuItem
+                                onClick={() => openEdit(bc)}
+                                className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
+                              >
+                                <Edit3 className="size-3.5" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => openBarcode(bc)}
+                                className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-100"
+                              >
+                                <Barcode className="size-3.5" /> View Barcode
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                              <DropdownMenuItem
+                                onClick={() => openDelete(bc)}
+                                className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50"
+                              >
+                                <Trash2 className="size-3.5" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                      {isExpanded && (
+                        <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
+                          <TableCell
+                            colSpan={6}
+                            className="border-b border-slate-100 p-0"
+                          >
+                            <div className="flex flex-col gap-3 px-5 py-4 text-sm">
+                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Status & Cond.
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <Badge
+                                    className={`border-none px-2 py-0.5 text-[10px] font-bold ${statusCfg[bc.status]?.cls || "bg-slate-100 text-slate-600"}`}
+                                  >
+                                    {statusCfg[bc.status]?.label || bc.status}
+                                  </Badge>
+                                  <span className="text-xs font-semibold text-slate-600">
+                                    {bc.condition}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Shelf Location
+                                </span>
+                                <span className="text-sm font-bold text-slate-700">
+                                  {bc.location?.shelfId
+                                    ? bc.location.shelfName
+                                    : "Unassigned"}
+                                </span>
+                              </div>
+                              <div className="flex flex-col gap-1 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Notes
+                                </span>
+                                <span className="text-sm text-slate-700">
+                                  {bc.notes || "—"}
+                                </span>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </Fragment>
+                  );
+                })
               )}
             </TableBody>
           </Table>
@@ -476,11 +573,9 @@ export function BookCopiesPage() {
             Showing{" "}
             <span className="font-bold text-slate-700">
               {filtered.length === 0 ? 0 : (page - 1) * ROWS_PER_PAGE + 1}–
-              {Math.min(page * ROWS_PER_PAGE, filtered.length)}
+              {Math.min(page * ROWS_PER_PAGE, total)}
             </span>{" "}
-            of{" "}
-            <span className="font-bold text-slate-700">{filtered.length}</span>{" "}
-            copies
+            of <span className="font-bold text-slate-700">{total}</span> copies
           </p>
           <div className="order-1 flex items-center gap-2 sm:order-2">
             <Button
@@ -523,7 +618,11 @@ export function BookCopiesPage() {
       <BookCopyFormModal
         open={formOpen}
         initial={editTarget}
-        isPending={createMutation.isPending || updateMutation.isPending || bulkCreateMutation.isPending}
+        isPending={
+          createMutation.isPending ||
+          updateMutation.isPending ||
+          bulkCreateMutation.isPending
+        }
         onClose={() => setFormOpen(false)}
         onSave={handleSave}
       />

@@ -1,9 +1,14 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { BookCondition, BookCopyStatus } from '../entities/book-copy.entity';
+import { BookCondition, BookCopyStatus } from 'src/common/enums/enum.enums';
 
 export class UpdateBookCopyDto {
-  @IsOptional()
+  @ApiPropertyOptional({
+    example: 'UUID of the book',
+    required: false,
+  })
   @IsString()
+  @IsOptional()
   bookId?: string;
 
   @IsOptional()
@@ -20,9 +25,13 @@ export class UpdateBookCopyDto {
   @IsOptional()
   notes?: string;
 
+  @ApiPropertyOptional({
+    example: 'UUID of the shelf section',
+    required: false,
+  })
   @IsString()
   @IsOptional()
-  shelfId?: string;
+  shelfSectionId?: string;
 
   @IsEnum(BookCopyStatus)
   @IsOptional()

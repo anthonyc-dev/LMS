@@ -22,6 +22,7 @@ import { Role } from 'src/common/enums/role.enum';
 import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { BookCopyStatus } from 'src/common/enums/enum.enums';
 
 @ApiTags('book-copies')
 @Controller('book-copies')
@@ -48,8 +49,18 @@ export class BookCopiesController {
   @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
   @Throttle({ default: { limit: 60, ttl: 60000 } })
   @Get()
-  findAll(@Query('search') search?: string) {
-    return this.bookCopiesService.findAll(search);
+  findAll(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('search') search?: string,
+    @Query('status') status?: BookCopyStatus,
+  ) {
+    return this.bookCopiesService.findAll(
+      Number(page) || 1,
+      Number(limit) || 10,
+      search,
+      status,
+    );
   }
 
   @Roles(Role.ADMIN, Role.STUDENT, Role.FACULTY)

@@ -5,6 +5,7 @@ import {
   CheckIcon,
   ChevronsUpDownIcon,
 } from "lucide-react";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import {
@@ -76,6 +77,7 @@ const EMPTY_FORM = {
   purchasePrice: "0",
   bookId: "",
   shelfId: "",
+  shelfSectionIds: [] as string[],
 };
 
 export interface BookCopyFormProps {
@@ -108,7 +110,10 @@ export function BookCopyFormModal({
             ? String(initial.purchasePrice)
             : "0",
           bookId: initial.bookId,
-          shelfId: initial.shelfId || "",
+          shelfId: initial.location?.shelfId || "",
+          shelfSectionIds: initial.location?.sectionId
+            ? [initial.location.sectionId]
+            : [],
         }
       : { ...EMPTY_FORM },
   );
@@ -117,6 +122,7 @@ export function BookCopyFormModal({
   const [mode, setMode] = useState<"single" | "multiple">("single");
   const [count, setCount] = useState("2");
   const [bookPopoverOpen, setBookPopoverOpen] = useState(false);
+  const [sectionPopoverOpen, setSectionPopoverOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -133,13 +139,17 @@ export function BookCopyFormModal({
                 ? String(initial.purchasePrice)
                 : "0",
               bookId: initial.bookId,
-              shelfId: initial.shelfId || "",
+              shelfId: initial.location?.shelfId || "",
+              shelfSectionIds: initial.location?.sectionId
+                ? [initial.location.sectionId]
+                : [],
             }
           : { ...EMPTY_FORM, bookId: defaultBookId || "" },
       );
       setErrors({});
       setMode("single");
       setCount("2");
+      setSectionPopoverOpen(false);
     }
   }, [open, initial, defaultBookId]);
 
@@ -177,8 +187,24 @@ export function BookCopyFormModal({
     ));
   }, [shelves]);
 
-  const set = (key: keyof typeof form) => (val: string | null) =>
-    setForm((f) => ({ ...f, [key]: (val ?? "") as never }));
+  const set = (key: keyof typeof form) => (val: any) =>
+    setForm((f) => ({ ...f, [key]: val }));
+
+  const handleToggleSection = (secId: string) => {
+    if (initial) {
+      setForm((f) => ({
+        ...f,
+        shelfSectionIds: f.shelfSectionIds.includes(secId) ? [] : [secId],
+      }));
+    } else {
+      setForm((f) => ({
+        ...f,
+        shelfSectionIds: f.shelfSectionIds.includes(secId)
+          ? f.shelfSectionIds.filter((id) => id !== secId)
+          : [...f.shelfSectionIds, secId],
+      }));
+    }
+  };
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -211,7 +237,7 @@ export function BookCopyFormModal({
         : undefined,
       purchasePrice: form.purchasePrice ? +form.purchasePrice : undefined,
       bookId: form.bookId,
-      shelfId: form.shelfId || undefined,
+      shelfSectionIds: form.shelfSectionIds,
       ...(mode === "multiple" && !initial
         ? { count: parseInt(count, 10) }
         : {}),
@@ -408,27 +434,101 @@ export function BookCopyFormModal({
             </Field>
           </div>
 
-          <Field id="shelf-id" label="Location (Shelf)">
-            <Select
-              value={form.shelfId}
-              onValueChange={(v) => set("shelfId")(v === "none" ? "" : v)}
-            >
-              <SelectTrigger className="w-full rounded-xl border-slate-200">
-                <SelectValue placeholder="No shelf assigned">
-                  {form.shelfId === "" || form.shelfId === "none"
-                    ? "No shelf assigned"
-                    : shelves.find((s) => s.id === form.shelfId)?.name ||
-                      (initial && initial.shelfId === form.shelfId
-                        ? initial.shelf?.name
-                        : form.shelfId)}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                <SelectItem value="none">No shelf assigned</SelectItem>
-                {shelfItems}
-              </SelectContent>
-            </Select>
-          </Field>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field id="shelf-id" label="Location (Shelf)">
+              <Select
+                value={form.shelfId}
+                onValueChange={(v) => {
+                  setForm((f) => ({
+                    ...f,
+                    shelfId: v === "none" ? "" : (v ?? ""),
+                    shelfSectionIds: [],
+                  }));
+                }}
+              >
+                <SelectTrigger className="w-full rounded-xl border-slate-200">
+                  <SelectValue placeholder="No shelf assigned">
+                    {form.shelfId === "" || form.shelfId === "none"
+                      ? "No shelf assigned"
+                      : shelves.find((s) => s.id === form.shelfId)?.name ||
+                        (initial && initial.location?.shelfId === form.shelfId
+                          ? initial.location?.shelfName
+                          : form.shelfId)}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                  <SelectItem value="none">No shelf assigned</SelectItem>
+                  {shelfItems}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field id="shelf-section-id" label="Location (Section)">
+              <Popover
+                open={sectionPopoverOpen}
+                onOpenChange={setSectionPopoverOpen}
+              >
+                <PopoverTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      disabled={!form.shelfId || form.shelfId === "none"}
+                      className="w-full justify-between rounded-xl border-slate-200 bg-white px-3 py-2 text-left font-normal text-slate-700 disabled:opacity-50"
+                    />
+                  }
+                >
+                  <span className="truncate">
+                    {form.shelfSectionIds.length === 0
+                      ? "No section assigned"
+                      : form.shelfSectionIds
+                          .map((id) => {
+                            const sec = shelves
+                              .find((s) => s.id === form.shelfId)
+                              ?.sections.find((s) => s.id === id);
+                            return sec ? sec.name : id;
+                          })
+                          .join(", ")}
+                  </span>
+                  <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 text-slate-500 opacity-50" />
+                </PopoverTrigger>
+                <PopoverContent className="max-h-60 w-(--anchor-width) min-w-[200px] overflow-y-auto rounded-xl border-slate-100 bg-white p-2 shadow-xl">
+                  <div className="space-y-2">
+                    {shelves
+                      .find((s) => s.id === form.shelfId)
+                      ?.sections.map((sec) => {
+                        const isChecked = form.shelfSectionIds.includes(
+                          sec.id!,
+                        );
+                        return (
+                          <div
+                            key={sec.id}
+                            className="flex cursor-pointer items-center space-x-2 rounded-lg p-1.5 hover:bg-slate-50"
+                            onClick={() => handleToggleSection(sec.id!)}
+                          >
+                            <Checkbox
+                              checked={isChecked}
+                              onCheckedChange={() =>
+                                handleToggleSection(sec.id!)
+                              }
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <span className="text-sm font-medium text-slate-700 select-none">
+                              {sec.name}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    {!shelves.find((s) => s.id === form.shelfId)?.sections
+                      .length && (
+                      <p className="p-2 text-xs text-slate-400 italic">
+                        No sections found for this shelf.
+                      </p>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </Field>
+          </div>
 
           {!initial && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

@@ -103,6 +103,22 @@ export function AdminLayout() {
     return item.roles.includes(user?.role || "");
   });
 
+  const getPageTitle = (pathname: string) => {
+    if (/^\/student\/books\/details\/[^/]+$/.test(pathname)) {
+      return "Book Details";
+    }
+
+    if (/^\/admin\/books\/(?!add)[^/]+$/.test(pathname)) {
+      return "Book Details";
+    }
+
+    if (/^\/admin\/book-copies\/[^/]+$/.test(pathname)) {
+      return "Book Copy Details";
+    }
+
+    return pathname.split("/").pop()?.replace(/-/g, " ") || "Dashboard";
+  };
+
   return (
     <SidebarProvider>
       <div className="flex min-h-svh w-full">
@@ -123,8 +139,7 @@ export function AdminLayout() {
               <SidebarTrigger />
             </div>
             <h1 className="text-lg font-semibold capitalize">
-              {location.pathname.split("/").pop()?.replace("-", " ") ||
-                "Dashboard"}
+              {getPageTitle(location.pathname)}
             </h1>
           </header>
           <div className="flex-1 overflow-auto bg-gray-100 p-4 lg:p-6">

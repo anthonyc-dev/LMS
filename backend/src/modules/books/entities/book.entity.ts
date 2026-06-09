@@ -105,7 +105,7 @@ export class Book {
   inventory: Inventory;
 
   @OneToMany(() => BookCopy, (copy) => copy.book)
-  bookCopies: BookCopy;
+  bookCopies: BookCopy[];
 
   // @ManyToOne(() => Shelf, (shelf) => shelf.books)
   // @JoinColumn({ name: 'shelfId' })

@@ -1,32 +1,22 @@
 import api from "@/shared/lib/axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export interface BookCopy {
+export interface ShelfSectionResponse {
   id: string;
-  barcode: string;
-  status: string;
-  condition: string;
-  notes?: string;
-  acquiredAt?: string;
-  purchasePrice?: string;
-  bookId: string;
-  shelfId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
+  name: string;
+  bookCopies?: { id: string }[];
 }
 
-export interface Shelf {
+export interface ShelfResponse {
   id: string;
   code: string;
   name: string;
   description: string | null;
   floor: string | null;
-  section: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
-  bookCopies: BookCopy[];
+  sections: ShelfSectionResponse[];
 }
 
 export interface CreateShelfPayload {
@@ -34,24 +24,25 @@ export interface CreateShelfPayload {
   name: string;
   description?: string;
   floor: string;
-  section?: string;
+  sections?: { name: string }[];
 }
 
 export interface UpdateShelfPayload extends Partial<CreateShelfPayload> {
   id: string;
+  sections?: { id?: string; name: string }[];
 }
 
-async function fetchShelves(): Promise<Shelf[]> {
+async function fetchShelves(): Promise<ShelfResponse[]> {
   const response = await api.get("/shelves");
   return response.data;
 }
 
-async function createShelf(data: CreateShelfPayload): Promise<Shelf> {
+async function createShelf(data: CreateShelfPayload): Promise<ShelfResponse> {
   const response = await api.post("/shelves", data);
   return response.data;
 }
 
-async function updateShelf(data: UpdateShelfPayload): Promise<Shelf> {
+async function updateShelf(data: UpdateShelfPayload): Promise<ShelfResponse> {
   const { id, ...payload } = data;
   const response = await api.put(`/shelves/${id}`, payload);
   return response.data;
@@ -74,6 +65,7 @@ export function useCreateShelf() {
     mutationFn: createShelf,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["shelves"] });
+      qc.invalidateQueries({ queryKey: ["books"] });
     },
   });
 }
@@ -84,6 +76,7 @@ export function useUpdateShelf() {
     mutationFn: updateShelf,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["shelves"] });
+      qc.invalidateQueries({ queryKey: ["books"] });
     },
   });
 }
@@ -94,6 +87,7 @@ export function useDeleteShelf() {
     mutationFn: deleteShelf,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["shelves"] });
+      qc.invalidateQueries({ queryKey: ["books"] });
     },
   });
 }

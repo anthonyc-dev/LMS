@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BookCondition, BookCopyStatus } from 'src/common/enums/enum.enums';
 import { Book } from 'src/modules/books/entities/book.entity';
-import { Shelf } from 'src/modules/shelves/entities/shelf.entity';
-
+import { ShelfSection } from 'src/modules/shelf-sections/entities/shelf-section.entity';
 import {
   Column,
   CreateDateColumn,
@@ -13,23 +13,6 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-
-export enum BookCopyStatus {
-  AVAILABLE = 'AVAILABLE',
-  BORROWED = 'BORROWED',
-  RESERVED = 'RESERVED',
-  LOST = 'LOST',
-  DAMAGED = 'DAMAGED',
-  MAINTENANCE = 'MAINTENANCE',
-}
-
-export enum BookCondition {
-  NEW = 'NEW',
-  GOOD = 'GOOD',
-  FAIR = 'FAIR',
-  POOR = 'POOR',
-  DAMAGED = 'DAMAGED',
-}
 
 @Entity({ name: 'book_copies' })
 export class BookCopy {
@@ -106,19 +89,17 @@ export class BookCopy {
   @JoinColumn({ name: 'bookId' })
   book: Book;
 
-  // Shelf Relation
+  // Shelf Section Relation
   @ApiPropertyOptional()
-  @Column('uuid', {
-    nullable: true,
-  })
-  shelfId?: string;
+  @Column({ type: 'uuid', nullable: true })
+  shelfSectionId?: string;
 
-  @ManyToOne(() => Shelf, (shelf) => shelf.bookCopies, {
+  @ManyToOne(() => ShelfSection, (section) => section.bookCopies, {
     nullable: true,
     onDelete: 'SET NULL',
   })
-  @JoinColumn({ name: 'shelfId' })
-  shelf: Shelf;
+  @JoinColumn({ name: 'shelfSectionId' })
+  shelfSection?: ShelfSection;
 
   //   // Borrow History
   //   @OneToMany(() => Borrowing, (borrowing) => borrowing.bookCopy)

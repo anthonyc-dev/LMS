@@ -20,3 +20,21 @@ export enum YearLevelEnum {
   FIFTH_YEAR = '5th Year',
   OLD_STUDENT = 'Old Student',
 }
+
+export enum BookCopyStatus {
+  AVAILABLE = 'AVAILABLE',
+  BORROWED = 'BORROWED',
+  RESERVED = 'RESERVED',
+  LOST = 'LOST',
+  DAMAGED = 'DAMAGED',
+  UNAVAILABLE = 'UNAVAILABLE',
+  MAINTENANCE = 'MAINTENANCE',
+}
+
+export enum BookCondition {
+  NEW = 'NEW',
+  GOOD = 'GOOD',
+  FAIR = 'FAIR',
+  POOR = 'POOR',
+  DAMAGED = 'DAMAGED',
+}
