@@ -4,6 +4,7 @@ import { UpdateShelfSectionDto } from './dto/update-shelf-section.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ShelfSection } from './entities/shelf-section.entity';
 import { Repository } from 'typeorm';
+import { Shelf } from '../shelves/entities/shelf.entity';
 
 @Injectable()
 export class ShelfSectionsService {
@@ -50,7 +51,7 @@ export class ShelfSectionsService {
       shelfSection.name = updateShelfSectionDto.name;
     }
     if (updateShelfSectionDto.shelfId !== undefined) {
-      shelfSection.shelf = { id: updateShelfSectionDto.shelfId } as any;
+      shelfSection.shelf = { id: updateShelfSectionDto.shelfId } as Shelf;
     }
     return this.shelfSectionRepository.save(shelfSection);
   }

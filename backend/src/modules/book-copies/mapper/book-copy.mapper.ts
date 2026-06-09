@@ -35,6 +35,6 @@ export class BookCopyMapper {
   }
 
   static toResponseList(copies: BookCopy[]) {
-    return copies.map(this.toResponse);
+    return copies.map((copy) => this.toResponse(copy));
   }
 }
