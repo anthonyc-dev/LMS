@@ -1,5 +1,30 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+class CreateShelfSectionItem {
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'The id of the shelf section',
+    example: 'uuid',
+  })
+  id?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'The name of the shelf section',
+    example: 'Section A',
+  })
+  name: string;
+}
 
 export class CreateShelfDto {
   @IsString()
@@ -34,19 +59,13 @@ export class CreateShelfDto {
   })
   description?: string;
 
-  @IsString()
   @IsOptional()
-  @ApiProperty({
-    description: 'The section of the shelf',
-    example: 'Fiction',
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateShelfSectionItem)
+  @ApiPropertyOptional({
+    description: 'Sections to create within this shelf',
+    type: [CreateShelfSectionItem],
   })
-  section?: string;
-
-  // @IsNumber()
-  // @IsNotEmpty()
-  // @ApiProperty({
-  //   description: 'The capacity of the shelf',
-  //   example: 100,
-  // })
-  // capacity: number;
+  sections?: CreateShelfSectionItem[];
 }

@@ -11,10 +11,20 @@ export interface Book {
     id: string;
     name: string;
   };
+  bookCopies?: {
+    shelf?: {
+      id: string;
+      name: string;
+    };
+  }[];
   pages?: number;
+  language?: string;
   coverImage?: string;
   edition?: string;
-  language?: string;
+  availableCopies?: number;
+  availabilityLabel?: string;
+  status?: string;
+  locations?: string[];
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;

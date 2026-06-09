@@ -29,7 +29,7 @@ export function DeleteShelfModal({
             <p className="text-sm font-medium text-slate-500">
               Remove shelf{" "}
               <span className="font-bold text-slate-800">
-                "{shelf.code} — {shelf.label}"
+                "{shelf.code} — {shelf.name}"
               </span>
               ? This cannot be undone.
             </p>

@@ -1,5 +1,4 @@
 import type { Book } from "./book";
-import type { Shelf } from "./shelf";
 
 export type BookCopyStatus =
   | "AVAILABLE"
@@ -21,8 +20,12 @@ export interface BookCopy {
   purchasePrice?: number;
   bookId: string;
   book?: Book;
-  shelfId?: string;
-  shelf?: Shelf;
+  location?: {
+    shelfId: string | null;
+    shelfName: string | null;
+    sectionId: string | null;
+    sectionName: string | null;
+  };
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;

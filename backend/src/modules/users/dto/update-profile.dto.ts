@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEmail, Matches, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEmail,
+  Matches,
+  IsEnum,
+} from 'class-validator';
 import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
 
 export class UpdateProfileDto {
@@ -17,7 +23,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   @Matches(/^(09|\+639)\d{9}$/, {
-    message: 'Phone number must be a valid PH format (09XXXXXXXXX or +639XXXXXXXXX)',
+    message:
+      'Phone number must be a valid PH format (09XXXXXXXXX or +639XXXXXXXXX)',
   })
   phoneNumber?: string;
 

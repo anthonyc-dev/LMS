@@ -46,6 +46,11 @@ const BrowseBooksPage = lazy(() =>
     default: m.BrowseBooksPage,
   })),
 );
+const ViewBookPage = lazy(() =>
+  import("@/features/books/pages/ViewBookPage").then((m) => ({
+    default: m.ViewBookPage,
+  })),
+);
 const DashboardPage = lazy(() =>
   import("@/features/books/pages/DashboardPage").then((m) => ({
     default: m.DashboardPage,
@@ -230,6 +235,7 @@ function App() {
               <Route path="books">
                 <Route index element={<MyBooksPage />} />
                 <Route path="browse" element={<BrowseBooksPage />} />
+                <Route path="details/:id" element={<ViewBookPage />} />
                 <Route path="borrow" element={<BorrowBooksPage />} />
                 <Route path="history" element={<BorrowingHistoryPage />} />
               </Route>

@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BookCopy } from 'src/modules/book-copies/entities/book-copy.entity';
+import { ShelfSection } from 'src/modules/shelf-sections/entities/shelf-section.entity';
 
 @Entity({ name: 'shelves' })
 export class Shelf {
@@ -51,13 +51,8 @@ export class Shelf {
   })
   floor?: string;
 
-  @ApiPropertyOptional({
-    example: 'West Wing',
-  })
-  @Column({
-    nullable: true,
-  })
-  section?: string;
+  @OneToMany(() => ShelfSection, (section) => section.shelf)
+  sections: ShelfSection[];
 
   @ApiProperty()
   @CreateDateColumn()
@@ -70,7 +65,4 @@ export class Shelf {
   @ApiPropertyOptional()
   @DeleteDateColumn()
   deletedAt?: Date;
-
-  @OneToMany(() => BookCopy, (bookCopy) => bookCopy.shelf)
-  bookCopies: BookCopy[];
 }

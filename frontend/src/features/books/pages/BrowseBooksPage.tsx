@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
-  Star,
   Bookmark,
   ArrowRight,
   Grid2X2,
@@ -23,135 +22,68 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/shared/components/ui/toggle-group";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/shared/components/ui/toggle-group";
 
 // Asset imports
-import book1Img from "@/assets/images/dashboard/book1.png";
-import book2Img from "@/assets/images/dashboard/book2.png";
 import bookDark1Img from "@/assets/images/dashboard/book_dark1.png";
-import bookDark2Img from "@/assets/images/dashboard/book_dark2.png";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { useBooks } from "@/features/books/hooks/useBooks";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
-const CATEGORIES = [
-  "All Books",
-  "Fiction",
-  "Science",
-  "History",
-  "Biography",
-  "Mystery",
-  "Technology",
-  "Art",
+const BOOK_COLORS = [
+  "from-blue-100 to-indigo-50",
+  "from-slate-800 to-slate-900",
+  "from-amber-50 to-orange-50",
+  "from-rose-800 to-rose-900",
+  "from-gray-50 to-slate-100",
+  "from-emerald-50 to-teal-50",
+  "from-indigo-800 to-indigo-900",
+  "from-orange-800 to-orange-900",
 ];
 
-const BOOKS = [
-  {
-    id: 1,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    rating: 4.8,
-    reviews: 2431,
-    category: "Fiction",
-    image: book1Img,
-    status: "Available",
-    color: "from-blue-100 to-indigo-50",
-  },
-  {
-    id: 2,
-    title: "Brief History of Time",
-    author: "Stephen Hawking",
-    rating: 4.9,
-    reviews: 3892,
-    category: "Science",
-    image: bookDark1Img,
-    status: "Borrowed",
-    color: "from-slate-800 to-slate-900",
-  },
-  {
-    id: 3,
-    title: "A Promised Land",
-    author: "Barack Obama",
-    rating: 4.7,
-    reviews: 1854,
-    category: "Biography",
-    image: book2Img,
-    status: "Available",
-    color: "from-amber-50 to-orange-50",
-  },
-  {
-    id: 4,
-    title: "The Silent Patient",
-    author: "Alex Michaelides",
-    rating: 4.5,
-    reviews: 4201,
-    category: "Mystery",
-    image: bookDark2Img,
-    status: "Reserved",
-    color: "from-rose-800 to-rose-900",
-  },
-  {
-    id: 5,
-    title: "Steve Jobs",
-    author: "Walter Isaacson",
-    rating: 4.8,
-    reviews: 2109,
-    category: "Biography",
-    image: book1Img,
-    status: "Available",
-    color: "from-gray-50 to-slate-100",
-  },
-  {
-    id: 6,
-    title: "Atomic Habits",
-    author: "James Clear",
-    rating: 5.0,
-    reviews: 8743,
-    category: "Technology",
-    image: book2Img,
-    status: "Available",
-    color: "from-emerald-50 to-teal-50",
-  },
-  {
-    id: 7,
-    title: "Deep Work",
-    author: "Cal Newport",
-    rating: 4.6,
-    reviews: 1567,
-    category: "Technology",
-    image: bookDark1Img,
-    status: "Available",
-    color: "from-indigo-800 to-indigo-900",
-  },
-  {
-    id: 8,
-    title: "The Alchemist",
-    author: "Paulo Coelho",
-    rating: 4.7,
-    reviews: 6231,
-    category: "Fiction",
-    image: bookDark2Img,
-    status: "Available",
-    color: "from-orange-800 to-orange-900",
-  },
-];
+const getBookColor = (id: string) => {
+  const sum = id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return BOOK_COLORS[sum % BOOK_COLORS.length];
+};
 
 export function BrowseBooksPage() {
   usePageTitle("Browse Books");
   const [activeCategory, setActiveCategory] = useState("All Books");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [viewMode, setViewMode] = useState<readonly string[]>(["grid"]);
+  const navigate = useNavigate();
 
-  const filteredBooks =
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  const { data, isLoading } = useBooks({
+    page: 1,
+    limit: 100, // Fetch up to 100 for browsing
+    search: debouncedSearch,
+  });
+
+  const books = data?.data || [];
+  const totalBooks = data?.total || 0;
+
+  // Extract unique categories from fetched books
+  const CATEGORIES = [
+    "All Books",
+    ...Array.from(new Set(books.map((b) => b.category?.name).filter((n): n is string => !!n))),
+  ];
+
+  const displayBooks =
     activeCategory === "All Books"
-      ? BOOKS
-      : BOOKS.filter((b) => b.category === activeCategory);
-
-  const displayBooks = searchQuery
-    ? filteredBooks.filter(
-        (b) =>
-          b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          b.author.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
-    : filteredBooks;
+      ? books
+      : books.filter((b) => b.category?.name === activeCategory);
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 md:space-y-8">
@@ -318,105 +250,107 @@ export function BrowseBooksPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-          {displayBooks.map((book) => (
-            <article
-              key={book.id}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60"
-            >
-              {/* Book Cover */}
-              <div
-                className={`relative aspect-3/4 overflow-hidden bg-linear-to-br ${book.color}`}
-              >
-                <img
-                  src={book.image}
-                  alt={book.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-
-                {/* Hover Overlay Actions */}
-                <div className="absolute inset-0 flex items-start justify-end bg-linear-to-t from-black/50 via-transparent to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <div className="flex flex-col gap-2">
-                    <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-rose-500">
-                      <Heart size={14} />
-                    </button>
-                    <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-indigo-600">
-                      <Bookmark size={14} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Status Badge */}
-                <div className="absolute bottom-3 left-3">
-                  <Badge
-                    className={`rounded-full border-0 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase shadow-lg backdrop-blur-md ${
-                      book.status === "Available"
-                        ? "bg-emerald-500/90 text-white"
-                        : book.status === "Borrowed"
-                          ? "bg-rose-500/90 text-white"
-                          : "bg-amber-500/90 text-white"
-                    }`}
-                  >
-                    {book.status === "Available" && (
-                      <span className="relative mr-1.5 flex size-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/75" />
-                        <span className="relative inline-flex size-1.5 rounded-full bg-white" />
-                      </span>
-                    )}
-                    {book.status}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Book Info */}
-              <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4">
-                <div className="space-y-1.5">
-                  <h3 className="line-clamp-1 text-sm font-bold tracking-tight text-slate-900 transition-colors group-hover:text-indigo-600 sm:text-base">
-                    {book.title}
-                  </h3>
-                  <p className="truncate text-xs text-slate-500 sm:text-sm">
-                    {book.author}
-                  </p>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex items-center gap-0.5 rounded-md bg-amber-50 px-1.5 py-0.5">
-                      <Star
-                        size={11}
-                        className="fill-amber-400 text-amber-400"
-                      />
-                      <span className="text-[11px] font-bold text-amber-700">
-                        {book.rating}
-                      </span>
-                    </div>
-                    <span className="hidden text-[10px] text-slate-400 sm:inline">
-                      ({book.reviews.toLocaleString()})
-                    </span>
-                  </div>
-
-                  <Badge
-                    variant="secondary"
-                    className="rounded-md bg-slate-100 text-[10px] font-medium text-slate-500 sm:text-xs"
-                  >
-                    {book.category}
-                  </Badge>
-                </div>
-
-                <Button
-                  className="mt-3 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:bg-indigo-600 hover:shadow-md hover:shadow-indigo-200 active:scale-[0.98] sm:text-sm"
-                  disabled={book.status === "Borrowed"}
+          {isLoading
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex flex-col gap-3 rounded-2xl border border-slate-100 p-3"
                 >
-                  {book.status === "Borrowed" ? "Unavailable" : "Borrow Now"}
-                </Button>
-              </div>
-            </article>
-          ))}
+                  <Skeleton className="aspect-3/4 w-full rounded-xl" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              ))
+            : displayBooks.map((book) => {
+                const coverColor = getBookColor(book.id);
+
+                return (
+                  <article
+                    key={book.id}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60"
+                  >
+                    {/* Book Cover */}
+                    <div
+                      className={`relative aspect-3/4 overflow-hidden bg-linear-to-br ${coverColor}`}
+                    >
+                      <img
+                        src={book.coverImage || bookDark1Img}
+                        alt={book.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+
+                      {/* Hover Overlay Actions */}
+                      <div className="absolute inset-0 flex items-start justify-end bg-linear-to-t from-black/50 via-transparent to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        <div className="flex flex-col gap-2">
+                          <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-rose-500">
+                            <Heart size={14} />
+                          </button>
+                          <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-indigo-600">
+                            <Bookmark size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Status Badge */}
+                      <div className="absolute bottom-3 left-3">
+                        <Badge
+                          className={`rounded-full border-0 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase shadow-lg backdrop-blur-md ${
+                            book?.status === "AVAILABLE"
+                              ? "bg-emerald-500/90 text-white"
+                              : book?.status === "UNAVAILABLE"
+                                ? "bg-rose-500/90 text-white"
+                                : "bg-amber-500/90 text-white"
+                          }`}
+                        >
+                          {book?.status === "AVAILABLE" && (
+                            <span className="relative mr-1.5 flex size-1.5">
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/75" />
+                              <span className="relative inline-flex size-1.5 rounded-full bg-white" />
+                            </span>
+                          )}
+                          {book?.availabilityLabel}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Book Info */}
+                    <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4">
+                      <div className="space-y-1.5">
+                        <h3 className="line-clamp-1 text-sm font-bold tracking-tight text-slate-900 transition-colors group-hover:text-indigo-600 sm:text-base">
+                          {book.title}
+                        </h3>
+                        <p className="truncate text-xs text-slate-500 sm:text-sm">
+                          {book.author}
+                        </p>
+                      </div>
+
+                      <div className="mt-3 flex items-center">
+                        <Badge
+                          variant="secondary"
+                          className="rounded-md bg-slate-100 text-[10px] font-medium text-slate-500 sm:text-xs"
+                        >
+                          {book.category?.name || "Uncategorized"}
+                        </Badge>
+                      </div>
+
+                      <Button
+                        className="mt-3 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:bg-indigo-600 hover:shadow-md hover:shadow-indigo-200 active:scale-[0.98] sm:text-sm"
+                        onClick={() =>
+                          navigate(`/student/books/details/${book.id}`)
+                        }
+                      >
+                        View Book
+                      </Button>
+                    </div>
+                  </article>
+                );
+              })}
         </div>
 
         {/* Load More */}
         <div className="flex flex-col items-center gap-3 pt-6">
           <p className="text-xs text-slate-400 sm:text-sm">
-            Showing {displayBooks.length} of 12,450 books
+            Showing {displayBooks.length} of {totalBooks} books
           </p>
           <Button
             variant="outline"

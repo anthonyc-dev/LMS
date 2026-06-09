@@ -39,7 +39,11 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
-import { useBooks, useDeleteBook, useUpdateBook } from "@/features/books/hooks/useBooks";
+import {
+  useBooks,
+  useDeleteBook,
+  useUpdateBook,
+} from "@/features/books/hooks/useBooks";
 import type { Book, UpdateBookDto } from "@/features/books/types/book";
 
 import { Skeleton } from "@/shared/components/ui/skeleton";
@@ -240,6 +244,9 @@ export function BooksPage() {
                     <TableHead className="py-4 font-bold text-slate-500">
                       Pages
                     </TableHead>
+                    <TableHead className="py-4 font-bold text-slate-500">
+                      Available Copies
+                    </TableHead>
                   </>
                 )}
                 <TableHead className="py-4 pr-5 text-right font-bold text-slate-500">
@@ -271,6 +278,9 @@ export function BooksPage() {
                         <TableCell>
                           <Skeleton className="h-4 w-10" />
                         </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-10" />
+                        </TableCell>
                       </>
                     )}
                     <TableCell className="pr-5 text-right">
@@ -281,7 +291,7 @@ export function BooksPage() {
               ) : books.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={isMobile ? 2 : 5}
+                    colSpan={isMobile ? 2 : 6}
                     className="py-10 text-center text-slate-500"
                   >
                     No books found. Try adjusting your search.
@@ -356,6 +366,9 @@ export function BooksPage() {
                             </TableCell>
                             <TableCell className="text-sm font-medium text-slate-700">
                               {book.pages || "—"}
+                            </TableCell>
+                            <TableCell className="text-sm font-medium text-slate-700">
+                              {book.availableCopies}
                             </TableCell>
                           </>
                         )}
@@ -436,6 +449,14 @@ export function BooksPage() {
                                 </span>
                                 <span className="text-sm font-medium text-slate-700">
                                   {book.pages || "—"}
+                                </span>
+                              </div>
+                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Available Copies
+                                </span>
+                                <span className="text-sm font-medium text-slate-700">
+                                  {book.availableCopies}
                                 </span>
                               </div>
                             </div>

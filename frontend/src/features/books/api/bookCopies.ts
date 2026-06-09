@@ -9,16 +9,11 @@ export interface CreateBookCopyPayload {
   acquiredAt?: string;
   purchasePrice?: number;
   bookId: string;
-  shelfId?: string;
+  shelfSectionId?: string;
 }
 
 export interface UpdateBookCopyPayload extends Partial<CreateBookCopyPayload> {
   id: string;
-}
-
-async function fetchBookCopies(search?: string): Promise<BookCopy[]> {
-  const response = await api.get("/book-copies", { params: { search } });
-  return response.data;
 }
 
 async function createBookCopy(data: CreateBookCopyPayload): Promise<BookCopy> {
@@ -36,10 +31,30 @@ async function deleteBookCopy(id: string): Promise<void> {
   await api.delete(`/book-copies/${id}`);
 }
 
-export function useBookCopies(search?: string) {
+export interface PaginatedBookCopies {
+  data: BookCopy[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+async function fetchBookCopies(
+  page = 1,
+  limit = 10,
+  search?: string,
+  status?: string
+): Promise<PaginatedBookCopies> {
+  const response = await api.get("/book-copies", {
+    params: { page, limit, search, status },
+  });
+  return response.data;
+}
+
+export function useBookCopies(page = 1, limit = 10, search?: string, status?: string) {
   return useQuery({
-    queryKey: ["book-copies", search],
-    queryFn: () => fetchBookCopies(search),
+    queryKey: ["book-copies", page, limit, search, status],
+    queryFn: () => fetchBookCopies(page, limit, search, status),
   });
 }
 
@@ -60,6 +75,7 @@ export function useBulkCreateBookCopy() {
     mutationFn: bulkCreateBookCopy,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["book-copies"] });
+      qc.invalidateQueries({ queryKey: ["books"] });
     },
   });
 }
@@ -70,6 +86,7 @@ export function useCreateBookCopy() {
     mutationFn: createBookCopy,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["book-copies"] });
+      qc.invalidateQueries({ queryKey: ["books"] });
     },
   });
 }
@@ -80,6 +97,7 @@ export function useUpdateBookCopy() {
     mutationFn: updateBookCopy,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["book-copies"] });
+      qc.invalidateQueries({ queryKey: ["books"] });
     },
   });
 }
@@ -90,6 +108,7 @@ export function useDeleteBookCopy() {
     mutationFn: deleteBookCopy,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["book-copies"] });
+      qc.invalidateQueries({ queryKey: ["books"] });
     },
   });
 }

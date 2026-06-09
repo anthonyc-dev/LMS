@@ -33,7 +33,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 import { toast } from "sonner";
 import { type UsersMeta as UsersMetaType } from "@/features/users/api/users";
 import {
@@ -41,6 +45,7 @@ import {
   type UserFormData,
   roleConfig,
 } from "@/features/users/pages/UserManagement";
+import { userFormSchema } from "@/features/users/validation/userSchema";
 
 const EMPTY_FORM: UserFormData = {
   schoolId: "",
@@ -74,6 +79,7 @@ export function UserModal({
 }: UserModalProps) {
   const isEdit = !!editUser;
   const [form, setForm] = useState<UserFormData>(EMPTY_FORM);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (open) {
@@ -89,19 +95,46 @@ export function UserModal({
               role: editUser.role,
               avatarFile: null,
             }
-          : EMPTY_FORM
+          : EMPTY_FORM,
       );
+      setErrors({});
     }
   }, [open, editUser]);
 
-  const set = (key: keyof UserFormData) => (val: string | null) =>
+  const set = (key: keyof UserFormData) => (val: string | null) => {
     setForm((p) => ({ ...p, [key]: (val ?? "") as never }));
+    if (errors[key]) {
+      setErrors((p) => {
+        const newErrors = { ...p };
+        delete newErrors[key];
+        return newErrors;
+      });
+    }
+  };
 
   const handleSave = () => {
-    if (!form.fullName.trim() || !form.email.trim() || !form.schoolId.trim()) {
-      toast.error("Full name, email, and school ID are required.");
+    const result = userFormSchema.safeParse(form);
+    if (!result.success) {
+      const formattedErrors = result.error.format();
+      const newErrors: Record<string, string> = {};
+
+      if (formattedErrors.schoolId)
+        newErrors.schoolId = formattedErrors.schoolId._errors[0];
+      if (formattedErrors.fullName)
+        newErrors.fullName = formattedErrors.fullName._errors[0];
+      if (formattedErrors.email)
+        newErrors.email = formattedErrors.email._errors[0];
+      if (formattedErrors.department)
+        newErrors.department = formattedErrors.department._errors[0];
+      if (formattedErrors.yearLevel)
+        newErrors.yearLevel = formattedErrors.yearLevel._errors[0];
+
+      setErrors(newErrors);
+      toast.error("Please fix the validation errors in the form.");
       return;
     }
+
+    setErrors({});
     onSave(form);
   };
 
@@ -109,7 +142,11 @@ export function UserModal({
   const RoleIcon = roleIcon.icon;
 
   return (
-    <Dialog key={open ? (editUser?.id ?? "create") : "closed"} open={open} onOpenChange={onClose}>
+    <Dialog
+      key={open ? (editUser?.id ?? "create") : "closed"}
+      open={open}
+      onOpenChange={onClose}
+    >
       <DialogContent className="max-h-[90vh] w-[95vw] overflow-x-hidden overflow-y-auto rounded-3xl border-none p-0 shadow-2xl sm:max-w-[580px]">
         {/* Gradient Header */}
         <div
@@ -160,7 +197,9 @@ export function UserModal({
           {/* Avatar Upload */}
           <div className="flex flex-col items-center justify-center gap-3 pb-2">
             <div className="group relative">
-              <Avatar className={`h-20 w-20 shadow-sm ring-2 ring-slate-100 transition-opacity ${isPending ? "opacity-50" : ""}`}>
+              <Avatar
+                className={`h-20 w-20 shadow-sm ring-2 ring-slate-100 transition-opacity ${isPending ? "opacity-50" : ""}`}
+              >
                 <AvatarImage
                   src={
                     form.avatarFile
@@ -169,19 +208,23 @@ export function UserModal({
                   }
                 />
                 <AvatarFallback className="bg-slate-100 text-xl font-bold text-slate-400">
-                  {form.fullName
-                    ? form.fullName.charAt(0).toUpperCase()
-                    : <Users className="size-8 opacity-20" />}
+                  {form.fullName ? (
+                    form.fullName.charAt(0).toUpperCase()
+                  ) : (
+                    <Users className="size-8 opacity-20" />
+                  )}
                 </AvatarFallback>
               </Avatar>
-              
+
               {isPending && (
                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-slate-900/10 backdrop-blur-[1px]">
                   <Loader2 className="size-6 animate-spin text-indigo-600" />
                 </div>
               )}
 
-              <label className={`absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-white shadow-sm transition-transform ${isPending ? "bg-slate-400 cursor-not-allowed" : "bg-indigo-600 cursor-pointer hover:scale-110"}`}>
+              <label
+                className={`absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-white shadow-sm transition-transform ${isPending ? "cursor-not-allowed bg-slate-400" : "cursor-pointer bg-indigo-600 hover:scale-110"}`}
+              >
                 <Camera className="size-3.5" />
                 <input
                   type="file"
@@ -196,8 +239,12 @@ export function UserModal({
               </label>
             </div>
             <div className="space-y-0.5 text-center">
-              <p className="text-xs font-semibold text-slate-700">Profile Picture</p>
-              <p className="text-[10px] text-slate-400">Optional. Image file only.</p>
+              <p className="text-xs font-semibold text-slate-700">
+                Profile Picture
+              </p>
+              <p className="text-[10px] text-slate-400">
+                Optional. Image file only.
+              </p>
             </div>
           </div>
 
@@ -213,9 +260,12 @@ export function UserModal({
                   value={form.schoolId}
                   onChange={(e) => set("schoolId")(e.target.value)}
                   placeholder="22-0350"
-                  className="rounded-xl border-slate-200 pl-9 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className={`rounded-xl pl-9 focus-visible:ring-indigo-500/20 ${errors.schoolId ? "border-rose-500 focus-visible:border-rose-500" : "border-slate-200 focus-visible:border-indigo-500"}`}
                 />
               </div>
+              {errors.schoolId && (
+                <p className="text-xs text-rose-500">{errors.schoolId}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
@@ -227,9 +277,12 @@ export function UserModal({
                   value={form.fullName}
                   onChange={(e) => set("fullName")(e.target.value)}
                   placeholder="John Doe"
-                  className="rounded-xl border-slate-200 pl-9 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className={`rounded-xl pl-9 focus-visible:ring-indigo-500/20 ${errors.fullName ? "border-rose-500 focus-visible:border-rose-500" : "border-slate-200 focus-visible:border-indigo-500"}`}
                 />
               </div>
+              {errors.fullName && (
+                <p className="text-xs text-rose-500">{errors.fullName}</p>
+              )}
             </div>
           </div>
 
@@ -246,9 +299,12 @@ export function UserModal({
                   value={form.email}
                   onChange={(e) => set("email")(e.target.value)}
                   placeholder="user@lms.edu"
-                  className="rounded-xl border-slate-200 pl-9 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className={`rounded-xl pl-9 focus-visible:ring-indigo-500/20 ${errors.email ? "border-rose-500 focus-visible:border-rose-500" : "border-slate-200 focus-visible:border-indigo-500"}`}
                 />
               </div>
+              {errors.email && (
+                <p className="text-xs text-rose-500">{errors.email}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
@@ -278,7 +334,9 @@ export function UserModal({
                   value={form.department}
                   onValueChange={set("department")}
                 >
-                  <SelectTrigger className="h-auto min-h-10 w-full rounded-xl border-slate-200 py-2 pl-9 text-left whitespace-normal focus:ring-indigo-500/20 [&>span]:line-clamp-none">
+                  <SelectTrigger
+                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-indigo-500/20 [&>span]:line-clamp-none ${errors.department ? "border-rose-500 focus:border-rose-500" : "border-slate-200"}`}
+                  >
                     <SelectValue
                       placeholder={
                         isLoadingMeta ? "Loading..." : "Select department"
@@ -300,6 +358,9 @@ export function UserModal({
                   </SelectContent>
                 </Select>
               </div>
+              {errors.department && (
+                <p className="text-xs text-rose-500">{errors.department}</p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
@@ -308,7 +369,9 @@ export function UserModal({
               <div className="relative">
                 <School className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Select value={form.yearLevel} onValueChange={set("yearLevel")}>
-                  <SelectTrigger className="h-auto min-h-10 w-full rounded-xl border-slate-200 py-2 pl-9 text-left whitespace-normal focus:ring-indigo-500/20 [&>span]:line-clamp-none">
+                  <SelectTrigger
+                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-indigo-500/20 [&>span]:line-clamp-none ${errors.yearLevel ? "border-rose-500 focus:border-rose-500" : "border-slate-200"}`}
+                  >
                     <SelectValue
                       placeholder={
                         isLoadingMeta ? "Loading..." : "Select year level"
@@ -330,6 +393,9 @@ export function UserModal({
                   </SelectContent>
                 </Select>
               </div>
+              {errors.yearLevel && (
+                <p className="text-xs text-rose-500">{errors.yearLevel}</p>
+              )}
             </div>
           </div>
 
@@ -343,7 +409,7 @@ export function UserModal({
                 <Shield className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Select
                   value={form.role}
-                   onValueChange={(v) => set("role")((v ?? "") as string)}
+                  onValueChange={(v) => set("role")((v ?? "") as string)}
                 >
                   <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 pl-9 focus:ring-indigo-500/20">
                     <SelectValue />

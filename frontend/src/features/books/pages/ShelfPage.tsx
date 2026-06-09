@@ -4,15 +4,11 @@ import {
   Search,
   Edit3,
   Trash2,
-  BookOpen,
   MoreHorizontal,
   MapPin,
   Layers,
   LayoutGrid,
   List,
-  Package,
-  CheckCircle2,
-  AlertTriangle,
   X,
   Hash,
   ChevronLeft,
@@ -23,10 +19,8 @@ import {
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Badge } from "@/shared/components/ui/badge";
-import { Card, CardContent } from "@/shared/components/ui/card";
-import { Progress } from "@/shared/components/ui/progress";
 
+import { Card, CardContent } from "@/shared/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,54 +52,14 @@ import {
   useDeleteShelf,
 } from "@/features/books/api/shelves";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import { ShelfFormModal } from "@/features/books/components/ShelfFormModal";
-import { DeleteShelfModal } from "@/features/books/components/DeleteShelfModal";
 import {
-  type Shelf,
-  type ShelfStatus,
-  FLOORS,
-} from "@/features/books/types/shelf";
-
-// ---------------------------------------------------------------------------
-// Types & seed data
-// ---------------------------------------------------------------------------
+  ShelfFormModal,
+  type ShelfFormPayload,
+} from "@/features/books/components/ShelfFormModal";
+import { DeleteShelfModal } from "@/features/books/components/DeleteShelfModal";
+import { type Shelf, FLOORS } from "@/features/books/types/shelf";
 
 const ROWS_PER_PAGE = 8;
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-const statusCfg: Record<
-  ShelfStatus,
-  { label: string; cls: string; icon: React.ReactNode }
-> = {
-  active: {
-    label: "Active",
-    cls: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    icon: <CheckCircle2 className="size-3" />,
-  },
-  maintenance: {
-    label: "Maintenance",
-    cls: "bg-amber-100  text-amber-800  border-amber-200",
-    icon: <AlertTriangle className="size-3" />,
-  },
-  full: {
-    label: "Full",
-    cls: "bg-rose-100   text-rose-800   border-rose-200",
-    icon: <Package className="size-3" />,
-  },
-};
-
-function occupancyColor(pct: number) {
-  if (pct >= 95) return "bg-rose-500";
-  if (pct >= 75) return "bg-amber-500";
-  return "bg-emerald-500";
-}
-
-// ---------------------------------------------------------------------------
-// Main Page
-// ---------------------------------------------------------------------------
 
 export function ShelfPage() {
   usePageTitle("Shelf");
@@ -123,11 +77,9 @@ export function ShelfPage() {
       code: s.code,
       name: s.name,
       floor: s.floor || "Ground Floor",
-      section: s.section || "Section A",
-      category: "General",
-      capacity: 100, // Default capacity
-      occupied: s.bookCopies?.length || 0,
-      status: (s.bookCopies?.length || 0) >= 100 ? "full" : "active",
+      description: s.description || "",
+      sections:
+        s.sections?.map((sec) => ({ id: sec.id, name: sec.name })) || [],
       notes: s.description || "",
       lastAudited: new Date(s.updatedAt || new Date())
         .toISOString()
@@ -137,7 +89,6 @@ export function ShelfPage() {
 
   const [search, setSearch] = useState("");
   const [floorFilter, setFloorFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [page, setPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
@@ -151,13 +102,11 @@ export function ShelfPage() {
       shelves.filter((s) => {
         const matchSearch =
           s.code.toLowerCase().includes(search.toLowerCase()) ||
-          s.name.toLowerCase().includes(search.toLowerCase()) ||
-          s.category.toLowerCase().includes(search.toLowerCase());
+          s.name.toLowerCase().includes(search.toLowerCase());
         const matchFloor = floorFilter === "all" || s.floor === floorFilter;
-        const matchStatus = statusFilter === "all" || s.status === statusFilter;
-        return matchSearch && matchFloor && matchStatus;
+        return matchSearch && matchFloor;
       }),
-    [shelves, search, floorFilter, statusFilter],
+    [shelves, search, floorFilter],
   );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
@@ -165,16 +114,6 @@ export function ShelfPage() {
     (page - 1) * ROWS_PER_PAGE,
     page * ROWS_PER_PAGE,
   );
-
-  const totalCapacity = shelves.reduce((s, sh) => s + sh.capacity, 0);
-  const totalOccupied = shelves.reduce((s, sh) => s + sh.occupied, 0);
-  const totalFree = totalCapacity - totalOccupied;
-  const fillPct = Math.round((totalOccupied / totalCapacity) * 100);
-  const maintenanceCount = shelves.filter(
-    (s) => s.status === "maintenance",
-  ).length;
-  const _fullCount = shelves.filter((s) => s.status === "full").length;
-  void _fullCount;
 
   // Handlers
   const openCreate = () => {
@@ -190,14 +129,14 @@ export function ShelfPage() {
     setDeleteOpen(true);
   };
 
-  const handleSave = async (data: Omit<Shelf, "id" | "lastAudited">) => {
+  const handleSave = async (data: ShelfFormPayload) => {
     try {
       const payload = {
         code: data.code,
         name: data.name,
         description: data.notes,
         floor: data.floor,
-        section: data.section,
+        sections: data.sections.map((s) => ({ id: s.id, name: s.name })),
       };
 
       if (editTarget) {
@@ -231,12 +170,6 @@ export function ShelfPage() {
   const onFloor = (v: string | null) => {
     if (v !== null) {
       setFloorFilter(v);
-      setPage(1);
-    }
-  };
-  const onStatus = (v: string | null) => {
-    if (v !== null) {
-      setStatusFilter(v);
       setPage(1);
     }
   };
@@ -348,74 +281,6 @@ export function ShelfPage() {
             </div>
           </CardContent>
         </Card>
-
-        <Card className="group border-slate-100 bg-white transition-all hover:border-indigo-200 hover:shadow-md">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="shrink-0 rounded-xl bg-indigo-50 p-3 text-indigo-600 transition-transform group-hover:scale-110">
-              <Package className="size-4" />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
-                Total Capacity
-              </p>
-              <h3 className="text-xl font-black text-slate-900">
-                {totalCapacity}
-              </h3>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="group border-slate-100 bg-white transition-all hover:border-emerald-200 hover:shadow-md">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="shrink-0 rounded-xl bg-emerald-50 p-3 text-emerald-600 transition-transform group-hover:scale-110">
-              <CheckCircle2 className="size-4" />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
-                Free Slots
-              </p>
-              <h3 className="text-xl font-black text-emerald-700">
-                {totalFree}
-              </h3>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="group border-slate-100 bg-white transition-all hover:border-amber-200 hover:shadow-md">
-          <CardContent className="flex items-center gap-3 p-5">
-            <div className="shrink-0 rounded-xl bg-amber-50 p-3 text-amber-600 transition-transform group-hover:scale-110">
-              <AlertTriangle className="size-4" />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
-                Maintenance
-              </p>
-              <h3 className="text-xl font-black text-amber-700">
-                {maintenanceCount}
-              </h3>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Utilization card */}
-        <Card className="group border-slate-100 bg-white transition-all hover:border-blue-200 hover:shadow-md lg:col-span-1">
-          <CardContent className="p-5">
-            <div className="mb-3 flex items-center gap-3">
-              <div className="shrink-0 rounded-xl bg-blue-50 p-3 text-blue-600 transition-transform group-hover:scale-110">
-                <BookOpen className="size-4" />
-              </div>
-              <div>
-                <p className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
-                  Overall Fill
-                </p>
-                <h3 className="text-xl font-black text-slate-900">
-                  {fillPct}%
-                </h3>
-              </div>
-            </div>
-            <Progress value={fillPct} className="h-1.5 bg-slate-100" />
-          </CardContent>
-        </Card>
       </div>
 
       {/* ── Toolbar ── */}
@@ -462,24 +327,6 @@ export function ShelfPage() {
               </SelectContent>
             </Select>
 
-            {/* Status filter */}
-            <Select
-              value={statusFilter}
-              onValueChange={(v) => {
-                if (v !== null) onStatus(v);
-              }}
-            >
-              <SelectTrigger className="h-9 w-36 rounded-xl border-slate-200 text-sm">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-                <SelectItem value="full">Full</SelectItem>
-              </SelectContent>
-            </Select>
-
             <span className="flex items-center gap-1 text-xs font-medium text-slate-400">
               <Hash className="size-3" />
               {filtered.length} shelf{filtered.length !== 1 ? "es" : ""}
@@ -518,16 +365,7 @@ export function ShelfPage() {
                         Label
                       </TableHead>
                       <TableHead className="py-4 font-bold text-slate-500">
-                        Floor / Section
-                      </TableHead>
-                      <TableHead className="py-4 font-bold text-slate-500">
-                        Category
-                      </TableHead>
-                      <TableHead className="py-4 font-bold text-slate-500">
-                        Occupancy
-                      </TableHead>
-                      <TableHead className="py-4 font-bold text-slate-500">
-                        Status
+                        Floor | Section
                       </TableHead>
                       <TableHead className="py-4 font-bold text-slate-500">
                         Last Audit
@@ -541,9 +379,6 @@ export function ShelfPage() {
               </TableHeader>
               <TableBody>
                 {paginated.map((shelf) => {
-                  const pct = Math.round(
-                    (shelf.occupied / shelf.capacity) * 100,
-                  );
                   const isExpanded = isMobile && expandedRow === shelf.id;
                   return (
                     <Fragment key={shelf.id}>
@@ -567,8 +402,9 @@ export function ShelfPage() {
                                     {shelf.name}
                                   </p>
                                   {shelf.notes && (
-                                    <p className="max-w-[160px] truncate text-[11px] font-medium text-amber-600">
-                                      ⚠ {shelf.notes}
+                                    <p className="max-w-[160px] truncate text-[11px] font-medium text-emerald-600">
+                                      <Form className="mr-1 inline size-3" />{" "}
+                                      {shelf.notes}
                                     </p>
                                   )}
                                 </div>
@@ -600,42 +436,13 @@ export function ShelfPage() {
                                   {shelf.floor}
                                 </p>
                                 <p className="text-[11px] font-medium text-slate-400">
-                                  {shelf.section}
+                                  {shelf.sections
+                                    .map((s) => s.name)
+                                    .join(", ") || "No sections"}
                                 </p>
                               </div>
                             </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant="secondary"
-                                className="border-none bg-slate-100 text-xs font-bold text-slate-600"
-                              >
-                                {shelf.category}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="min-w-[140px]">
-                              <div className="space-y-1.5">
-                                <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                                  <span>
-                                    {shelf.occupied}/{shelf.capacity}
-                                  </span>
-                                  <span>{pct}%</span>
-                                </div>
-                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                                  <div
-                                    className={`h-full rounded-full transition-all duration-500 ${occupancyColor(pct)}`}
-                                    style={{ width: `${pct}%` }}
-                                  />
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge
-                                className={`flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold ${statusCfg[shelf.status].cls}`}
-                              >
-                                {statusCfg[shelf.status].icon}
-                                {statusCfg[shelf.status].label}
-                              </Badge>
-                            </TableCell>
+
                             <TableCell>
                               <span className="text-xs font-medium text-slate-400">
                                 {shelf.lastAudited}
@@ -685,52 +492,43 @@ export function ShelfPage() {
                             colSpan={2}
                             className="border-b border-slate-100 p-0"
                           >
-                            <div className="flex flex-col gap-3 px-5 py-4 text-sm">
-                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                                <span className="font-medium text-slate-500">
-                                  Floor / Section
+                            <div className="flex flex-col gap-3 px-4 py-4 text-sm">
+                              <div className="space-y-1 border-b border-slate-100 pb-3">
+                                <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                                  Floor
                                 </span>
-                                <span className="font-bold text-slate-800">
-                                  {shelf.floor} · {shelf.section}
-                                </span>
+                                <p className="font-bold text-slate-800">
+                                  {shelf.floor}
+                                </p>
                               </div>
-                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                                <span className="font-medium text-slate-500">
-                                  Category
+                              <div className="space-y-1.5 border-b border-slate-100 pb-3">
+                                <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                                  Sections
                                 </span>
-                                <Badge
-                                  variant="secondary"
-                                  className="border-none bg-slate-100 text-xs font-bold text-slate-600"
-                                >
-                                  {shelf.category}
-                                </Badge>
+                                {shelf.sections.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {shelf.sections.map((s) => (
+                                      <span
+                                        key={s.id ?? s.name}
+                                        className="rounded-md bg-slate-200/70 px-2 py-0.5 text-xs font-semibold text-slate-700"
+                                      >
+                                        {s.name}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs font-medium text-slate-400">
+                                    No sections
+                                  </p>
+                                )}
                               </div>
-                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                                <span className="font-medium text-slate-500">
-                                  Occupancy
-                                </span>
-                                <span className="font-bold text-slate-800">
-                                  {shelf.occupied}/{shelf.capacity} ({pct}%)
-                                </span>
-                              </div>
-                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                                <span className="font-medium text-slate-500">
-                                  Status
-                                </span>
-                                <Badge
-                                  className={`flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold ${statusCfg[shelf.status].cls}`}
-                                >
-                                  {statusCfg[shelf.status].icon}
-                                  {statusCfg[shelf.status].label}
-                                </Badge>
-                              </div>
-                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                                <span className="font-medium text-slate-500">
+                              <div className="space-y-1">
+                                <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
                                   Last Audit
                                 </span>
-                                <span className="font-bold text-slate-800">
+                                <p className="font-bold text-slate-800">
                                   {shelf.lastAudited}
-                                </span>
+                                </p>
                               </div>
                             </div>
                           </TableCell>
@@ -763,8 +561,6 @@ export function ShelfPage() {
         {viewMode === "grid" && (
           <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {paginated.map((shelf) => {
-              const pct = Math.round((shelf.occupied / shelf.capacity) * 100);
-              const cfg = statusCfg[shelf.status];
               return (
                 <div
                   key={shelf.id}
@@ -777,11 +573,6 @@ export function ShelfPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge
-                        className={`flex items-center gap-1 border text-[10px] font-bold ${cfg.cls}`}
-                      >
-                        {cfg.icon} {cfg.label}
-                      </Badge>
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           render={
@@ -821,38 +612,16 @@ export function ShelfPage() {
                       {shelf.name}
                     </p>
                     <p className="text-[11px] font-medium text-slate-400">
-                      {shelf.floor} · {shelf.section}
+                      {shelf.floor} ·{" "}
+                      {shelf.sections.map((s) => s.name).join(", ") || "N/A"}
                     </p>
                   </div>
-
-                  <Badge
-                    variant="secondary"
-                    className="border border-slate-200 bg-white text-xs font-bold text-slate-600 shadow-xs"
-                  >
-                    {shelf.category}
-                  </Badge>
 
                   {shelf.notes && (
-                    <p className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-1 text-[10px] font-medium text-amber-700">
-                      <Form />
-                      {shelf.notes}
+                    <p className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-1 text-[10px] font-medium text-emerald-700">
+                      <Form className="mr-1 inline size-3" /> {shelf.notes}
                     </p>
                   )}
-
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-[11px] font-bold text-slate-500">
-                      <span>
-                        {shelf.occupied}/{shelf.capacity} books
-                      </span>
-                      <span>{pct}%</span>
-                    </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${occupancyColor(pct)}`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  </div>
                 </div>
               );
             })}

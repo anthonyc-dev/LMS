@@ -13,6 +13,7 @@ import {
   uploadImageToCloudinary,
 } from 'src/common/utils/cloudinaryUpload';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BookCopyStatus } from 'src/common/enums/enum.enums';
 
 @Injectable()
 export class BooksService {
@@ -22,6 +23,7 @@ export class BooksService {
     @InjectRepository(Book)
     private readonly bookRepository: Repository<Book>,
   ) {}
+
   async create(createBookDto: CreateBookDto, file?: Express.Multer.File) {
     this.logger.log('Creating book', createBookDto);
 
@@ -77,6 +79,11 @@ export class BooksService {
       order: { createdAt: 'DESC' },
       relations: {
         category: true,
+        bookCopies: {
+          shelfSection: {
+            shelf: true,
+          },
+        },
       },
     };
 
@@ -93,7 +100,42 @@ export class BooksService {
       ];
     }
 
-    const [data, total] = await this.bookRepository.findAndCount(findOptions);
+    const [books, total] = await this.bookRepository.findAndCount(findOptions);
+
+    const data = books.map((book) => {
+      const availableCopies =
+        book.bookCopies?.filter(
+          (copy) => copy.status === BookCopyStatus.AVAILABLE,
+        ).length || 0;
+
+      const availabilityLabel =
+        availableCopies > 0
+          ? `${availableCopies} copies available`
+          : 'No copies available';
+
+      const locations = [
+        ...new Set(
+          book.bookCopies
+            .filter((copy) => copy.status === BookCopyStatus.AVAILABLE)
+            .map((copy) =>
+              copy.shelfSection?.shelf?.name && copy.shelfSection?.name
+                ? `${copy.shelfSection.shelf.name} → ${copy.shelfSection.name}`
+                : null,
+            )
+            .filter(Boolean),
+        ),
+      ];
+      return {
+        ...book,
+        availableCopies,
+        availabilityLabel,
+        status:
+          availableCopies > 0
+            ? BookCopyStatus.AVAILABLE
+            : BookCopyStatus.UNAVAILABLE,
+        locations: locations.length > 0 ? locations : ['Unavailable'],
+      };
+    });
 
     return {
       data,
@@ -104,12 +146,55 @@ export class BooksService {
     };
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     this.logger.log('Finding book with id', id);
-    return this.bookRepository.findOne({
+    const book = await this.bookRepository.findOne({
       where: { id },
-      relations: ['category'],
+      relations: {
+        category: true,
+        bookCopies: {
+          shelfSection: {
+            shelf: true,
+          },
+        },
+      },
     });
+    if (!book) {
+      return null;
+    }
+
+    const availableCopies = book.bookCopies.filter(
+      (copy) => copy.status === BookCopyStatus.AVAILABLE,
+    ).length;
+
+    const availabilityLabel =
+      availableCopies > 0
+        ? `${availableCopies} copies available`
+        : 'No copies available';
+
+    const locations = [
+      ...new Set(
+        book.bookCopies
+          .filter((copy) => copy.status === BookCopyStatus.AVAILABLE)
+          .map((copy) =>
+            copy.shelfSection?.name && copy.shelfSection?.shelf?.name
+              ? `${copy.shelfSection.name} → ${copy.shelfSection.shelf.name}`
+              : null,
+          )
+          .filter(Boolean),
+      ),
+    ];
+
+    return {
+      ...book,
+      availableCopies,
+      availabilityLabel,
+      status:
+        availableCopies > 0
+          ? BookCopyStatus.AVAILABLE
+          : BookCopyStatus.UNAVAILABLE,
+      locations: locations.length > 0 ? locations : ['Unavailable'],
+    };
   }
 
   async update(
