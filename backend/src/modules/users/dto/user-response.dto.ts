@@ -10,6 +10,10 @@ export class UserResponseDto {
   @Expose()
   schoolId: string;
 
+  @ApiProperty({ required: false, nullable: true })
+  @Expose()
+  barcode?: string;
+
   @ApiProperty()
   @Expose()
   fullName: string;

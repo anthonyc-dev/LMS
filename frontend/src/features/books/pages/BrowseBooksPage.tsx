@@ -2,26 +2,14 @@ import { useState, useEffect } from "react";
 import {
   Search,
   Bookmark,
-  ArrowRight,
   Grid2X2,
   List,
-  SlidersHorizontal,
-  Sparkles,
   Heart,
-  BookOpen,
-  TrendingUp,
   ChevronDown,
 } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -77,7 +65,11 @@ export function BrowseBooksPage() {
   // Extract unique categories from fetched books
   const CATEGORIES = [
     "All Books",
-    ...Array.from(new Set(books.map((b) => b.category?.name).filter((n): n is string => !!n))),
+    ...Array.from(
+      new Set(
+        books.map((b) => b.category?.name).filter((n): n is string => !!n),
+      ),
+    ),
   ];
 
   const displayBooks =
@@ -87,6 +79,61 @@ export function BrowseBooksPage() {
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 md:space-y-8">
+      {/* ── Featured Hero ──────────────────────────────────────────── */}
+      {/* <section className="group relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-900 to-indigo-950 p-6 sm:p-8 md:p-10">
+        <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:gap-12">
+          <div className="flex-1 space-y-4 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 px-3 py-1.5 text-xs font-semibold text-indigo-400">
+              <Sparkles size={12} />
+              Curated For You
+            </div>
+            <h1 className="text-2xl leading-tight font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
+              Uncover the{" "}
+              <span className="bg-linear-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                Classics
+              </span>
+            </h1>
+            <p className="max-w-lg text-sm leading-relaxed text-slate-400 md:text-base">
+              Discover a handpicked collection of timeless literature that
+              shaped the world. From epic journeys to intimate portraits of the
+              human soul.
+            </p>
+
+            <div className="flex items-center justify-center gap-6 pt-2 md:justify-start">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <BookOpen size={14} className="text-indigo-400" />
+                <span>
+                  <strong className="text-white">{displayBooks.length} </strong>{" "}
+                  Books
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <TrendingUp size={14} className="text-emerald-400" />
+                <span>
+                  <strong className="text-white">98%</strong> Satisfaction
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative flex w-48 shrink-0 items-center justify-center sm:w-56 md:w-64">
+            <div className="absolute inset-0 scale-150 rounded-full bg-indigo-500/15 blur-3xl transition-all duration-700 group-hover:bg-indigo-500/25" />
+            <div className="relative transition-transform duration-700 ease-out group-hover:-translate-y-2 group-hover:scale-105 group-hover:rotate-2">
+              <div className="absolute inset-0 translate-y-6 scale-[0.85] rounded-xl bg-black/30 blur-2xl" />
+              <img
+                src={bookDark1Img}
+                alt="Featured Book"
+                className="relative w-full drop-shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-violet-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute top-0 right-0 h-full w-1/3 bg-linear-to-l from-indigo-500/5 to-transparent" />
+      </section> */}
+
       {/* ── Search Bar ─────────────────────────────────────────────── */}
       <section className="space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -103,20 +150,6 @@ export function BrowseBooksPage() {
 
           {/* Controls */}
           <div className="flex items-center gap-2">
-            <Select defaultValue="popular">
-              <SelectTrigger className="h-11 w-[140px] flex-1 rounded-xl border-slate-200 bg-white text-sm shadow-sm sm:w-[150px] sm:flex-none">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal size={14} className="text-slate-400" />
-                  <SelectValue placeholder="Sort by" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl">
-                <SelectItem value="popular">Most Popular</SelectItem>
-                <SelectItem value="newest">Recently Added</SelectItem>
-                <SelectItem value="rating">Highest Rated</SelectItem>
-              </SelectContent>
-            </Select>
-
             <ToggleGroup
               value={viewMode}
               onValueChange={(v) => v && setViewMode(v)}
@@ -157,76 +190,6 @@ export function BrowseBooksPage() {
             </button>
           ))}
         </div>
-      </section>
-
-      {/* ── Featured Hero ──────────────────────────────────────────── */}
-      <section className="group relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-900 to-indigo-950 p-6 sm:p-8 md:p-10">
-        <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:gap-12">
-          {/* Text Content */}
-          <div className="flex-1 space-y-4 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 px-3 py-1.5 text-xs font-semibold text-indigo-400">
-              <Sparkles size={12} />
-              Curated For You
-            </div>
-            <h1 className="text-2xl leading-tight font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
-              Uncover the{" "}
-              <span className="bg-linear-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                Classics
-              </span>
-            </h1>
-            <p className="max-w-lg text-sm leading-relaxed text-slate-400 md:text-base">
-              Discover a handpicked collection of timeless literature that
-              shaped the world. From epic journeys to intimate portraits of the
-              human soul.
-            </p>
-            <div className="flex flex-col items-center gap-3 sm:flex-row md:items-start">
-              <Button className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98]">
-                <BookOpen size={16} className="mr-2" />
-                Explore Collection
-              </Button>
-              <Button
-                variant="ghost"
-                className="gap-2 text-sm font-semibold text-slate-300 hover:bg-white/5 hover:text-white"
-              >
-                Learn More <ArrowRight size={14} />
-              </Button>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="flex items-center justify-center gap-6 pt-2 md:justify-start">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <BookOpen size={14} className="text-indigo-400" />
-                <span>
-                  <strong className="text-white">12,450</strong> Books
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <TrendingUp size={14} className="text-emerald-400" />
-                <span>
-                  <strong className="text-white">98%</strong> Satisfaction
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Book Visual */}
-          <div className="relative flex w-48 shrink-0 items-center justify-center sm:w-56 md:w-64">
-            <div className="absolute inset-0 scale-150 rounded-full bg-indigo-500/15 blur-3xl transition-all duration-700 group-hover:bg-indigo-500/25" />
-            <div className="relative transition-transform duration-700 ease-out group-hover:-translate-y-2 group-hover:scale-105 group-hover:rotate-2">
-              <div className="absolute inset-0 translate-y-6 scale-[0.85] rounded-xl bg-black/30 blur-2xl" />
-              <img
-                src={bookDark1Img}
-                alt="Featured Book"
-                className="relative w-full drop-shadow-2xl"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Background Decorations */}
-        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-600/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-violet-600/10 blur-3xl" />
-        <div className="pointer-events-none absolute top-0 right-0 h-full w-1/3 bg-linear-to-l from-indigo-500/5 to-transparent" />
       </section>
 
       {/* ── Book Grid ──────────────────────────────────────────────── */}

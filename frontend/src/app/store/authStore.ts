@@ -7,6 +7,7 @@ interface User {
   role?: string;
   schoolId?: string;
   avatarUrl?: string;
+  barcode?: string;
 }
 
 interface AuthState {

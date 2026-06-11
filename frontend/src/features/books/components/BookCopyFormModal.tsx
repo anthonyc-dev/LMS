@@ -109,7 +109,7 @@ export function BookCopyFormModal({
           purchasePrice: initial.purchasePrice
             ? String(initial.purchasePrice)
             : "0",
-          bookId: initial.bookId,
+          bookId: initial.bookId || initial.book?.id || "",
           shelfId: initial.location?.shelfId || "",
           shelfSectionIds: initial.location?.sectionId
             ? [initial.location.sectionId]
@@ -138,7 +138,7 @@ export function BookCopyFormModal({
               purchasePrice: initial.purchasePrice
                 ? String(initial.purchasePrice)
                 : "0",
-              bookId: initial.bookId,
+              bookId: initial.bookId || initial.book?.id || "",
               shelfId: initial.location?.shelfId || "",
               shelfSectionIds: initial.location?.sectionId
                 ? [initial.location.sectionId]
@@ -152,6 +152,15 @@ export function BookCopyFormModal({
       setSectionPopoverOpen(false);
     }
   }, [open, initial, defaultBookId]);
+
+  useEffect(() => {
+    if (mode === "single" && form.shelfSectionIds.length > 1) {
+      setForm((f) => ({
+        ...f,
+        shelfSectionIds: f.shelfSectionIds.slice(0, 1),
+      }));
+    }
+  }, [mode, form.shelfSectionIds]);
 
   const { data: paginatedBooks } = useBooks({ limit: 1000 });
   const books = paginatedBooks?.data || [];
@@ -191,7 +200,7 @@ export function BookCopyFormModal({
     setForm((f) => ({ ...f, [key]: val }));
 
   const handleToggleSection = (secId: string) => {
-    if (initial) {
+    if (initial || mode === "single") {
       setForm((f) => ({
         ...f,
         shelfSectionIds: f.shelfSectionIds.includes(secId) ? [] : [secId],
@@ -227,21 +236,34 @@ export function BookCopyFormModal({
   };
 
   const handleSave = () => {
-    if (!validate()) return;
-    onSave({
-      status: form.status,
-      condition: form.condition,
-      notes: form.notes.trim() || undefined,
-      acquiredAt: form.acquiredAt
-        ? new Date(form.acquiredAt).toISOString()
-        : undefined,
-      purchasePrice: form.purchasePrice ? +form.purchasePrice : undefined,
-      bookId: form.bookId,
-      shelfSectionIds: form.shelfSectionIds,
-      ...(mode === "multiple" && !initial
-        ? { count: parseInt(count, 10) }
-        : {}),
-    });
+    try {
+      if (!validate()) {
+        return;
+      }
+
+      const safeIsoDate = (dateStr: string) => {
+        if (!dateStr) return undefined;
+        const d = new Date(dateStr);
+        return isNaN(d.getTime()) ? undefined : d.toISOString();
+      };
+
+      const payload = {
+        status: form.status,
+        condition: form.condition,
+        notes: form.notes?.trim() || undefined,
+        acquiredAt: form.acquiredAt ? safeIsoDate(form.acquiredAt) : undefined,
+        purchasePrice: form.purchasePrice ? +form.purchasePrice : undefined,
+        bookId: form.bookId,
+        shelfSectionIds: form.shelfSectionIds,
+        ...(mode === "multiple" && !initial
+          ? { count: parseInt(count, 10) }
+          : {}),
+      };
+
+      onSave(payload);
+    } catch (err) {
+      console.error("Crash in handleSave:", err);
+    }
   };
 
   return (

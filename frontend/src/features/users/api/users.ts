@@ -32,6 +32,7 @@ export interface ApiUser {
   yearLevel: string;
   phoneNumber?: string;
   avatarUrl?: string;
+  barcode?: string;
   Role: Role;
   createdAt: string;
   updatedAt: string;
@@ -48,6 +49,7 @@ export function normalizeApiUser(raw: Record<string, unknown>): ApiUser {
     yearLevel: getField<string>(raw, "yearLevel", "year_level") ?? "",
     phoneNumber: getField<string>(raw, "phoneNumber", "phone_number", "phone"),
     avatarUrl: getField<string>(raw, "avatarUrl", "avatar_url"),
+    barcode: getField<string>(raw, "barcode"),
     Role: normalizeRole(getField(raw, "Role", "role")),
     createdAt:
       getField<string>(raw, "createdAt", "created_at", "createdAt") ??
