@@ -22,6 +22,9 @@ export class User {
   @Column({ unique: true })
   schoolId: string;
 
+  @Column({ type: 'text', nullable: true })
+  barcode?: string;
+
   @Column()
   fullName: string;
 

@@ -17,6 +17,7 @@ import { normalizeIp } from 'src/common/utils/normalizedIp.util';
 import * as nodemailer from 'nodemailer';
 import { randomBytes } from 'crypto';
 import cloudinary from 'src/config/cloudinary';
+import * as bwipjs from 'bwip-js';
 
 @Injectable()
 export class UsersService {
@@ -77,6 +78,8 @@ export class UsersService {
       user.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`;
     }
 
+    user.barcode = await this.generateBarcode(user.schoolId);
+
     return this.usersRepository.save(user);
   }
 
@@ -122,6 +125,8 @@ export class UsersService {
     if (!user.avatarUrl) {
       user.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`;
     }
+
+    user.barcode = await this.generateBarcode(user.schoolId);
 
     const savedUser = await this.usersRepository.save(user);
 
@@ -192,10 +197,14 @@ export class UsersService {
   async update(id: string, userData: UpdateUserDto) {
     this.logger.log(`Updating user: ${id}`);
 
-    const updateData = { ...userData };
+    const updateData: Partial<User> = { ...userData };
 
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    if (updateData.schoolId) {
+      updateData.barcode = await this.generateBarcode(updateData.schoolId);
     }
 
     await this.usersRepository.update(id, updateData);
@@ -275,5 +284,22 @@ export class UsersService {
     }
 
     return false;
+  }
+
+  private async generateBarcode(text: string): Promise<string> {
+    const normalized = this.normalizeBarcode(text);
+    const png = await bwipjs.toBuffer({
+      bcid: 'code128',
+      text: normalized,
+      scale: 3,
+      height: 10,
+      includetext: true,
+      textxalign: 'center',
+    });
+    return `data:image/png;base64,${png.toString('base64')}`;
+  }
+
+  private normalizeBarcode(value: string): string {
+    return value.trim().toUpperCase();
   }
 }

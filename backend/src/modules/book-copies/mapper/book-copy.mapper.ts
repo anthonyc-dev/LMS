@@ -10,6 +10,7 @@ export class BookCopyMapper {
       notes: copy.notes,
       acquiredAt: copy.acquiredAt,
       purchasePrice: copy.purchasePrice,
+      bookId: copy.bookId,
 
       book: copy.book
         ? {

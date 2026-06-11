@@ -22,12 +22,7 @@ export function ProfilePage() {
   const [isEditingAddress, setIsEditingAddress] = useState(false);
 
   // Personal info fields
-  const [firstName, setFirstName] = useState(
-    () => (user?.fullName ?? "").split(" ")[0] ?? "",
-  );
-  const [lastName, setLastName] = useState(
-    () => (user?.fullName ?? "").split(" ").slice(1).join(" ") ?? "",
-  );
+  const [firstName, setFirstName] = useState(user?.fullName ?? "");
   const [dateOfBirth, setDateOfBirth] = useState("12-10-1990");
   const [email, setEmail] = useState(user?.email ?? "");
   const [phoneNumber, setPhoneNumber] = useState("(+62) 821 2554-5846");
@@ -48,7 +43,7 @@ export function ProfilePage() {
     role === "admin" ? "Admin" : role === "faculty" ? "Faculty" : "Student";
 
   const handleSavePersonal = () => {
-    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    const fullName = `${firstName}`;
     if (!fullName) {
       toast.error("Name cannot be empty.");
       return;
@@ -63,7 +58,7 @@ export function ProfilePage() {
 
   const handleCancelPersonal = () => {
     setFirstName((user?.fullName ?? "").split(" ")[0] ?? "");
-    setLastName((user?.fullName ?? "").split(" ").slice(1).join(" ") ?? "");
+
     setEmail(user?.email ?? "");
     setIsEditingPersonal(false);
   };
@@ -103,31 +98,134 @@ export function ProfilePage() {
       <div className="mx-auto max-w-[1000px] space-y-6 pb-12">
         {/* Page Title */}
         <h1 className="text-lg font-semibold text-emerald-700">My Profile</h1>
-
         {/* Profile Header Card */}
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
-          <div className="flex items-center gap-5">
-            {/* Avatar with camera badge */}
-            <div className="group relative shrink-0">
-              <Avatar className="h-20 w-20 shadow ring-2 ring-slate-100">
-                <AvatarImage src={user?.avatarUrl} />
-                <AvatarFallback className="bg-amber-100 text-lg font-bold text-amber-700">
-                  {user?.fullName?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <button className="absolute -right-0.5 bottom-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white bg-emerald-600 text-white shadow-sm transition-colors hover:bg-emerald-700">
-                <Camera className="size-3" />
-              </button>
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-5">
+              {/* Avatar with camera badge */}
+              <div className="group relative shrink-0">
+                <Avatar className="h-20 w-20 shadow ring-2 ring-slate-100">
+                  <AvatarImage src={user?.avatarUrl} />
+                  <AvatarFallback className="bg-amber-100 text-lg font-bold text-amber-700">
+                    {user?.fullName?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <button className="absolute -right-0.5 bottom-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white bg-emerald-600 text-white shadow-sm transition-colors hover:bg-emerald-700">
+                  <Camera className="size-3" />
+                </button>
+              </div>
+              {/* Name & meta */}
+              <div className="min-w-0">
+                <h2 className="text-lg font-bold text-slate-900">
+                  {user?.fullName ?? "User"}
+                </h2>
+                <p className="mt-0.5 text-sm text-slate-500">{roleLabel}</p>
+                <p className="mt-0.5 text-sm text-slate-500">
+                  {city}, {country}
+                </p>
+              </div>
             </div>
-            {/* Name & meta */}
-            <div className="min-w-0">
-              <h2 className="text-lg font-bold text-slate-900">
-                {user?.fullName ?? "User"}
-              </h2>
-              <p className="mt-0.5 text-sm text-slate-500">{roleLabel}</p>
-              <p className="mt-0.5 text-sm text-slate-500">
-                {city}, {country}
-              </p>
+
+            {/* Large Scannable Barcode */}
+            {user?.barcode && (
+              <div className="border-slate-150 flex shrink-0 flex-col items-center gap-1.5 rounded-xl border bg-slate-50/50 px-4 py-2.5 shadow-xs transition-all duration-200 hover:shadow-sm">
+                <div className="flex w-full max-w-[240px] items-center justify-center rounded-lg border border-slate-200/60 bg-white p-2">
+                  <img
+                    src={user.barcode}
+                    alt={`Barcode for ${user.schoolId}`}
+                    className="h-12 w-auto object-contain mix-blend-multiply transition-transform duration-300 hover:scale-105"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Digital Library ID Card */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-5 text-base font-semibold text-emerald-700">
+            Digital Library Card
+          </h3>
+          <div className="flex flex-col items-center gap-8 md:flex-row md:items-start">
+            {/* The Library ID Card */}
+            <div className="group relative flex aspect-[1.586/1] w-full max-w-[340px] shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-emerald-700/35 bg-linear-to-br from-emerald-800 via-emerald-950 to-slate-900 p-4 text-white shadow-md transition-all duration-300 select-none hover:scale-[1.01] hover:shadow-lg">
+              {/* Glossy sheen */}
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-transparent" />
+              {/* Watermark decors */}
+              <div className="pointer-events-none absolute -right-6 -bottom-6 h-28 w-28 rounded-full bg-emerald-500/10 blur-xl" />
+              <div className="pointer-events-none absolute -top-6 -left-6 h-28 w-28 rounded-full bg-teal-500/10 blur-xl" />
+
+              {/* Card Top */}
+              <div className="z-10 flex items-start justify-between">
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">
+                    LMS Library Card
+                  </p>
+                  <p className="text-[8px] font-medium tracking-wider text-emerald-200/50 uppercase">
+                    Official Library ID
+                  </p>
+                </div>
+                <div className="rounded-full border border-emerald-500/20 bg-emerald-950/40 px-2 py-0.5 text-[9px] font-semibold text-emerald-400/80">
+                  ACTIVE
+                </div>
+              </div>
+
+              {/* Card Middle (User Info - Read Only) */}
+              <div className="z-10 my-1.5 flex items-center gap-3">
+                <Avatar className="h-12 w-12 shrink-0 shadow-sm ring-2 ring-emerald-400/20">
+                  <AvatarImage src={user?.avatarUrl} />
+                  <AvatarFallback className="bg-emerald-950 text-xs font-bold text-emerald-300">
+                    {user?.fullName?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <h3 className="truncate text-xs font-bold tracking-wide text-emerald-50">
+                    {user?.fullName ?? "Member Name"}
+                  </h3>
+                  <p className="mt-0.5 text-[9px] font-semibold tracking-wider text-emerald-300/70 uppercase">
+                    {roleLabel}
+                  </p>
+                  <p className="mt-0.5 font-mono text-[9px] text-emerald-200/40">
+                    ID: {user?.schoolId || "—"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Card Bottom (Barcode) */}
+              {user?.barcode ? (
+                <div className="z-10 flex flex-col items-center justify-center rounded bg-white/95 p-1 shadow-sm">
+                  <img
+                    src={user.barcode}
+                    alt={`Barcode for ${user.schoolId}`}
+                    className="h-6 w-full object-contain mix-blend-multiply"
+                  />
+                </div>
+              ) : (
+                <div className="z-10 flex h-8 items-center justify-center rounded border border-dashed border-emerald-600/30 bg-emerald-950/20">
+                  <span className="text-[10px] font-medium text-emerald-300/40">
+                    No Barcode Available
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Description / Instructions */}
+            <div className="w-full flex-1 space-y-4 pt-2">
+              <div className="space-y-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/10 ring-inset">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                  Active Library Account
+                </span>
+                <h4 className="text-base font-bold text-slate-800">
+                  Digital Membership Pass
+                </h4>
+                <p className="max-w-lg text-sm leading-relaxed text-slate-500">
+                  This pass contains your unique barcode mapped directly to your{" "}
+                  <strong>School ID ({user?.schoolId})</strong> in the LMS
+                  database. Present this card on your device screen at checkout
+                  counters or scan kiosks to borrow books.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -180,21 +278,6 @@ export function ProfilePage() {
                 ) : (
                   <p className="text-sm font-semibold text-slate-800">
                     {firstName || "—"}
-                  </p>
-                )}
-              </div>
-              {/* Last Name */}
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-slate-400">Last Name</p>
-                {isEditingPersonal ? (
-                  <Input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="h-9 rounded-lg text-sm font-medium"
-                  />
-                ) : (
-                  <p className="text-sm font-semibold text-slate-800">
-                    {lastName || "—"}
                   </p>
                 )}
               </div>
@@ -254,6 +337,13 @@ export function ProfilePage() {
                 <p className="text-xs font-medium text-slate-400">User Role</p>
                 <p className="text-sm font-semibold text-slate-800 capitalize">
                   {roleLabel}
+                </p>
+              </div>
+              {/* School ID */}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-slate-400">School ID</p>
+                <p className="text-sm font-semibold text-slate-800">
+                  {user?.schoolId || "—"}
                 </p>
               </div>
             </div>

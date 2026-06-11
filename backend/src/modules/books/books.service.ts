@@ -177,8 +177,8 @@ export class BooksService {
         book.bookCopies
           .filter((copy) => copy.status === BookCopyStatus.AVAILABLE)
           .map((copy) =>
-            copy.shelfSection?.name && copy.shelfSection?.shelf?.name
-              ? `${copy.shelfSection.name} → ${copy.shelfSection.shelf.name}`
+            copy.shelfSection?.shelf?.name && copy.shelfSection?.name
+              ? `${copy.shelfSection.shelf.name} → ${copy.shelfSection.name}`
               : null,
           )
           .filter(Boolean),
