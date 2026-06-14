@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BorrowingStatus } from '../entities/borrowing.entity';
+import { BorrowingStatus } from 'src/common/enums/enum.enums';
 
 export class CreateBorrowingDto {
   @ApiPropertyOptional({ example: 'user-uuid' })
@@ -16,10 +16,10 @@ export class CreateBorrowingDto {
   @IsUUID()
   userId?: string;
 
-  @ApiProperty({ example: 'book-uuid' })
+  @ApiProperty({ example: 'book-copy-uuid' })
   @IsNotEmpty()
   @IsUUID()
-  bookId: string;
+  bookCopyId: string;
 
   @ApiProperty({ example: '2026-01-01T00:00:00Z' })
   @Type(() => Date)

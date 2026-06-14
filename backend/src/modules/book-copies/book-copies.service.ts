@@ -67,6 +67,7 @@ export class BookCopiesService {
     const query = this.bookCopyRepository
       .createQueryBuilder('bookCopy')
       .leftJoinAndSelect('bookCopy.book', 'book')
+      .leftJoinAndSelect('bookCopy.borrowings', 'borrowings')
       .leftJoinAndSelect('bookCopy.shelfSection', 'shelfSection')
       .leftJoinAndSelect('shelfSection.shelf', 'shelf')
       .skip(skip)

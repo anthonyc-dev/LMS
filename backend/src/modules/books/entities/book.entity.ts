@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BookCopy } from 'src/modules/book-copies/entities/book-copy.entity';
-import { Borrowing } from 'src/modules/borrowings/entities/borrowing.entity';
 import { Category } from 'src/modules/categories/entities/category.entity';
 import { Inventory } from 'src/modules/inventory/entities/inventory.entity';
 import {
@@ -93,9 +92,6 @@ export class Book {
   @ApiPropertyOptional()
   @DeleteDateColumn()
   deletedAt?: Date;
-
-  @OneToMany(() => Borrowing, (borrowing) => borrowing.book)
-  borrowings: Borrowing[];
 
   @ManyToOne(() => Category, (category) => category.books)
   @JoinColumn({ name: 'categoryId' })

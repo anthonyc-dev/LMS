@@ -12,7 +12,7 @@ import {
   Tag,
   Layers,
   Users,
-  ClipboardList,
+  RefreshCw,
 } from "lucide-react";
 import { useAuthStore } from "@/app/store/authStore";
 
@@ -86,10 +86,15 @@ const menuItems = [
   //   roles: ["admin"],
   // },
   {
-    icon: ClipboardList,
-    label: "Borrowing History",
-    path: "/admin/borrowing-history",
-    roles: ["admin"],
+    icon: RefreshCw,
+    label: "Circulation",
+    path: "/admin/circulation",
+    roles: ["admin", "faculty"],
+    items: [
+      { label: "Borrow Book", path: "/admin/circulation/borrow" },
+      { label: "Return Book", path: "/admin/circulation/return" },
+      { label: "Records", path: "/admin/circulation/records" },
+    ],
   },
 ];
 

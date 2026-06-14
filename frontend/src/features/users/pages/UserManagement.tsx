@@ -17,6 +17,7 @@ import {
   Calendar,
   Clock,
   ChevronDown,
+  Eye,
 } from "lucide-react";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Button } from "@/shared/components/ui/button";
@@ -59,6 +60,7 @@ import {
 } from "@/features/users/api/users";
 import { UserModal } from "@/features/users/components/UserModal";
 import { DeleteUserModal } from "@/features/users/components/DeleteUserModal";
+import { ViewUserModal } from "@/features/users/components/ViewUserModal";
 import { TableSkeleton } from "@/shared/components/DataTable/TableSkeleton";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
@@ -82,9 +84,10 @@ export interface User {
   role: Role;
   joinedAt: string;
   lastActive: string;
-  borrowedBooks: number;
+  activeBorrowingsCount: number;
   avatarColor: string;
   avatarUrl?: string;
+  borrowings?: any[];
 }
 
 const AVATAR_COLORS = [
@@ -120,9 +123,10 @@ function mapApiUser(u: ApiUser): User {
       year: "numeric",
     }),
     lastActive: formatRelativeTime(u.updatedAt),
-    borrowedBooks: u.borrowings ? u.borrowings.length : 0,
+    activeBorrowingsCount: u.activeBorrowingsCount,
     avatarColor: pickAvatarColor(),
     avatarUrl: u.avatarUrl,
+    borrowings: u.borrowings ?? [],
   };
 }
 
@@ -210,6 +214,7 @@ export function UserManagement() {
   const [page, setPage] = useState(1);
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewUser, setViewUser] = useState<User | null>(null);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -262,6 +267,9 @@ export function UserManagement() {
   const openAddModal = () => {
     setEditUser(null);
     setModalOpen(true);
+  };
+  const openViewModal = (user: User) => {
+    setViewUser(user);
   };
   const openEditModal = (user: User) => {
     setEditUser(user);
@@ -590,20 +598,6 @@ export function UserManagement() {
                 </SelectContent>
               </Select>
             )}
-
-            {/* Status filter */}
-            {/* <Select value={statusFilter} onValueChange={onStatus}>
-              <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 sm:w-44">
-                <Filter className="mr-1.5 size-3.5 text-slate-400" />
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
-              </SelectContent>
-            </Select> */}
           </div>
         </div>
 
@@ -670,10 +664,14 @@ export function UserManagement() {
                   return (
                     <Fragment key={user.id}>
                       <TableRow
-                        className={`group transition-colors hover:bg-slate-50/60 ${isMobile ? "cursor-pointer" : ""}`}
+                        className={`group transition-colors hover:bg-slate-50/60 ${
+                          isMobile ? "cursor-pointer" : ""
+                        }`}
                         onClick={() => {
                           if (isMobile) {
                             setExpandedRow(isExpanded ? null : user.id);
+                          } else {
+                            openViewModal(user);
                           }
                         }}
                       >
@@ -748,7 +746,7 @@ export function UserManagement() {
                             {/* Borrowed */}
                             <TableCell className="hidden text-center sm:table-cell">
                               <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-black text-slate-700">
-                                {user.borrowedBooks}
+                                {user.activeBorrowingsCount}
                               </span>
                             </TableCell>
                           </>
@@ -779,6 +777,13 @@ export function UserManagement() {
                                 sideOffset={8}
                                 className="w-44 rounded-xl border-slate-100 shadow-xl"
                               >
+                                <DropdownMenuItem
+                                  onClick={() => openViewModal(user)}
+                                  className="gap-2 rounded-lg font-semibold text-slate-700 focus:bg-indigo-50 focus:text-indigo-700"
+                                >
+                                  <Eye className="size-4" />
+                                  View User
+                                </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => openEditModal(user)}
                                   className="gap-2 rounded-lg font-semibold text-slate-700 focus:bg-indigo-50 focus:text-indigo-700"
@@ -838,7 +843,7 @@ export function UserManagement() {
                                   Borrowed
                                 </span>
                                 <span className="font-bold text-slate-800">
-                                  {user.borrowedBooks} books
+                                  {user.activeBorrowingsCount} books
                                 </span>
                               </div>
                             </div>
@@ -916,6 +921,11 @@ export function UserManagement() {
         meta={meta}
         isLoadingMeta={isLoadingMeta}
         isPending={isSaving}
+      />
+      <ViewUserModal
+        open={!!viewUser}
+        onClose={() => setViewUser(null)}
+        user={viewUser}
       />
       <DeleteUserModal
         user={deleteUser}

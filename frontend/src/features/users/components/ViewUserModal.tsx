@@ -1,0 +1,209 @@
+import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
+import { Badge } from "@/shared/components/ui/badge";
+import { type User, roleConfig } from "@/features/users/pages/UserManagement";
+import { Users, Mail, Phone, Building2, School, BookOpen } from "lucide-react";
+
+export interface ViewUserModalProps {
+  open: boolean;
+  onClose: () => void;
+  user: User | null;
+}
+
+export function ViewUserModal({ open, onClose, user }: ViewUserModalProps) {
+  if (!user) return null;
+
+  const role = roleConfig(user.role);
+  const RoleIcon = role.icon;
+
+  const borrowings = user.borrowings ?? [];
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-h-[90vh] w-[95vw] overflow-x-hidden overflow-y-auto rounded-3xl border-none p-0 shadow-2xl sm:max-w-[700px]">
+        {/* Header */}
+        <div
+          className={`relative overflow-hidden p-6 text-white ${
+            user.role === "admin"
+              ? "bg-linear-to-br from-violet-600 to-purple-700"
+              : user.role === "faculty"
+                ? "bg-linear-to-br from-blue-600 to-indigo-700"
+                : "bg-linear-to-br from-emerald-500 to-teal-600"
+          }`}
+        >
+          <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/5" />
+          <div className="absolute top-6 right-8 opacity-10">
+            <Users size={90} className="-rotate-12" />
+          </div>
+
+          <div className="relative z-10 flex items-start gap-4">
+            <Avatar className="h-20 w-20 shadow-sm ring-4 ring-white/20">
+              <AvatarImage src={user.avatarUrl} />
+              <AvatarFallback className="bg-slate-100 text-2xl font-bold text-slate-400">
+                {user.fullName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="pt-2">
+              <h2 className="text-2xl font-black text-white">
+                {user.fullName}
+              </h2>
+              <p className="font-medium text-white/80">{user.schoolId}</p>
+              <div className="mt-2 flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                <RoleIcon className="size-3.5" />
+                {role.label}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="space-y-8 bg-white p-6">
+          {/* User Details */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold tracking-wider text-slate-900 uppercase">
+                Contact Info
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                    <Mail className="size-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500">
+                      Email Address
+                    </p>
+                    <p className="text-sm font-bold text-slate-900">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                    <Phone className="size-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500">
+                      Phone Number
+                    </p>
+                    <p className="text-sm font-bold text-slate-900">
+                      {user.phone || "Not provided"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold tracking-wider text-slate-900 uppercase">
+                Academic Info
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                    <Building2 className="size-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500">
+                      Department
+                    </p>
+                    <p className="text-sm font-bold text-slate-900">
+                      {user.department || "N/A"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                    <School className="size-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500">
+                      Year Level
+                    </p>
+                    <p className="text-sm font-bold text-slate-900">
+                      {user.yearLevel || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Borrowings */}
+          <div className="space-y-4">
+            <h3 className="flex items-center gap-2 text-sm font-bold tracking-wider text-slate-900 uppercase">
+              <BookOpen className="size-4" />
+              Borrowing History
+            </h3>
+
+            {borrowings.length === 0 ? (
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 text-center">
+                <p className="text-sm font-medium text-slate-500">
+                  No borrowing history found for this user.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-2xl border border-slate-100">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-slate-100 bg-slate-50">
+                      <tr>
+                        <th className="px-4 py-3 font-bold text-slate-500">
+                          Book
+                        </th>
+                        <th className="px-4 py-3 font-bold text-slate-500">
+                          Borrowed
+                        </th>
+                        <th className="px-4 py-3 font-bold text-slate-500">
+                          Due
+                        </th>
+                        <th className="px-4 py-3 font-bold text-slate-500">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 bg-white">
+                      {borrowings.map((b: any) => (
+                        <tr
+                          key={b.id}
+                          className="transition-colors hover:bg-slate-50/50"
+                        >
+                          <td className="px-4 py-3">
+                            <p className="font-bold text-slate-900">
+                              {b.book?.title || "Unknown Book"}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              ISBN: {b.book?.isbn || "N/A"}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3 text-slate-600">
+                            {new Date(b.borrowDate).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-3 text-slate-600">
+                            {new Date(b.dueDate).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-3">
+                            <Badge
+                              className={` ${b.status === "borrowed" ? "border-amber-200 bg-amber-50 text-amber-700" : ""} ${b.status === "returned" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : ""} ${b.status === "overdue" ? "border-rose-200 bg-rose-50 text-rose-700" : ""} `}
+                            >
+                              {b.status.charAt(0).toUpperCase() +
+                                b.status.slice(1)}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

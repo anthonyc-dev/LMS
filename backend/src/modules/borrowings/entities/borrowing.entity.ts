@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Book } from 'src/modules/books/entities/book.entity';
+import { BorrowingStatus } from 'src/common/enums/enum.enums';
+import { BookCopy } from 'src/modules/book-copies/entities/book-copy.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   Column,
@@ -12,15 +13,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-export enum BorrowingStatus {
-  PENDING = 'pending',
-  BORROWED = 'borrowed',
-  RETURNED = 'returned',
-  OVERDUE = 'overdue',
-}
-
 @Entity('borrowings')
-@Index(['userId', 'bookId', 'status'], { unique: true })
+@Index(['userId', 'bookCopyId', 'status'])
 export class Borrowing {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -31,7 +25,7 @@ export class Borrowing {
 
   @ApiProperty()
   @Column('uuid', { nullable: false })
-  bookId: string;
+  bookCopyId: string;
 
   @ApiProperty()
   @Column('timestamp', { nullable: false })
@@ -65,6 +59,8 @@ export class Borrowing {
   @ManyToOne(() => User, (user) => user.borrowings, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => Book, (book) => book.borrowings, { onDelete: 'CASCADE' })
-  book: Book;
+  @ManyToOne(() => BookCopy, (bookCopy) => bookCopy.borrowings, {
+    onDelete: 'CASCADE',
+  })
+  bookCopy: BookCopy;
 }
