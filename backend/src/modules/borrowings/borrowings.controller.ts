@@ -39,9 +39,11 @@ export class BorrowingsController {
     // The librarian/operator is making the request, but we must
     // attach the borrowing to the student whose ID is passed in the DTO.
     if (!createBorrowingDto.userId) {
-      throw new BadRequestException("userId (borrower ID) is required to create a borrowing record.");
+      throw new BadRequestException(
+        'userId (borrower ID) is required to create a borrowing record.',
+      );
     }
-    
+
     return this.borrowingsService.create(createBorrowingDto, req.user.sub);
   }
 
@@ -55,10 +57,15 @@ export class BorrowingsController {
     @Req() req: RequestWithUser,
   ) {
     if (!createBulkBorrowingDto.userId) {
-      throw new BadRequestException("userId (borrower ID) is required to create a bulk borrowing record.");
+      throw new BadRequestException(
+        'userId (borrower ID) is required to create a bulk borrowing record.',
+      );
     }
-    
-    return this.borrowingsService.createBulk(createBulkBorrowingDto, req.user.sub);
+
+    return this.borrowingsService.createBulk(
+      createBulkBorrowingDto,
+      req.user.sub,
+    );
   }
 
   @Roles(Role.ADMIN, Role.FACULTY, Role.STUDENT)

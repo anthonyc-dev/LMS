@@ -13,6 +13,7 @@ import { Borrowing } from './entities/borrowing.entity';
 import { LessThan, Not } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { BookCopyStatus, BorrowingStatus } from 'src/common/enums/enum.enums';
+import { Role } from 'src/common/enums/role.enum';
 import { User } from '../users/entities/user.entity';
 import { BookCopy } from '../book-copies/entities/book-copy.entity';
 
@@ -228,9 +229,9 @@ export class BorrowingsService {
 
       // Fetch user role based limit
       let MAX_BORROW_LIMIT = 5;
-      if (borrower.role === 'student') MAX_BORROW_LIMIT = 3;
-      else if (borrower.role === 'faculty') MAX_BORROW_LIMIT = 5;
-      else if (borrower.role === 'admin') MAX_BORROW_LIMIT = 10;
+      if (borrower.role === Role.STUDENT) MAX_BORROW_LIMIT = 3;
+      else if (borrower.role === Role.FACULTY) MAX_BORROW_LIMIT = 5;
+      else if (borrower.role === Role.ADMIN) MAX_BORROW_LIMIT = 10;
 
       if (activeBorrowingsCount + bookCopyIds.length > MAX_BORROW_LIMIT) {
         throw new BadRequestException(
