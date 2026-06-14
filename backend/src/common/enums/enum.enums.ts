@@ -38,3 +38,10 @@ export enum BookCondition {
   POOR = 'POOR',
   DAMAGED = 'DAMAGED',
 }
+
+export enum BorrowingStatus {
+  PENDING = 'pending',
+  BORROWED = 'borrowed',
+  RETURNED = 'returned',
+  OVERDUE = 'overdue',
+}

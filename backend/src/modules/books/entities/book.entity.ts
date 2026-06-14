@@ -94,9 +94,6 @@ export class Book {
   @DeleteDateColumn()
   deletedAt?: Date;
 
-  @OneToMany(() => Borrowing, (borrowing) => borrowing.book)
-  borrowings: Borrowing[];
-
   @ManyToOne(() => Category, (category) => category.books)
   @JoinColumn({ name: 'categoryId' })
   category: Category;

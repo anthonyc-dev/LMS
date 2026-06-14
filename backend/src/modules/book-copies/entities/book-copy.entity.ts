@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BookCondition, BookCopyStatus } from 'src/common/enums/enum.enums';
 import { Book } from 'src/modules/books/entities/book.entity';
+import { Borrowing } from 'src/modules/borrowings/entities/borrowing.entity';
 import { ShelfSection } from 'src/modules/shelf-sections/entities/shelf-section.entity';
 import {
   Column,
@@ -12,6 +13,7 @@ import {
   Index,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity({ name: 'book_copies' })
@@ -101,9 +103,8 @@ export class BookCopy {
   @JoinColumn({ name: 'shelfSectionId' })
   shelfSection?: ShelfSection;
 
-  //   // Borrow History
-  //   @OneToMany(() => Borrowing, (borrowing) => borrowing.bookCopy)
-  //   borrowings: Borrowing[];
+  @OneToMany(() => Borrowing, (borrowing) => borrowing.bookCopy)
+  borrowings: Borrowing[];
 
   @ApiProperty()
   @CreateDateColumn()

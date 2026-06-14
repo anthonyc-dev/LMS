@@ -18,6 +18,7 @@ import * as nodemailer from 'nodemailer';
 import { randomBytes } from 'crypto';
 import cloudinary from 'src/config/cloudinary';
 import * as bwipjs from 'bwip-js';
+import { BorrowingStatus } from 'src/common/enums/enum.enums';
 
 @Injectable()
 export class UsersService {
@@ -176,11 +177,50 @@ export class UsersService {
 
   async findAll(page: number = 1, limit: number = 10) {
     this.logger.log(`Fetching all users: page ${page}, limit ${limit}`);
-    const [data, total] = await this.usersRepository.findAndCount({
-      order: { createdAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
-      relations: ['borrowings'],
+
+    const query = this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.borrowings', 'borrowing')
+      .leftJoinAndSelect('borrowing.bookCopy', 'bookCopy')
+      .leftJoinAndSelect('bookCopy.book', 'book')
+      .orderBy('user.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [users, total] = await query.getManyAndCount();
+
+    const data = users.map((user) => {
+      const activeBorrowingsCount = user.borrowings
+        ? user.borrowings.filter(
+            (borrow) =>
+              borrow.status === BorrowingStatus.BORROWED ||
+              borrow.status === BorrowingStatus.OVERDUE,
+          ).length
+        : 0;
+
+      return {
+        ...user,
+        activeBorrowingsCount,
+        borrowingsCount: user.borrowings?.length || 0,
+        borrowings:
+          user.borrowings?.map((borrowing) => ({
+            id: borrowing.id,
+            bookCopyId: borrowing.bookCopyId,
+            borrowDate: borrowing.borrowDate,
+            dueDate: borrowing.dueDate,
+            returnedDate: borrowing.returnedDate,
+            status: borrowing.status,
+            extendedCount: borrowing.extendedCount,
+
+            book: borrowing.bookCopy
+              ? {
+                  id: borrowing.bookCopy.book?.id,
+                  title: borrowing.bookCopy.book?.title,
+                  isbn: borrowing.bookCopy.book?.isbn,
+                }
+              : null,
+          })) || [],
+      };
     });
 
     return {

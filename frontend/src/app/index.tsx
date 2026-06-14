@@ -129,6 +129,23 @@ const AdminBorrowingHistoryPage = lazy(() =>
   })),
 );
 
+// Circulation pages
+const CirculationBorrowPage = lazy(() =>
+  import("@/features/circulation/pages/BorrowBookPage").then((m) => ({
+    default: m.BorrowBookPage,
+  })),
+);
+const CirculationReturnPage = lazy(() =>
+  import("@/features/circulation/pages/ReturnBookPage").then((m) => ({
+    default: m.ReturnBookPage,
+  })),
+);
+const CirculationRecordsPage = lazy(() =>
+  import("@/features/circulation/pages/BorrowingRecordsPage").then((m) => ({
+    default: m.BorrowingRecordsPage,
+  })),
+);
+
 function App() {
   const [isInitializing, setIsInitializing] = useState(true);
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -259,6 +276,9 @@ function App() {
                 path="borrowing-history"
                 element={<AdminBorrowingHistoryPage />}
               />
+              <Route path="circulation/borrow" element={<CirculationBorrowPage />} />
+              <Route path="circulation/return" element={<CirculationReturnPage />} />
+              <Route path="circulation/records" element={<CirculationRecordsPage />} />
             </Route>
           </Route>
 

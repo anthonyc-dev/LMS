@@ -37,6 +37,7 @@ export interface ApiUser {
   createdAt: string;
   updatedAt: string;
   borrowings?: any[];
+  activeBorrowingsCount: number;
 }
 
 export function normalizeApiUser(raw: Record<string, unknown>): ApiUser {
@@ -58,6 +59,7 @@ export function normalizeApiUser(raw: Record<string, unknown>): ApiUser {
       getField<string>(raw, "updatedAt", "updated_at", "updatedAt") ??
       new Date().toISOString(),
     borrowings: getField<any[]>(raw, "borrowings"),
+    activeBorrowingsCount: getField<number>(raw, "activeBorrowingsCount"),
   };
 }
 
