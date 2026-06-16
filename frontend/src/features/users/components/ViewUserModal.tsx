@@ -29,10 +29,10 @@ export function ViewUserModal({ open, onClose, user }: ViewUserModalProps) {
         <div
           className={`relative overflow-hidden p-6 text-white ${
             user.role === "admin"
-              ? "bg-linear-to-br from-violet-600 to-purple-700"
+              ? "bg-slate-600"
               : user.role === "faculty"
-                ? "bg-linear-to-br from-blue-600 to-indigo-700"
-                : "bg-linear-to-br from-emerald-500 to-teal-600"
+                ? "bg-linear-to-br from-blue-600 to-blue-700"
+                : "bg-blue-600"
           }`}
         >
           <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/5" />
@@ -188,7 +188,7 @@ export function ViewUserModal({ open, onClose, user }: ViewUserModalProps) {
                           </td>
                           <td className="px-4 py-3">
                             <Badge
-                              className={` ${b.status === "borrowed" ? "border-amber-200 bg-amber-50 text-amber-700" : ""} ${b.status === "returned" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : ""} ${b.status === "overdue" ? "border-rose-200 bg-rose-50 text-rose-700" : ""} `}
+                              className={` ${b.status === "borrowed" ? "border-warning-bg bg-warning-bg text-warning-text" : ""} ${b.status === "returned" ? "border-success-bg bg-success-bg text-success-text" : ""} ${b.status === "overdue" ? "border-error-bg bg-error-bg text-error-text" : ""} `}
                             >
                               {b.status.charAt(0).toUpperCase() +
                                 b.status.slice(1)}

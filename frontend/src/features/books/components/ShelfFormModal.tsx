@@ -42,7 +42,7 @@ function Field({
         {label}
       </Label>
       {children}
-      {err && <p className="text-xs font-medium text-rose-500">{err}</p>}
+      {err && <p className="text-xs font-medium text-error-bg0">{err}</p>}
     </div>
   );
 }
@@ -136,7 +136,7 @@ export function ShelfFormModal({
             <Input
               id="shelf-code"
               placeholder="e.g. A-01"
-              className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
@@ -146,7 +146,7 @@ export function ShelfFormModal({
             <Input
               id="shelf-name"
               placeholder="e.g. Fiction — Row 1"
-              className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -220,7 +220,7 @@ export function ShelfFormModal({
                         />
                         {hasBooks ? (
                           <span
-                            className="shrink-0 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold tracking-wider text-amber-500 uppercase"
+                            className="shrink-0 rounded-md bg-warning-bg px-2 py-0.5 text-[10px] font-bold tracking-wider text-warning-bg0 uppercase"
                             title="Cannot delete — section has book copies"
                           >
                             Has books
@@ -229,7 +229,7 @@ export function ShelfFormModal({
                           <button
                             type="button"
                             onClick={() => removeSection(s.name)}
-                            className="shrink-0 rounded-md bg-rose-50 px-2 py-0.5 text-[10px] font-bold tracking-wider text-rose-400 uppercase hover:bg-rose-100 hover:text-rose-600"
+                            className="shrink-0 rounded-md bg-error-bg px-2 py-0.5 text-[10px] font-bold tracking-wider text-error-text uppercase hover:bg-error-bg hover:text-error-text"
                           >
                             Remove
                           </button>
@@ -238,13 +238,13 @@ export function ShelfFormModal({
                     ) : (
                       <div
                         key={s.name}
-                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
+                        className="inline-flex items-center gap-1 rounded-lg bg-success-bg px-2.5 py-1 text-xs font-semibold text-success-text"
                       >
                         {s.name}
                         <button
                           type="button"
                           onClick={() => removeSection(s.name)}
-                          className="ml-0.5 text-emerald-400 hover:text-rose-500"
+                          className="ml-0.5 text-success-text hover:text-error-bg0"
                         >
                           ×
                         </button>
@@ -260,7 +260,7 @@ export function ShelfFormModal({
             <Input
               id="shelf-notes"
               placeholder="Any remarks about this shelf…"
-              className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />

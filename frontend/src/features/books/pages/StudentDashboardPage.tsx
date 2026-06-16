@@ -100,7 +100,7 @@ const recommendationBooks = [
     rating: 4.7,
     category: "Biography",
     image: book2Img,
-    color: "bg-amber-50/50",
+    color: "bg-warning-bg/50",
   },
   {
     id: 4,
@@ -109,7 +109,7 @@ const recommendationBooks = [
     rating: 4.5,
     category: "Mystery",
     image: bookDark2Img,
-    color: "bg-rose-900/90",
+    color: "bg-error-text/90",
   },
 ];
 
@@ -188,8 +188,8 @@ export function StudentDashboardPage() {
   return (
     <div className="animate-fade-in mx-auto max-w-[1600px] space-y-6 pb-12">
       {/* Modern Gradient Hero Welcome Banner */}
-      <section className="group relative flex flex-col items-center justify-between overflow-hidden rounded-2xl bg-linear-to-r from-blue-900 via-indigo-950 to-slate-900 p-6 shadow-sm transition-all duration-300 hover:shadow-md md:flex-row md:p-8">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-blue-400 via-indigo-900 to-slate-900 opacity-10" />
+      <section className="group relative flex flex-col items-center justify-between overflow-hidden rounded-2xl bg-linear-to-r from-blue-900 via-blue-950 to-slate-900 p-6 shadow-sm transition-all duration-300 hover:shadow-md md:flex-row md:p-8">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-blue-400 via-blue-900 to-slate-900 opacity-10" />
         <div className="absolute top-0 right-0 h-80 w-80 translate-x-12 -translate-y-12 rounded-full bg-blue-500/10 blur-3xl" />
 
         <div className="z-10 w-full space-y-4 text-center md:max-w-2xl md:text-left">
@@ -201,7 +201,7 @@ export function StudentDashboardPage() {
           <div className="space-y-1.5">
             <h1 className="text-2xl leading-tight font-black tracking-tight text-white sm:text-3xl lg:text-4xl">
               {greeting},{" "}
-              <span className="bg-linear-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">
                 {user?.fullName || "Scholar"}
               </span>
             </h1>
@@ -278,7 +278,7 @@ export function StudentDashboardPage() {
         </Card>
 
         {/* Return Countdown Deadline */}
-        <Card className="group transition-all duration-300 hover:border-amber-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-warning-bg hover:shadow-md">
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div className="space-y-1">
               <span className="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
@@ -295,14 +295,14 @@ export function StudentDashboardPage() {
                   : "All clear"}
               </p>
             </div>
-            <div className="animate-pulse rounded-xl bg-amber-50 p-3 text-amber-600 transition-transform group-hover:scale-110">
+            <div className="animate-pulse rounded-xl bg-warning-bg p-3 text-warning-text transition-transform group-hover:scale-110">
               <Clock className="size-5" />
             </div>
           </CardContent>
         </Card>
 
         {/* Semester Reading Goal (Custom Circular Ring Indicator) */}
-        <Card className="group transition-all duration-300 hover:border-violet-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-slate-200 hover:shadow-md">
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div className="space-y-1">
               <span className="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
@@ -330,7 +330,7 @@ export function StudentDashboardPage() {
                   cy="24"
                 />
                 <circle
-                  className="text-violet-600 transition-all duration-500"
+                  className="text-slate-600 transition-all duration-500"
                   strokeWidth="3"
                   strokeDasharray={ringCircumference}
                   strokeDashoffset={ringOffset}
@@ -342,7 +342,7 @@ export function StudentDashboardPage() {
                   cy="24"
                 />
               </svg>
-              <div className="absolute text-[9px] font-black text-violet-700">
+              <div className="absolute text-[9px] font-black text-slate-700">
                 {progressPercent}%
               </div>
             </div>
@@ -350,7 +350,7 @@ export function StudentDashboardPage() {
         </Card>
 
         {/* Fines & Violations Status */}
-        <Card className="group transition-all duration-300 hover:border-emerald-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-success-bg hover:shadow-md">
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div className="space-y-1">
               <span className="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
@@ -359,12 +359,12 @@ export function StudentDashboardPage() {
               <h3 className="text-2xl leading-normal font-black text-slate-800">
                 $0.00
               </h3>
-              <Badge className="flex w-fit items-center gap-0.5 border-none bg-emerald-500/10 text-[8px] font-bold text-emerald-500 hover:bg-emerald-500/10">
+              <Badge className="flex w-fit items-center gap-0.5 border-none bg-success-bg0/10 text-[8px] font-bold text-success-bg0 hover:bg-success-bg0/10">
                 <ShieldCheck size={10} />
                 <span>Account Safe</span>
               </Badge>
             </div>
-            <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600 transition-transform group-hover:scale-110">
+            <div className="rounded-xl bg-success-bg p-3 text-success-text transition-transform group-hover:scale-110">
               <Award className="size-5" />
             </div>
           </CardContent>
@@ -434,7 +434,7 @@ export function StudentDashboardPage() {
                         <span
                           className={
                             book.daysRemaining <= 3
-                              ? "text-rose-500"
+                              ? "text-error-bg0"
                               : "text-blue-600"
                           }
                         >
@@ -445,7 +445,7 @@ export function StudentDashboardPage() {
                         value={(book.daysRemaining / book.totalDays) * 100}
                         className={`h-1.5 bg-slate-100 ${
                           book.daysRemaining <= 3
-                            ? "[&>div]:bg-rose-500"
+                            ? "[&>div]:bg-error-bg0"
                             : "[&>div]:bg-blue-600"
                         }`}
                       />
@@ -476,7 +476,7 @@ export function StudentDashboardPage() {
                 Weekly analysis of study time (Hours)
               </p>
             </div>
-            <TrendingUp className="size-4 text-emerald-500" />
+            <TrendingUp className="size-4 text-success-bg0" />
           </CardHeader>
           <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={180}>
@@ -571,7 +571,7 @@ export function StudentDashboardPage() {
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 rounded bg-white/95 px-1 py-0.5 shadow-xs backdrop-blur-md">
-                    <Star className="size-2.5 fill-amber-400 text-amber-400" />
+                    <Star className="size-2.5 fill-warning-text text-warning-text" />
                     <span className="text-[8px] font-black text-slate-700">
                       {book.rating}
                     </span>
@@ -594,7 +594,7 @@ export function StudentDashboardPage() {
         <Card className="shadow-xs transition-shadow hover:shadow-md">
           <CardHeader className="border-b border-slate-50 pb-4">
             <CardTitle className="flex items-center gap-1.5 text-base font-black text-slate-800">
-              <CalendarDays className="size-4 text-violet-500" />
+              <CalendarDays className="size-4 text-slate-500" />
               <span>Library Events</span>
             </CardTitle>
             <p className="text-xs font-medium text-slate-400">
@@ -613,10 +613,10 @@ export function StudentDashboardPage() {
                       <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-blue-500" />
                     )}
                     {evt.type === "social" && (
-                      <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+                      <span className="inline-block h-2 w-2 rounded-full bg-warning-bg0" />
                     )}
                     {evt.type === "health" && (
-                      <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="inline-block h-2 w-2 rounded-full bg-success-bg0" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">

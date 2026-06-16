@@ -402,7 +402,7 @@ export function ShelfPage() {
                                     {shelf.name}
                                   </p>
                                   {shelf.notes && (
-                                    <p className="max-w-[160px] truncate text-[11px] font-medium text-emerald-600">
+                                    <p className="max-w-[160px] truncate text-[11px] font-medium text-success-text">
                                       <Form className="mr-1 inline size-3" />{" "}
                                       {shelf.notes}
                                     </p>
@@ -424,7 +424,7 @@ export function ShelfPage() {
                                 {shelf.name}
                               </p>
                               {shelf.notes && (
-                                <p className="max-w-[160px] truncate text-[11px] font-medium text-emerald-600">
+                                <p className="max-w-[160px] truncate text-[11px] font-medium text-success-text">
                                   <Form className="mr-1 inline size-3" />{" "}
                                   {shelf.notes}
                                 </p>
@@ -470,14 +470,14 @@ export function ShelfPage() {
                               >
                                 <DropdownMenuItem
                                   onClick={() => openEdit(shelf)}
-                                  className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
+                                  className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600"
                                 >
                                   <Edit3 className="size-3.5" /> Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="my-1 bg-slate-100" />
                                 <DropdownMenuItem
                                   onClick={() => openDelete(shelf)}
-                                  className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-rose-600 hover:bg-rose-50"
+                                  className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-error-text hover:bg-error-bg"
                                 >
                                   <Trash2 className="size-3.5" /> Delete
                                 </DropdownMenuItem>
@@ -591,14 +591,14 @@ export function ShelfPage() {
                         >
                           <DropdownMenuItem
                             onClick={() => openEdit(shelf)}
-                            className="cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
+                            className="cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600"
                           >
                             <Edit3 className="size-3" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="my-1 bg-slate-100" />
                           <DropdownMenuItem
                             onClick={() => openDelete(shelf)}
-                            className="cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium text-rose-600 hover:bg-rose-50"
+                            className="cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium text-error-text hover:bg-error-bg"
                           >
                             <Trash2 className="size-3" /> Delete
                           </DropdownMenuItem>
@@ -618,7 +618,7 @@ export function ShelfPage() {
                   </div>
 
                   {shelf.notes && (
-                    <p className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-1 text-[10px] font-medium text-emerald-700">
+                    <p className="rounded-lg border border-warning-bg bg-warning-bg px-2 py-1 text-[10px] font-medium text-success-text">
                       <Form className="mr-1 inline size-3" /> {shelf.notes}
                     </p>
                   )}

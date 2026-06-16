@@ -120,14 +120,14 @@ export function FacultyDashboardPage() {
       
       {/* Welcome & Faculty Card Header */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 p-6 rounded-2xl bg-white border border-slate-100 shadow-sm relative overflow-hidden">
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl" />
+        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-slate-500/5 rounded-full blur-3xl" />
         <div className="space-y-1.5 z-10">
           <div className="flex items-center gap-2">
-            <GraduationCap className="size-5 text-violet-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-violet-600">Faculty Space</span>
+            <GraduationCap className="size-5 text-slate-500" />
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Faculty Space</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-            Hello, <span className="text-transparent bg-clip-text bg-linear-to-r from-violet-600 to-indigo-600">{user?.fullName || "Professor"}</span>
+            Hello, <span className="text-transparent bg-clip-text bg-linear-to-r from-slate-600 to-blue-600">{user?.fullName || "Professor"}</span>
           </h1>
           <p className="text-slate-500 font-medium text-sm flex items-center gap-2">
             <Calendar className="size-4 text-slate-400" />
@@ -135,8 +135,8 @@ export function FacultyDashboardPage() {
           </p>
         </div>
         
-        <div className="flex items-center gap-3 bg-violet-50/50 border border-violet-100/50 p-3 rounded-xl z-10 w-full lg:w-auto">
-          <div className="h-10 w-10 bg-linear-to-tr from-violet-600 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+        <div className="flex items-center gap-3 bg-slate-50/50 border border-slate-100/50 p-3 rounded-xl z-10 w-full lg:w-auto">
+          <div className="h-10 w-10 bg-linear-to-tr from-slate-600 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
             {user?.fullName ? user.fullName.split(" ").map(n => n[0]).join("") : "PF"}
           </div>
           <div className="flex flex-col min-w-0">
@@ -150,13 +150,13 @@ export function FacultyDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         
         {/* Active Personal Loans */}
-        <Card className="hover:shadow-md hover:border-violet-200 transition-all group">
+        <Card className="hover:shadow-md hover:border-slate-200 transition-all group">
           <CardContent className="p-6 space-y-3">
             <div className="flex justify-between items-start">
-              <div className="p-2.5 rounded-xl bg-violet-50 text-violet-600 group-hover:scale-110 transition-transform">
+              <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 group-hover:scale-110 transition-transform">
                 <BookOpen className="size-5" />
               </div>
-              <Badge className="bg-violet-50 text-violet-700 hover:bg-violet-50 border-none font-bold text-[10px]">Quota: 15 Max</Badge>
+              <Badge className="bg-slate-50 text-slate-700 hover:bg-slate-50 border-none font-bold text-[10px]">Quota: 15 Max</Badge>
             </div>
             <div className="space-y-0.5">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">My Active Loans</span>
@@ -184,20 +184,20 @@ export function FacultyDashboardPage() {
         </Card>
 
         {/* Book Requests */}
-        <Card className="hover:shadow-md hover:border-emerald-200 transition-all group">
+        <Card className="hover:shadow-md hover:border-success-bg transition-all group">
           <CardContent className="p-6 space-y-3">
             <div className="flex justify-between items-start">
-              <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform">
+              <div className="p-2.5 rounded-xl bg-success-bg text-success-text group-hover:scale-110 transition-transform">
                 <PlusCircle className="size-5" />
               </div>
-              <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none font-bold text-[10px]">Acquisitions</Badge>
+              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none font-bold text-[10px]">Acquisitions</Badge>
             </div>
             <div className="space-y-0.5">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Acquisitions Requested</span>
               <h3 className="text-2xl font-black text-slate-800">{acquisitions.length} <span className="text-xs font-normal text-slate-400">suggested</span></h3>
             </div>
             <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-              <CheckCircle2 className="size-3.5 text-emerald-500" />
+              <CheckCircle2 className="size-3.5 text-success-bg0" />
               <span>{acquisitions.filter(a => a.status === "Approved").length} approved by admin</span>
             </p>
           </CardContent>
@@ -260,25 +260,25 @@ export function FacultyDashboardPage() {
               
               {/* Request 1 */}
               <div className="relative flex gap-4 items-start">
-                <div className="z-10 flex items-center justify-center size-9 rounded-full bg-emerald-500 text-white shrink-0 border-4 border-white shadow-xs">
+                <div className="z-10 flex items-center justify-center size-9 rounded-full bg-success-bg0 text-white shrink-0 border-4 border-white shadow-xs">
                   <CheckCircle2 className="size-4" />
                 </div>
                 <div className="space-y-1 pt-0.5">
                   <h4 className="text-xs font-black text-slate-800 leading-tight">Deep Learning with PyTorch</h4>
                   <p className="text-[10px] text-slate-400 font-semibold uppercase">Acquisition Stage: Approved</p>
-                  <span className="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">Awaiting cataloging</span>
+                  <span className="text-[9px] text-success-text font-bold bg-success-bg px-1.5 py-0.5 rounded">Awaiting cataloging</span>
                 </div>
               </div>
 
               {/* Request 2 */}
               <div className="relative flex gap-4 items-start">
-                <div className="z-10 flex items-center justify-center size-9 rounded-full bg-violet-600 text-white shrink-0 border-4 border-white shadow-xs">
+                <div className="z-10 flex items-center justify-center size-9 rounded-full bg-slate-600 text-white shrink-0 border-4 border-white shadow-xs">
                   <Clock className="size-4" />
                 </div>
                 <div className="space-y-1 pt-0.5">
                   <h4 className="text-xs font-black text-slate-800 leading-tight">Neural Networks & Deep Learning</h4>
                   <p className="text-[10px] text-slate-400 font-semibold uppercase">Acquisition Stage: Submitted</p>
-                  <span className="text-[9px] text-violet-600 font-bold bg-violet-50 px-1.5 py-0.5 rounded">Sent to Chief Librarian</span>
+                  <span className="text-[9px] text-slate-600 font-bold bg-slate-50 px-1.5 py-0.5 rounded">Sent to Chief Librarian</span>
                 </div>
               </div>
 
@@ -306,7 +306,7 @@ export function FacultyDashboardPage() {
         <Card className="shadow-xs hover:shadow-md transition-shadow">
           <CardHeader className="border-b border-slate-50 pb-4">
             <CardTitle className="text-base font-black text-slate-800 flex items-center gap-1.5">
-              <PlusCircle className="size-4 text-violet-500" />
+              <PlusCircle className="size-4 text-slate-500" />
               <span>Acquisition Request</span>
             </CardTitle>
             <p className="text-xs text-slate-400 font-medium">Request a new textbook for your syllabus</p>
@@ -343,7 +343,7 @@ export function FacultyDashboardPage() {
               <Button 
                 type="submit" 
                 disabled={isSubmitting} 
-                className="w-full rounded-lg bg-violet-600 hover:bg-violet-500 text-white font-bold h-9 text-xs mt-2 transition-all cursor-pointer"
+                className="w-full rounded-lg bg-slate-600 hover:bg-slate-500 text-white font-bold h-9 text-xs mt-2 transition-all cursor-pointer"
               >
                 {isSubmitting ? "Submitting..." : "Submit Acquisition Request"}
               </Button>
@@ -377,21 +377,21 @@ export function FacultyDashboardPage() {
                   <div className="flex-1 max-w-[150px] px-4 space-y-1">
                     <div className="flex justify-between text-[9px] font-bold text-slate-400">
                       <span>Time Remaining</span>
-                      <span className={loan.daysRemaining <= 5 ? "text-rose-500" : "text-slate-600"}>
+                      <span className={loan.daysRemaining <= 5 ? "text-error-bg0" : "text-slate-600"}>
                         {loan.daysRemaining} days
                       </span>
                     </div>
                     <Progress 
                       value={(loan.daysRemaining / loan.totalDays) * 100} 
                       className={`h-1.5 rounded bg-slate-100 ${
-                        loan.daysRemaining <= 5 ? "[&>div]:bg-rose-500" : "[&>div]:bg-violet-600"
+                        loan.daysRemaining <= 5 ? "[&>div]:bg-error-bg0" : "[&>div]:bg-slate-600"
                       }`} 
                     />
                   </div>
 
                   <div className="flex items-center gap-2">
                     {loan.daysRemaining <= 5 && (
-                      <Badge className="bg-rose-50 text-rose-600 hover:bg-rose-50 border-none font-bold text-[8px] flex items-center gap-0.5">
+                      <Badge className="bg-error-bg text-error-text hover:bg-error-bg border-none font-bold text-[8px] flex items-center gap-0.5">
                         <AlertCircle className="size-2.5 shrink-0" />
                         <span>Near Due</span>
                       </Badge>
@@ -399,7 +399,7 @@ export function FacultyDashboardPage() {
                     <Button 
                       variant="outline" 
                       onClick={() => handleRenew(loan.id)}
-                      className="rounded-lg h-8 px-3 border-slate-200 text-slate-600 hover:border-violet-600 hover:text-violet-600 hover:bg-violet-50/30 transition-all font-bold text-[10px] flex items-center gap-1 cursor-pointer"
+                      className="rounded-lg h-8 px-3 border-slate-200 text-slate-600 hover:border-slate-600 hover:text-slate-600 hover:bg-slate-50/30 transition-all font-bold text-[10px] flex items-center gap-1 cursor-pointer"
                     >
                       <RotateCw className="size-3" />
                       <span>Renew</span>

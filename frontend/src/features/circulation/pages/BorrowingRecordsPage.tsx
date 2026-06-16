@@ -52,15 +52,15 @@ function statusConfig(status: BorrowingStatus) {
     case "returned":
       return {
         label: "Returned",
-        cls: "bg-emerald-100 text-emerald-700 border-emerald-200",
-        dot: "bg-emerald-500",
+        cls: "bg-success-bg text-success-text border-success-bg",
+        dot: "bg-success-text",
         icon: CheckCircle2,
       };
     case "overdue":
       return {
         label: "Overdue",
-        cls: "bg-rose-100 text-rose-700 border-rose-200",
-        dot: "bg-rose-500",
+        cls: "bg-error-bg text-error-text border-error-bg",
+        dot: "bg-error-text",
         icon: AlertTriangle,
       };
     default:
@@ -143,23 +143,23 @@ export function BorrowingRecordsPage() {
     if (sortKey !== k)
       return <ArrowUpDown className="ml-1 inline size-3.5 text-slate-300" />;
     return sortDir === "asc" ? (
-      <ArrowUp className="ml-1 inline size-3.5 text-indigo-500" />
+      <ArrowUp className="ml-1 inline size-3.5 text-blue-500" />
     ) : (
-      <ArrowDown className="ml-1 inline size-3.5 text-indigo-500" />
+      <ArrowDown className="ml-1 inline size-3.5 text-blue-500" />
     );
   };
 
   if (isLoading) {
     return (
       <div className="flex h-[400px] items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-indigo-500" />
+        <Loader2 className="size-8 animate-spin text-blue-500" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex h-[400px] items-center justify-center font-bold text-rose-500">
+      <div className="flex h-[400px] items-center justify-center font-bold text-red-500">
         Failed to load borrowing records.
       </div>
     );
@@ -169,8 +169,8 @@ export function BorrowingRecordsPage() {
     <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1600px] space-y-6 duration-700">
       {/* Page Header */}
       <div className="relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
-        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-indigo-400/5 blur-3xl" />
-        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-violet-400/5 blur-3xl" />
+        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-blue-400/5 blur-3xl" />
+        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-blue-400/5 blur-3xl" />
 
         <div className="relative z-10 space-y-1">
           <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
@@ -184,7 +184,7 @@ export function BorrowingRecordsPage() {
 
         <div className="relative z-10 flex items-center gap-3">
           <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-            <TrendingUp className="size-4 text-indigo-500" />
+            <TrendingUp className="size-4 text-blue-500" />
             <span className="text-xs font-bold text-slate-600">
               {borrowings?.length || 0} Total Records
             </span>
@@ -215,7 +215,7 @@ export function BorrowingRecordsPage() {
                     }}
                     className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all duration-200 ${
                       isActive
-                        ? "bg-white text-indigo-600 shadow-sm"
+                        ? "bg-white text-blue-600 shadow-sm"
                         : "text-slate-500 hover:text-slate-700"
                     }`}
                   >
@@ -235,7 +235,7 @@ export function BorrowingRecordsPage() {
                   setPage(1);
                 }}
                 placeholder="Search records..."
-                className="h-10 w-full rounded-xl border-slate-200 pl-9 text-sm focus-visible:border-indigo-400 focus-visible:ring-indigo-400/20"
+                className="h-10 w-full rounded-xl border-slate-200 pl-9 text-sm focus-visible:border-blue-400 focus-visible:ring-blue-400/20"
               />
               {search && (
                 <button
@@ -323,7 +323,7 @@ export function BorrowingRecordsPage() {
                       </TableCell>
                       <TableCell>
                         <span
-                          className={`font-medium ${record.status === "overdue" ? "text-rose-600" : "text-slate-700"}`}
+                          className={`font-medium ${record.status === "overdue" ? "text-error-text" : "text-slate-700"}`}
                         >
                           {new Date(record.dueDate).toLocaleDateString()}
                         </span>

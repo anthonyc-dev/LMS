@@ -136,7 +136,7 @@ export function BooksPage() {
         ) : (
           <div>
             <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-              <div className="rounded-xl bg-indigo-50 p-2">
+              <div className="rounded-xl bg-blue-50 p-2">
                 <Library className="size-7" />
               </div>
               Book Catalog Metadata
@@ -152,7 +152,7 @@ export function BooksPage() {
           <Button
             onClick={() => navigate("/admin/books/add")}
             id="add-book-btn"
-            className="h-11 gap-2 rounded-xl bg-slate-900 px-6 font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:scale-105 hover:bg-slate-800 active:scale-95"
+            className="h-11 gap-2 rounded-xl bg-slate-900 px-6 font-bold text-white shadow-lg shadow-blue-200 transition-all hover:scale-105 hover:bg-slate-800 active:scale-95"
           >
             <Plus className="size-4" /> Register Title
           </Button>
@@ -170,8 +170,8 @@ export function BooksPage() {
             </div>
           </div>
         ) : (
-          <div className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md">
-            <div className="shrink-0 rounded-xl bg-indigo-50 p-3 text-indigo-600 transition-transform group-hover:scale-110">
+          <div className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
+            <div className="shrink-0 rounded-xl bg-blue-50 p-3 text-blue-600 transition-transform group-hover:scale-110">
               <BookText className="size-5" />
             </div>
             <div>
@@ -209,7 +209,7 @@ export function BooksPage() {
               <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
               <Input
                 placeholder="Search title, author, ISBN…"
-                className="h-10 rounded-xl border-slate-200 pl-10 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                className="h-10 rounded-xl border-slate-200 pl-10 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -328,7 +328,7 @@ export function BooksPage() {
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="max-w-[200px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                              <p className="max-w-[200px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-blue-600">
                                 {book.title}
                               </p>
                               <p className="truncate text-xs font-medium text-slate-500">
@@ -396,7 +396,7 @@ export function BooksPage() {
                             >
                               <DropdownMenuItem
                                 onClick={() => handleEdit(book)}
-                                className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
+                                className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600"
                               >
                                 <Edit className="size-3.5" /> Edit Details
                               </DropdownMenuItem>
@@ -406,7 +406,7 @@ export function BooksPage() {
                                   setDeleteBook(book);
                                   setDeleteOpen(true);
                                 }}
-                                className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-rose-600 hover:bg-rose-50"
+                                className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-error-text hover:bg-error-bg"
                               >
                                 <Trash2 className="size-3.5" /> Delete Entry
                               </DropdownMenuItem>

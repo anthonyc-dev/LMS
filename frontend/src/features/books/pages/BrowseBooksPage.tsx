@@ -23,14 +23,14 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 
 const BOOK_COLORS = [
-  "from-blue-100 to-indigo-50",
+  "from-blue-100 to-blue-50",
   "from-slate-800 to-slate-900",
-  "from-amber-50 to-orange-50",
-  "from-rose-800 to-rose-900",
+  "from-warning-bg to-warning-bg",
+  "from-error-text to-error-text",
   "from-gray-50 to-slate-100",
-  "from-emerald-50 to-teal-50",
-  "from-indigo-800 to-indigo-900",
-  "from-orange-800 to-orange-900",
+  "from-success-bg to-blue-50",
+  "from-blue-800 to-blue-900",
+  "from-warning-text to-warning-text",
 ];
 
 const getBookColor = (id: string) => {
@@ -80,16 +80,16 @@ export function BrowseBooksPage() {
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 md:space-y-8">
       {/* ── Featured Hero ──────────────────────────────────────────── */}
-      {/* <section className="group relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-900 to-indigo-950 p-6 sm:p-8 md:p-10">
+      {/* <section className="group relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-900 to-blue-950 p-6 sm:p-8 md:p-10">
         <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:gap-12">
           <div className="flex-1 space-y-4 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 px-3 py-1.5 text-xs font-semibold text-indigo-400">
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-400">
               <Sparkles size={12} />
               Curated For You
             </div>
             <h1 className="text-2xl leading-tight font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
               Uncover the{" "}
-              <span className="bg-linear-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-blue-400 to-slate-400 bg-clip-text text-transparent">
                 Classics
               </span>
             </h1>
@@ -101,14 +101,14 @@ export function BrowseBooksPage() {
 
             <div className="flex items-center justify-center gap-6 pt-2 md:justify-start">
               <div className="flex items-center gap-2 text-xs text-slate-500">
-                <BookOpen size={14} className="text-indigo-400" />
+                <BookOpen size={14} className="text-blue-400" />
                 <span>
                   <strong className="text-white">{displayBooks.length} </strong>{" "}
                   Books
                 </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500">
-                <TrendingUp size={14} className="text-emerald-400" />
+                <TrendingUp size={14} className="text-success-text" />
                 <span>
                   <strong className="text-white">98%</strong> Satisfaction
                 </span>
@@ -117,7 +117,7 @@ export function BrowseBooksPage() {
           </div>
 
           <div className="relative flex w-48 shrink-0 items-center justify-center sm:w-56 md:w-64">
-            <div className="absolute inset-0 scale-150 rounded-full bg-indigo-500/15 blur-3xl transition-all duration-700 group-hover:bg-indigo-500/25" />
+            <div className="absolute inset-0 scale-150 rounded-full bg-blue-500/15 blur-3xl transition-all duration-700 group-hover:bg-blue-500/25" />
             <div className="relative transition-transform duration-700 ease-out group-hover:-translate-y-2 group-hover:scale-105 group-hover:rotate-2">
               <div className="absolute inset-0 translate-y-6 scale-[0.85] rounded-xl bg-black/30 blur-2xl" />
               <img
@@ -129,9 +129,9 @@ export function BrowseBooksPage() {
           </div>
         </div>
 
-        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-600/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-violet-600/10 blur-3xl" />
-        <div className="pointer-events-none absolute top-0 right-0 h-full w-1/3 bg-linear-to-l from-indigo-500/5 to-transparent" />
+        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-blue-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-slate-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute top-0 right-0 h-full w-1/3 bg-linear-to-l from-blue-500/5 to-transparent" />
       </section> */}
 
       {/* ── Search Bar ─────────────────────────────────────────────── */}
@@ -142,7 +142,7 @@ export function BrowseBooksPage() {
             <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
             <Input
               placeholder="Search books, authors, ISBN…"
-              className="h-11 rounded-xl border-slate-200 bg-white pl-10 text-sm shadow-sm transition-shadow focus:shadow-md focus:ring-2 focus:ring-indigo-500/20"
+              className="h-11 rounded-xl border-slate-200 bg-white pl-10 text-sm shadow-sm transition-shadow focus:shadow-md focus:ring-2 focus:ring-blue-500/20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -205,7 +205,7 @@ export function BrowseBooksPage() {
           </div>
           <Button
             variant="ghost"
-            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+            className="text-sm font-semibold text-blue-600 hover:text-blue-700"
           >
             View All
             <ChevronDown size={14} className="ml-1 -rotate-90" />
@@ -245,10 +245,10 @@ export function BrowseBooksPage() {
                       {/* Hover Overlay Actions */}
                       <div className="absolute inset-0 flex items-start justify-end bg-linear-to-t from-black/50 via-transparent to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                         <div className="flex flex-col gap-2">
-                          <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-rose-500">
+                          <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-error-bg0">
                             <Heart size={14} />
                           </button>
-                          <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-indigo-600">
+                          <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-blue-600">
                             <Bookmark size={14} />
                           </button>
                         </div>
@@ -259,10 +259,10 @@ export function BrowseBooksPage() {
                         <Badge
                           className={`rounded-full border-0 px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase shadow-lg backdrop-blur-md ${
                             book?.status === "AVAILABLE"
-                              ? "bg-emerald-500/90 text-white"
+                              ? "bg-success-bg0/90 text-white"
                               : book?.status === "UNAVAILABLE"
-                                ? "bg-rose-500/90 text-white"
-                                : "bg-amber-500/90 text-white"
+                                ? "bg-error-bg0/90 text-white"
+                                : "bg-warning-bg0/90 text-white"
                           }`}
                         >
                           {book?.status === "AVAILABLE" && (
@@ -279,7 +279,7 @@ export function BrowseBooksPage() {
                     {/* Book Info */}
                     <div className="flex flex-1 flex-col justify-between p-3.5 sm:p-4">
                       <div className="space-y-1.5">
-                        <h3 className="line-clamp-1 text-sm font-bold tracking-tight text-slate-900 transition-colors group-hover:text-indigo-600 sm:text-base">
+                        <h3 className="line-clamp-1 text-sm font-bold tracking-tight text-slate-900 transition-colors group-hover:text-blue-600 sm:text-base">
                           {book.title}
                         </h3>
                         <p className="truncate text-xs text-slate-500 sm:text-sm">
@@ -297,7 +297,7 @@ export function BrowseBooksPage() {
                       </div>
 
                       <Button
-                        className="mt-3 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:bg-indigo-600 hover:shadow-md hover:shadow-indigo-200 active:scale-[0.98] sm:text-sm"
+                        className="mt-3 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:bg-blue-600 hover:shadow-md hover:shadow-blue-200 active:scale-[0.98] sm:text-sm"
                         onClick={() =>
                           navigate(`/student/books/details/${book.id}`)
                         }
@@ -317,7 +317,7 @@ export function BrowseBooksPage() {
           </p>
           <Button
             variant="outline"
-            className="h-11 rounded-xl border-2 border-slate-200 px-8 text-sm font-semibold text-slate-600 transition-all hover:border-indigo-600 hover:bg-indigo-50/50 hover:text-indigo-600"
+            className="h-11 rounded-xl border-2 border-slate-200 px-8 text-sm font-semibold text-slate-600 transition-all hover:border-blue-600 hover:bg-blue-50/50 hover:text-blue-600"
           >
             Load More Books
           </Button>

@@ -103,13 +103,13 @@ function Field({
       >
         {Icon && <Icon className="size-3.5 text-slate-400" />}
         {label}
-        {required && <span className="ml-0.5 text-rose-500">*</span>}
+        {required && <span className="ml-0.5 text-error-bg0">*</span>}
       </Label>
       {children}
       {hint && !error && (
         <p className="text-[11px] font-medium text-slate-400">{hint}</p>
       )}
-      {error && <p className="text-[11px] font-bold text-rose-500">{error}</p>}
+      {error && <p className="text-[11px] font-bold text-error-bg0">{error}</p>}
     </div>
   );
 }
@@ -131,9 +131,9 @@ function StepDot({
     <div
       className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-black transition-all duration-300 ${
         done
-          ? "bg-emerald-500 text-white shadow-md shadow-emerald-200"
+          ? "bg-success-bg0 text-white shadow-md shadow-success-bg"
           : active
-            ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
+            ? "bg-blue-600 text-white shadow-md shadow-blue-200"
             : "bg-slate-100 text-slate-400"
       }`}
     >
@@ -288,14 +288,14 @@ export function AddBookPage() {
               <div className="flex items-center gap-2">
                 <StepDot n={s.n} active={step === s.n} done={step > s.n} />
                 <span
-                  className={`hidden text-xs font-bold md:block ${step === s.n ? "text-indigo-600" : step > s.n ? "text-emerald-600" : "text-slate-400"}`}
+                  className={`hidden text-xs font-bold md:block ${step === s.n ? "text-blue-600" : step > s.n ? "text-success-text" : "text-slate-400"}`}
                 >
                   {s.label}
                 </span>
               </div>
               {i < steps.length - 1 && (
                 <div
-                  className={`h-0.5 w-8 rounded-full transition-colors ${step > s.n ? "bg-emerald-400" : "bg-slate-100"}`}
+                  className={`h-0.5 w-8 rounded-full transition-colors ${step > s.n ? "bg-success-text" : "bg-slate-100"}`}
                 />
               )}
             </div>
@@ -307,7 +307,7 @@ export function AddBookPage() {
       {step === 1 && (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
           {/* Banner */}
-          <div className="relative overflow-hidden bg-linear-to-br from-indigo-600 to-violet-600 p-6 text-white">
+          <div className="relative overflow-hidden bg-linear-to-br from-blue-600 to-slate-600 p-6 text-white">
             <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/5" />
             <div className="absolute top-4 right-12 opacity-10">
               <BookOpen size={100} className="-rotate-12" />
@@ -319,7 +319,7 @@ export function AddBookPage() {
               <h2 className="text-2xl font-black text-white">
                 Book Information
               </h2>
-              <p className="font-medium text-indigo-200">
+              <p className="font-medium text-blue-200">
                 Enter the core details that identify this book metadata.
               </p>
             </div>
@@ -334,7 +334,7 @@ export function AddBookPage() {
                   Cover Image
                 </Label>
                 <div
-                  className="group relative flex aspect-3/4 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 transition-all hover:border-indigo-400 hover:bg-indigo-50"
+                  className="group relative flex aspect-3/4 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 transition-all hover:border-blue-400 hover:bg-blue-50"
                   onClick={() => fileRef.current?.click()}
                 >
                   {coverPreview ? (
@@ -357,10 +357,10 @@ export function AddBookPage() {
                     </>
                   ) : (
                     <>
-                      <div className="mb-2 rounded-xl bg-slate-100 p-3 transition-colors group-hover:bg-indigo-100">
-                        <ImageIcon className="size-5 transition-colors group-hover:text-indigo-500" />
+                      <div className="mb-2 rounded-xl bg-slate-100 p-3 transition-colors group-hover:bg-blue-100">
+                        <ImageIcon className="size-5 transition-colors group-hover:text-blue-500" />
                       </div>
-                      <span className="px-4 text-center text-[11px] font-bold transition-colors group-hover:text-indigo-600">
+                      <span className="px-4 text-center text-[11px] font-bold transition-colors group-hover:text-blue-600">
                         Click to upload
                       </span>
                       <span className="mt-1 text-[10px] text-slate-300">
@@ -400,7 +400,7 @@ export function AddBookPage() {
                   <Input
                     id="title"
                     placeholder="e.g. The Great Gatsby"
-                    className="h-10 rounded-xl border-slate-200 text-sm focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                    className="h-10 rounded-xl border-slate-200 text-sm focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                     value={formData.title}
                     onChange={(e) => {
                       set("title")(e.target.value);
@@ -417,7 +417,7 @@ export function AddBookPage() {
                   <Input
                     id="author"
                     placeholder="e.g. F. Scott Fitzgerald"
-                    className="h-10 rounded-xl border-slate-200 text-sm focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                    className="h-10 rounded-xl border-slate-200 text-sm focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                     value={formData.author}
                     onChange={(e) => {
                       set("author")(e.target.value);
@@ -503,7 +503,7 @@ export function AddBookPage() {
           <div className="flex justify-end px-6 pb-6">
             <Button
               onClick={handleNext}
-              className="h-10 gap-2 rounded-xl bg-indigo-600 px-6 font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:scale-105 hover:bg-indigo-700 active:scale-95"
+              className="h-10 gap-2 rounded-xl bg-blue-600 px-6 font-bold text-white shadow-lg shadow-blue-200 transition-all hover:scale-105 hover:bg-blue-700 active:scale-95"
             >
               Continue to Details <ArrowRight className="size-4" />
             </Button>
@@ -514,7 +514,7 @@ export function AddBookPage() {
       {/* ── STEP 2: Additional Details ── */}
       {step === 2 && (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-          <div className="relative overflow-hidden bg-linear-to-br from-violet-600 to-fuchsia-600 p-6 text-white">
+          <div className="relative overflow-hidden bg-linear-to-br from-slate-600 to-fuchsia-600 p-6 text-white">
             <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/5" />
             <div className="relative z-10 space-y-1">
               <Badge className="mb-2 border-white/20 bg-white/10 text-[10px] font-bold tracking-wider text-white uppercase">
@@ -523,7 +523,7 @@ export function AddBookPage() {
               <h2 className="text-2xl font-black text-white">
                 Additional Details
               </h2>
-              <p className="font-medium text-violet-200">
+              <p className="font-medium text-slate-200">
                 Add more context to help users find and understand this book.
               </p>
             </div>
@@ -542,7 +542,7 @@ export function AddBookPage() {
                 <Input
                   id="isbn"
                   placeholder="e.g. 978-0743273565"
-                  className="h-9 rounded-lg border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="h-9 rounded-lg border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                   value={formData.isbn}
                   onChange={(e) => {
                     set("isbn")(e.target.value);
@@ -554,7 +554,7 @@ export function AddBookPage() {
                 <Input
                   id="publisher"
                   placeholder="e.g. Scribner"
-                  className="h-9 rounded-lg border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="h-9 rounded-lg border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                   value={formData.publisher}
                   onChange={(e) => set("publisher")(e.target.value)}
                 />
@@ -565,7 +565,7 @@ export function AddBookPage() {
                   type="number"
                   placeholder="e.g. 350"
                   min="1"
-                  className="h-9 rounded-lg border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="h-9 rounded-lg border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                   value={formData.pages}
                   onChange={(e) => set("pages")(e.target.value)}
                 />
@@ -574,7 +574,7 @@ export function AddBookPage() {
                 <Input
                   id="edition"
                   placeholder="e.g. 1st Edition"
-                  className="h-9 rounded-lg border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="h-9 rounded-lg border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                   value={formData.edition}
                   onChange={(e) => set("edition")(e.target.value)}
                 />
@@ -584,7 +584,7 @@ export function AddBookPage() {
                   value={formData.language}
                   onValueChange={(v) => set("language")(v)}
                 >
-                  <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 focus:ring-indigo-500/20">
+                  <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 focus:ring-blue-500/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-slate-100 shadow-xl">
@@ -609,7 +609,7 @@ export function AddBookPage() {
               <Textarea
                 id="description"
                 placeholder="Brief summary of the book…"
-                className="h-24 resize-none rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                className="h-24 resize-none rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                 value={formData.description}
                 onChange={(e) => {
                   set("description")(e.target.value);
@@ -629,7 +629,7 @@ export function AddBookPage() {
             </Button>
             <Button
               onClick={handleNext}
-              className="h-10 gap-2 rounded-xl bg-violet-600 px-6 font-bold text-white shadow-lg shadow-violet-200 transition-all hover:scale-105 hover:bg-violet-700 active:scale-95"
+              className="h-10 gap-2 rounded-xl bg-slate-600 px-6 font-bold text-white shadow-lg shadow-slate-200 transition-all hover:scale-105 hover:bg-slate-700 active:scale-95"
             >
               Review & Submit <ArrowRight className="size-4" />
             </Button>
@@ -640,7 +640,7 @@ export function AddBookPage() {
       {/* ── STEP 3: Review ── */}
       {step === 3 && (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-          <div className="relative overflow-hidden bg-linear-to-br from-emerald-600 to-teal-600 p-6 text-white">
+          <div className="relative overflow-hidden bg-linear-to-br from-success-text to-blue-600 p-6 text-white">
             <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/5" />
             <div className="relative z-10 space-y-1">
               <Badge className="mb-2 border-white/20 bg-white/10 text-[10px] font-bold tracking-wider text-white uppercase">
@@ -649,7 +649,7 @@ export function AddBookPage() {
               <h2 className="text-2xl font-black text-white">
                 Review & Confirm
               </h2>
-              <p className="font-medium text-emerald-100">
+              <p className="font-medium text-success-bg">
                 Verify the details below before saving the metadata to the
                 catalog.
               </p>
@@ -668,8 +668,8 @@ export function AddBookPage() {
                     className="aspect-3/4 w-full rounded-xl object-cover shadow-md"
                   />
                 ) : (
-                  <div className="flex aspect-3/4 w-full items-center justify-center rounded-xl bg-linear-to-br from-indigo-100 to-violet-100 shadow-md">
-                    <BookOpen className="size-8 text-indigo-400" />
+                  <div className="flex aspect-3/4 w-full items-center justify-center rounded-xl bg-linear-to-br from-blue-100 to-slate-100 shadow-md">
+                    <BookOpen className="size-8 text-blue-400" />
                   </div>
                 )}
               </div>
@@ -687,7 +687,7 @@ export function AddBookPage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {selectedCategory && (
-                    <Badge className="border-none bg-indigo-100 text-xs font-bold text-indigo-700">
+                    <Badge className="border-none bg-blue-100 text-xs font-bold text-blue-700">
                       {selectedCategory.name}
                     </Badge>
                   )}
@@ -747,7 +747,7 @@ export function AddBookPage() {
               <Button
                 onClick={handleSubmit}
                 disabled={createBookMutation.isPending}
-                className="h-10 gap-2 rounded-xl bg-emerald-600 px-6 font-bold text-white shadow-lg shadow-emerald-200 transition-all hover:scale-105 hover:bg-emerald-700 active:scale-95"
+                className="h-10 gap-2 rounded-xl bg-success-text px-6 font-bold text-white shadow-lg shadow-success-bg transition-all hover:scale-105 hover:bg-success-text active:scale-95"
               >
                 <Check className="size-4" />{" "}
                 {createBookMutation.isPending ? "Adding..." : "Add Metadata"}

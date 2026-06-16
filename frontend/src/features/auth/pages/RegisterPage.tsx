@@ -174,7 +174,7 @@ export function RegisterPage() {
           <div className="mb-6 flex flex-col items-center text-center">
             <div className="mb-4 flex size-32 shrink-0 items-center justify-center overflow-hidden">
               <img
-                src="/logo.png"
+                src="/img/logo.png"
                 alt="NCMC Library"
                 className="h-full w-full object-contain"
               />

@@ -162,25 +162,25 @@ const ROWS_PER_PAGE = 6;
 const STATUS_CFG = {
   Returned: {
     icon: CheckCircle2,
-    cls: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    cls: "bg-success-bg text-success-text border-success-bg",
   },
   "On Loan": {
     icon: Clock,
-    cls: "bg-indigo-100  text-indigo-700  border-indigo-200",
+    cls: "bg-blue-100  text-blue-700  border-blue-200",
   },
   Overdue: {
     icon: AlertCircle,
-    cls: "bg-rose-100    text-rose-700    border-rose-200",
+    cls: "bg-error-bg    text-error-text    border-error-bg",
   },
 } as const;
 
 const AVATAR_COLORS = [
-  "bg-violet-100 text-violet-700",
+  "bg-slate-100 text-slate-700",
   "bg-blue-100 text-blue-700",
-  "bg-emerald-100 text-emerald-700",
-  "bg-rose-100 text-rose-700",
-  "bg-amber-100 text-amber-700",
-  "bg-indigo-100 text-indigo-700",
+  "bg-success-bg text-success-text",
+  "bg-error-bg text-error-text",
+  "bg-warning-bg text-warning-text",
+  "bg-blue-100 text-blue-700",
 ];
 
 // ---------------------------------------------------------------------------
@@ -236,7 +236,7 @@ export function BorrowingHistoryPage() {
       <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
         <div>
           <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-            <div className="rounded-xl bg-indigo-50 p-2">
+            <div className="rounded-xl bg-blue-50 p-2">
               <History className="size-7" />
             </div>
             Borrowing History
@@ -253,7 +253,7 @@ export function BorrowingHistoryPage() {
             >
               <Download className="size-4" /> Export PDF
             </Button>
-            <Button className="h-11 gap-2 rounded-xl bg-indigo-600 font-bold text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700">
+            <Button className="h-11 gap-2 rounded-xl bg-blue-600 font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700">
               Generate Report
             </Button>
           </div>
@@ -269,7 +269,7 @@ export function BorrowingHistoryPage() {
               <div className="rounded-xl bg-slate-100 p-2.5 text-slate-600 transition-transform group-hover:scale-110">
                 <BookOpen className="size-5" />
               </div>
-              <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-600">
+              <span className="flex items-center gap-0.5 text-xs font-bold text-success-text">
                 +12.5% <ArrowUpRight className="size-3" />
               </span>
             </div>
@@ -283,13 +283,13 @@ export function BorrowingHistoryPage() {
         </Card>
 
         {/* Active Loans */}
-        <Card className="group transition-all duration-300 hover:border-indigo-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-blue-200 hover:shadow-md">
           <CardContent className="p-5">
             <div className="mb-3 flex items-start justify-between">
-              <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform group-hover:scale-110">
                 <Clock className="size-5" />
               </div>
-              <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-600">
+              <span className="flex items-center gap-0.5 text-xs font-bold text-success-text">
                 +5.2% <ArrowUpRight className="size-3" />
               </span>
             </div>
@@ -303,33 +303,33 @@ export function BorrowingHistoryPage() {
         </Card>
 
         {/* Overdue */}
-        <Card className="group transition-all duration-300 hover:border-rose-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-error-bg hover:shadow-md">
           <CardContent className="p-5">
             <div className="mb-3 flex items-start justify-between">
-              <div className="rounded-xl bg-rose-50 p-2.5 text-rose-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-error-bg p-2.5 text-error-text transition-transform group-hover:scale-110">
                 <AlertCircle className="size-5" />
               </div>
-              <span className="flex items-center gap-0.5 text-xs font-bold text-rose-500">
+              <span className="flex items-center gap-0.5 text-xs font-bold text-error-bg0">
                 -2.4% <ArrowDownRight className="size-3" />
               </span>
             </div>
             <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
               Overdue Books
             </p>
-            <h3 className="text-2xl font-black text-rose-600">
+            <h3 className="text-2xl font-black text-error-text">
               {overdueCount}
             </h3>
           </CardContent>
         </Card>
 
         {/* Returned */}
-        <Card className="group transition-all duration-300 hover:border-emerald-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-success-bg hover:shadow-md">
           <CardContent className="p-5">
             <div className="mb-3 flex items-start justify-between">
-              <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-success-bg p-2.5 text-success-text transition-transform group-hover:scale-110">
                 <CheckCircle2 className="size-5" />
               </div>
-              <span className="flex items-center gap-0.5 text-xs font-bold text-emerald-600">
+              <span className="flex items-center gap-0.5 text-xs font-bold text-success-text">
                 +15.8% <ArrowUpRight className="size-3" />
               </span>
             </div>
@@ -352,7 +352,7 @@ export function BorrowingHistoryPage() {
             <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
             <Input
               placeholder="Search student, book or ID…"
-              className="h-10 rounded-xl border-slate-200 pl-10 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              className="h-10 rounded-xl border-slate-200 pl-10 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               value={search}
               onChange={(e) => onSearch(e.target.value)}
             />
@@ -481,7 +481,7 @@ export function BorrowingHistoryPage() {
                               </div>
                             )}
                             <div>
-                              <p className="max-w-[200px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                              <p className="max-w-[200px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-blue-600">
                                 {row.book}
                               </p>
                               <p className="text-[11px] font-medium text-slate-400">
@@ -563,7 +563,7 @@ export function BorrowingHistoryPage() {
                                 Due
                               </span>
                               <span
-                                className={`font-bold ${row.status === "Overdue" ? "text-rose-600" : "text-slate-800"}`}
+                                className={`font-bold ${row.status === "Overdue" ? "text-error-text" : "text-slate-800"}`}
                               >
                                 {row.dueDate}
                               </span>
@@ -621,7 +621,7 @@ export function BorrowingHistoryPage() {
               <Button
                 key={p}
                 size="icon"
-                className={`h-8 w-8 rounded-lg text-xs font-bold ${p === page ? "bg-slate-900 text-white shadow-sm shadow-indigo-200 hover:bg-slate-800" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+                className={`h-8 w-8 rounded-lg text-xs font-bold ${p === page ? "bg-slate-900 text-white shadow-sm shadow-blue-200 hover:bg-slate-800" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
                 onClick={() => setPage(p)}
               >
                 {p}

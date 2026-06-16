@@ -65,7 +65,7 @@ const ON_LOAN_BOOKS = [
     author: "Gillian Flynn",
     due: "22/02/22",
     image: book1Img,
-    color: "from-indigo-800 to-indigo-900",
+    color: "from-blue-800 to-blue-900",
   },
 ];
 
@@ -118,7 +118,7 @@ export function BorrowBooksPage() {
       <section className="group relative overflow-hidden rounded-2xl bg-[#E2E2F8] p-6 transition-shadow duration-300 hover:shadow-xl sm:p-8 md:p-10">
         <div className="relative z-10 flex flex-col items-center gap-6 md:flex-row md:gap-10">
           <div className="flex-1 space-y-4 text-center md:text-left">
-            <Badge className="rounded-full border-0 bg-indigo-600/10 px-3 py-1 text-xs font-semibold text-indigo-700">
+            <Badge className="rounded-full border-0 bg-blue-600/10 px-3 py-1 text-xs font-semibold text-blue-700">
               Featured Collection
             </Badge>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl">
@@ -129,7 +129,7 @@ export function BorrowBooksPage() {
               to inspiring volumes for children, we&apos;re celebrating classic
               works and contemporary triumphs.
             </p>
-            <Button className="rounded-xl bg-[#FF7A59] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200/50 transition-all hover:bg-[#FF6B49] hover:shadow-xl active:scale-[0.98]">
+            <Button className="rounded-xl bg-[#FF7A59] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-warning-bg/50 transition-all hover:bg-[#FF6B49] hover:shadow-xl active:scale-[0.98]">
               Find out more
             </Button>
           </div>
@@ -144,7 +144,7 @@ export function BorrowBooksPage() {
 
         {/* Background shapes */}
         <div className="pointer-events-none absolute top-0 right-0 h-80 w-80 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/20 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-0 left-0 h-48 w-48 -translate-x-1/3 translate-y-1/3 rounded-full bg-indigo-200/30 blur-2xl" />
+        <div className="pointer-events-none absolute bottom-0 left-0 h-48 w-48 -translate-x-1/3 translate-y-1/3 rounded-full bg-blue-200/30 blur-2xl" />
       </section>
 
       {/* ── On Loan Section ───────────────────────────────────────── */}
@@ -160,7 +160,7 @@ export function BorrowBooksPage() {
           </div>
           <Button
             variant="ghost"
-            className="gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+            className="gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700"
           >
             View All <ArrowRight size={14} />
           </Button>
@@ -185,8 +185,8 @@ export function BorrowBooksPage() {
                 </h3>
                 <p className="truncate text-xs text-slate-500">{book.author}</p>
                 <div className="flex items-center gap-1.5">
-                  <Clock size={10} className="text-amber-500" />
-                  <span className="text-[10px] font-semibold text-amber-600">
+                  <Clock size={10} className="text-warning-bg0" />
+                  <span className="text-[10px] font-semibold text-warning-text">
                     Due {book.due}
                   </span>
                 </div>
@@ -195,11 +195,11 @@ export function BorrowBooksPage() {
           ))}
 
           {/* Add more card */}
-          <div className="group flex aspect-3/4 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:border-indigo-400 hover:bg-indigo-50/50 hover:shadow-lg">
-            <div className="flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-all group-hover:bg-indigo-100 group-hover:text-indigo-600">
+          <div className="group flex aspect-3/4 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-400 hover:bg-blue-50/50 hover:shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-all group-hover:bg-blue-100 group-hover:text-blue-600">
               <Plus size={24} />
             </div>
-            <p className="mt-3 px-4 text-center text-xs font-semibold text-slate-400 group-hover:text-indigo-600">
+            <p className="mt-3 px-4 text-center text-xs font-semibold text-slate-400 group-hover:text-blue-600">
               Borrow more
             </p>
           </div>
@@ -234,7 +234,7 @@ export function BorrowBooksPage() {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                      <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-blue-600">
                         {book.title}
                       </h3>
                       <p className="mt-0.5 text-xs text-slate-500">
@@ -278,13 +278,13 @@ export function BorrowBooksPage() {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                      <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-blue-600">
                         {author.name}
                       </h3>
                       <p className="text-xs text-slate-500">{author.period}</p>
                     </div>
                     {author.badge && (
-                      <Badge className="shrink-0 rounded-md border-0 bg-indigo-50 px-2 py-0.5 text-[9px] font-bold text-indigo-600">
+                      <Badge className="shrink-0 rounded-md border-0 bg-blue-50 px-2 py-0.5 text-[9px] font-bold text-blue-600">
                         {author.badge}
                       </Badge>
                     )}
@@ -319,7 +319,7 @@ export function BorrowBooksPage() {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                      <h3 className="truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-blue-600">
                         {book.title}
                       </h3>
                       <p className="mt-0.5 text-xs text-slate-500">
@@ -329,7 +329,7 @@ export function BorrowBooksPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-8 shrink-0 rounded-lg text-slate-300 hover:text-indigo-600"
+                      className="size-8 shrink-0 rounded-lg text-slate-300 hover:text-blue-600"
                     >
                       <BookOpen size={14} />
                     </Button>

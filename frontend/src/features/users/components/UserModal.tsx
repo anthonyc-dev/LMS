@@ -152,10 +152,10 @@ export function UserModal({
         <div
           className={`relative overflow-hidden p-6 text-white ${
             form.role === "admin"
-              ? "bg-linear-to-br from-violet-600 to-purple-700"
+              ? "bg-slate-600"
               : form.role === "faculty"
-                ? "bg-linear-to-br from-blue-600 to-indigo-700"
-                : "bg-linear-to-br from-emerald-500 to-teal-600"
+                ? "bg-linear-to-br from-blue-600 to-blue-700"
+                : "bg-blue-600"
           }`}
         >
           <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/5" />
@@ -218,12 +218,12 @@ export function UserModal({
 
               {isPending && (
                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-slate-900/10 backdrop-blur-[1px]">
-                  <Loader2 className="size-6 animate-spin text-indigo-600" />
+                  <Loader2 className="size-6 animate-spin text-blue-600" />
                 </div>
               )}
 
               <label
-                className={`absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-white shadow-sm transition-transform ${isPending ? "cursor-not-allowed bg-slate-400" : "cursor-pointer bg-indigo-600 hover:scale-110"}`}
+                className={`absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-white shadow-sm transition-transform ${isPending ? "cursor-not-allowed bg-slate-400" : "cursor-pointer bg-blue-600 hover:scale-110"}`}
               >
                 <Camera className="size-3.5" />
                 <input
@@ -252,7 +252,7 @@ export function UserModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
-                School ID <span className="text-rose-500">*</span>
+                School ID <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Hash className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
@@ -260,16 +260,16 @@ export function UserModal({
                   value={form.schoolId}
                   onChange={(e) => set("schoolId")(e.target.value)}
                   placeholder="22-0350"
-                  className={`rounded-xl pl-9 focus-visible:ring-indigo-500/20 ${errors.schoolId ? "border-rose-500 focus-visible:border-rose-500" : "border-slate-200 focus-visible:border-indigo-500"}`}
+                  className={`rounded-xl pl-9 focus-visible:ring-blue-500/20 ${errors.schoolId ? "border-red-500 focus-visible:border-red-500" : "border-slate-200 focus-visible:border-blue-500"}`}
                 />
               </div>
               {errors.schoolId && (
-                <p className="text-xs text-rose-500">{errors.schoolId}</p>
+                <p className="text-xs text-red-500">{errors.schoolId}</p>
               )}
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
-                Full Name <span className="text-rose-500">*</span>
+                Full Name <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Users className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
@@ -277,11 +277,11 @@ export function UserModal({
                   value={form.fullName}
                   onChange={(e) => set("fullName")(e.target.value)}
                   placeholder="John Doe"
-                  className={`rounded-xl pl-9 focus-visible:ring-indigo-500/20 ${errors.fullName ? "border-rose-500 focus-visible:border-rose-500" : "border-slate-200 focus-visible:border-indigo-500"}`}
+                  className={`rounded-xl pl-9 focus-visible:ring-blue-500/20 ${errors.fullName ? "border-red-500 focus-visible:border-red-500" : "border-slate-200 focus-visible:border-blue-500"}`}
                 />
               </div>
               {errors.fullName && (
-                <p className="text-xs text-rose-500">{errors.fullName}</p>
+                <p className="text-xs text-red-500">{errors.fullName}</p>
               )}
             </div>
           </div>
@@ -290,7 +290,7 @@ export function UserModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
-                Email <span className="text-rose-500">*</span>
+                Email <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Mail className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
@@ -299,11 +299,11 @@ export function UserModal({
                   value={form.email}
                   onChange={(e) => set("email")(e.target.value)}
                   placeholder="user@lms.edu"
-                  className={`rounded-xl pl-9 focus-visible:ring-indigo-500/20 ${errors.email ? "border-rose-500 focus-visible:border-rose-500" : "border-slate-200 focus-visible:border-indigo-500"}`}
+                  className={`rounded-xl pl-9 focus-visible:ring-blue-500/20 ${errors.email ? "border-red-500 focus-visible:border-red-500" : "border-slate-200 focus-visible:border-blue-500"}`}
                 />
               </div>
               {errors.email && (
-                <p className="text-xs text-rose-500">{errors.email}</p>
+                <p className="text-xs text-red-500">{errors.email}</p>
               )}
             </div>
             <div className="space-y-1.5">
@@ -316,7 +316,7 @@ export function UserModal({
                   value={form.phoneNumber}
                   onChange={(e) => set("phoneNumber")(e.target.value)}
                   placeholder="09123457878"
-                  className="rounded-xl border-slate-200 pl-9 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="rounded-xl border-slate-200 pl-9 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                 />
               </div>
             </div>
@@ -326,7 +326,7 @@ export function UserModal({
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
-                Department <span className="text-rose-500">*</span>
+                Department <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Building2 className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
@@ -335,7 +335,7 @@ export function UserModal({
                   onValueChange={set("department")}
                 >
                   <SelectTrigger
-                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-indigo-500/20 [&>span]:line-clamp-none ${errors.department ? "border-rose-500 focus:border-rose-500" : "border-slate-200"}`}
+                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-blue-500/20 [&>span]:line-clamp-none ${errors.department ? "border-red-500 focus:border-red-500" : "border-slate-200"}`}
                   >
                     <SelectValue
                       placeholder={
@@ -359,18 +359,18 @@ export function UserModal({
                 </Select>
               </div>
               {errors.department && (
-                <p className="text-xs text-rose-500">{errors.department}</p>
+                <p className="text-xs text-red-500">{errors.department}</p>
               )}
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
-                Year Level <span className="text-rose-500">*</span>
+                Year Level <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <School className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Select value={form.yearLevel} onValueChange={set("yearLevel")}>
                   <SelectTrigger
-                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-indigo-500/20 [&>span]:line-clamp-none ${errors.yearLevel ? "border-rose-500 focus:border-rose-500" : "border-slate-200"}`}
+                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-blue-500/20 [&>span]:line-clamp-none ${errors.yearLevel ? "border-red-500 focus:border-red-500" : "border-slate-200"}`}
                   >
                     <SelectValue
                       placeholder={
@@ -394,7 +394,7 @@ export function UserModal({
                 </Select>
               </div>
               {errors.yearLevel && (
-                <p className="text-xs text-rose-500">{errors.yearLevel}</p>
+                <p className="text-xs text-red-500">{errors.yearLevel}</p>
               )}
             </div>
           </div>
@@ -403,7 +403,7 @@ export function UserModal({
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
-                Role <span className="text-rose-500">*</span>
+                Role <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Shield className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
@@ -411,7 +411,7 @@ export function UserModal({
                   value={form.role}
                   onValueChange={(v) => set("role")((v ?? "") as string)}
                 >
-                  <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 pl-9 focus:ring-indigo-500/20">
+                  <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 pl-9 focus:ring-blue-500/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-slate-100 shadow-xl">

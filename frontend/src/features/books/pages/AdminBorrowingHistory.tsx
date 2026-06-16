@@ -81,12 +81,12 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-001",
     bookTitle: "Clean Code",
     bookAuthor: "Robert C. Martin",
-    bookCover: "from-orange-500 to-amber-600",
+    bookCover: "from-warning-bg0 to-warning-text",
     isbn: "978-0132350884",
     borrowerName: "Marcus Johnson",
     borrowerEmail: "m.johnson@student.lms.edu",
     borrowerRole: "student",
-    borrowerAvatar: "bg-emerald-500",
+    borrowerAvatar: "bg-success-bg0",
     borrowDate: "May 10, 2025",
     dueDate: "May 24, 2025",
     status: "overdue",
@@ -98,7 +98,7 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-002",
     bookTitle: "The Pragmatic Programmer",
     bookAuthor: "Andrew Hunt",
-    bookCover: "from-blue-600 to-indigo-700",
+    bookCover: "from-blue-600 to-blue-700",
     isbn: "978-0135957059",
     borrowerName: "Dr. Sarah Chen",
     borrowerEmail: "s.chen@lms.edu",
@@ -113,12 +113,12 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-003",
     bookTitle: "Introduction to Algorithms",
     bookAuthor: "Cormen, Leiserson et al.",
-    bookCover: "from-violet-600 to-purple-700",
+    bookCover: "from-slate-600 to-slate-700",
     isbn: "978-0262046305",
     borrowerName: "James Lee",
     borrowerEmail: "j.lee@student.lms.edu",
     borrowerRole: "student",
-    borrowerAvatar: "bg-cyan-500",
+    borrowerAvatar: "bg-blue-500",
     borrowDate: "Apr 20, 2025",
     dueDate: "May 4, 2025",
     returnDate: "May 3, 2025",
@@ -129,12 +129,12 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-004",
     bookTitle: "Design Patterns",
     bookAuthor: "Gang of Four",
-    bookCover: "from-rose-500 to-pink-600",
+    bookCover: "from-error-bg0 to-pink-600",
     isbn: "978-0201633610",
     borrowerName: "Prof. David Vance",
     borrowerEmail: "d.vance@lms.edu",
     borrowerRole: "faculty",
-    borrowerAvatar: "bg-indigo-500",
+    borrowerAvatar: "bg-blue-500",
     borrowDate: "May 1, 2025",
     dueDate: "Jun 1, 2025",
     status: "renewed",
@@ -144,12 +144,12 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-005",
     bookTitle: "You Don't Know JS",
     bookAuthor: "Kyle Simpson",
-    bookCover: "from-yellow-500 to-orange-500",
+    bookCover: "from-yellow-500 to-warning-bg0",
     isbn: "978-1491904220",
     borrowerName: "Olivia Davis",
     borrowerEmail: "o.davis@student.lms.edu",
     borrowerRole: "student",
-    borrowerAvatar: "bg-amber-500",
+    borrowerAvatar: "bg-warning-bg0",
     borrowDate: "May 18, 2025",
     dueDate: "Jun 1, 2025",
     status: "active",
@@ -159,12 +159,12 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-006",
     bookTitle: "Refactoring",
     bookAuthor: "Martin Fowler",
-    bookCover: "from-teal-500 to-emerald-600",
+    bookCover: "from-blue-500 to-success-text",
     isbn: "978-0134757599",
     borrowerName: "Ryan Thompson",
     borrowerEmail: "r.thompson@student.lms.edu",
     borrowerRole: "student",
-    borrowerAvatar: "bg-violet-500",
+    borrowerAvatar: "bg-slate-500",
     borrowDate: "Apr 10, 2025",
     dueDate: "Apr 24, 2025",
     returnDate: "Apr 22, 2025",
@@ -191,12 +191,12 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-008",
     bookTitle: "Eloquent JavaScript",
     bookAuthor: "Marijn Haverbeke",
-    bookCover: "from-green-500 to-teal-600",
+    bookCover: "from-green-500 to-blue-600",
     isbn: "978-1593279509",
     borrowerName: "Emily Watson",
     borrowerEmail: "e.watson@student.lms.edu",
     borrowerRole: "student",
-    borrowerAvatar: "bg-rose-500",
+    borrowerAvatar: "bg-error-bg0",
     borrowDate: "May 20, 2025",
     dueDate: "Jun 3, 2025",
     status: "active",
@@ -206,12 +206,12 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-009",
     bookTitle: "Structure and Interpretation",
     bookAuthor: "Abelson & Sussman",
-    bookCover: "from-blue-500 to-cyan-600",
+    bookCover: "from-blue-500 to-blue-600",
     isbn: "978-0262510875",
     borrowerName: "Prof. Nathan Clark",
     borrowerEmail: "n.clark@lms.edu",
     borrowerRole: "faculty",
-    borrowerAvatar: "bg-emerald-500",
+    borrowerAvatar: "bg-success-bg0",
     borrowDate: "Apr 28, 2025",
     dueDate: "May 28, 2025",
     status: "renewed",
@@ -221,7 +221,7 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-010",
     bookTitle: "Computer Networks",
     bookAuthor: "Andrew Tanenbaum",
-    bookCover: "from-purple-500 to-violet-600",
+    bookCover: "from-slate-500 to-slate-600",
     isbn: "978-0132126953",
     borrowerName: "Isabella Brown",
     borrowerEmail: "i.brown@student.lms.edu",
@@ -237,12 +237,12 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-011",
     bookTitle: "Operating System Concepts",
     bookAuthor: "Silberschatz, Galvin",
-    bookCover: "from-red-500 to-rose-600",
+    bookCover: "from-red-500 to-error-text",
     isbn: "978-1119800361",
     borrowerName: "Marcus Johnson",
     borrowerEmail: "m.johnson@student.lms.edu",
     borrowerRole: "student",
-    borrowerAvatar: "bg-emerald-500",
+    borrowerAvatar: "bg-success-bg0",
     borrowDate: "May 12, 2025",
     dueDate: "May 26, 2025",
     status: "active",
@@ -252,7 +252,7 @@ const RECORDS: BorrowRecord[] = [
     id: "BR-012",
     bookTitle: "Database System Concepts",
     bookAuthor: "Silberschatz, Korth",
-    bookCover: "from-indigo-500 to-blue-600",
+    bookCover: "from-blue-500 to-blue-600",
     isbn: "978-1260515046",
     borrowerName: "Dr. Sarah Chen",
     borrowerEmail: "s.chen@lms.edu",
@@ -292,22 +292,22 @@ function statusConfig(status: BorrowStatus) {
     case "returned":
       return {
         label: "Returned",
-        cls: "bg-emerald-100 text-emerald-700 border-emerald-200",
-        dot: "bg-emerald-500",
+        cls: "bg-success-bg text-success-text border-success-bg",
+        dot: "bg-success-bg0",
         icon: CheckCircle2,
       };
     case "overdue":
       return {
         label: "Overdue",
-        cls: "bg-rose-100 text-rose-700 border-rose-200",
-        dot: "bg-rose-500",
+        cls: "bg-error-bg text-error-text border-error-bg",
+        dot: "bg-error-bg0",
         icon: AlertTriangle,
       };
     case "renewed":
       return {
         label: "Renewed",
-        cls: "bg-violet-100 text-violet-700 border-violet-200",
-        dot: "bg-violet-500",
+        cls: "bg-slate-100 text-slate-700 border-slate-200",
+        dot: "bg-slate-500",
         icon: RefreshCw,
       };
   }
@@ -316,11 +316,11 @@ function statusConfig(status: BorrowStatus) {
 function roleConfig(role: UserRole) {
   switch (role) {
     case "admin":
-      return { label: "Admin", icon: Crown, cls: "text-violet-600" };
+      return { label: "Admin", icon: Crown, cls: "text-slate-600" };
     case "faculty":
       return { label: "Faculty", icon: GraduationCap, cls: "text-blue-600" };
     case "student":
-      return { label: "Student", icon: GraduationCap, cls: "text-emerald-600" };
+      return { label: "Student", icon: GraduationCap, cls: "text-success-text" };
   }
 }
 
@@ -441,17 +441,17 @@ function RecordDetailModal({
                 Due Date
               </p>
               <p
-                className={`text-sm font-bold ${record.status === "overdue" ? "text-rose-600" : "text-slate-800"}`}
+                className={`text-sm font-bold ${record.status === "overdue" ? "text-error-text" : "text-slate-800"}`}
               >
                 {record.dueDate}
               </p>
             </div>
             {record.returnDate && (
-              <div className="col-span-2 space-y-1 rounded-xl bg-emerald-50 p-3">
-                <p className="text-[10px] font-bold tracking-wider text-emerald-500 uppercase">
+              <div className="col-span-2 space-y-1 rounded-xl bg-success-bg p-3">
+                <p className="text-[10px] font-bold tracking-wider text-success-bg0 uppercase">
                   Returned On
                 </p>
-                <p className="text-sm font-bold text-emerald-700">
+                <p className="text-sm font-bold text-success-text">
                   {record.returnDate}
                 </p>
               </div>
@@ -460,9 +460,9 @@ function RecordDetailModal({
 
           {/* Renew count */}
           {record.renewCount > 0 && (
-            <div className="flex items-center gap-2 rounded-xl border border-violet-100 bg-violet-50 p-3">
-              <RefreshCw className="size-4 text-violet-500" />
-              <span className="text-sm font-semibold text-violet-700">
+            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
+              <RefreshCw className="size-4 text-slate-500" />
+              <span className="text-sm font-semibold text-slate-700">
                 Renewed {record.renewCount} time
                 {record.renewCount > 1 ? "s" : ""}
               </span>
@@ -471,11 +471,11 @@ function RecordDetailModal({
 
           {/* Notes */}
           {record.notes && (
-            <div className="rounded-xl border border-amber-100 bg-amber-50 p-3">
-              <p className="mb-1 text-[10px] font-bold tracking-wider text-amber-500 uppercase">
+            <div className="rounded-xl border border-warning-bg bg-warning-bg p-3">
+              <p className="mb-1 text-[10px] font-bold tracking-wider text-warning-bg0 uppercase">
                 Notes
               </p>
-              <p className="text-sm text-amber-800">{record.notes}</p>
+              <p className="text-sm text-warning-text">{record.notes}</p>
             </div>
           )}
         </div>
@@ -570,9 +570,9 @@ export function AdminBorrowingHistory() {
     if (sortKey !== k)
       return <ArrowUpDown className="ml-1 inline size-3.5 text-slate-300" />;
     return sortDir === "asc" ? (
-      <ArrowUp className="ml-1 inline size-3.5 text-indigo-500" />
+      <ArrowUp className="ml-1 inline size-3.5 text-blue-500" />
     ) : (
-      <ArrowDown className="ml-1 inline size-3.5 text-indigo-500" />
+      <ArrowDown className="ml-1 inline size-3.5 text-blue-500" />
     );
   };
 
@@ -585,8 +585,8 @@ export function AdminBorrowingHistory() {
     <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1600px] space-y-6 duration-700">
       {/* ── Page Header ── */}
       <div className="relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
-        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-indigo-400/5 blur-3xl" />
-        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-violet-400/5 blur-3xl" />
+        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-blue-400/5 blur-3xl" />
+        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-slate-400/5 blur-3xl" />
 
         <div className="relative z-10 space-y-1">
           <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
@@ -600,7 +600,7 @@ export function AdminBorrowingHistory() {
 
         <div className="relative z-10 flex items-center gap-3">
           <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-            <TrendingUp className="size-4 text-indigo-500" />
+            <TrendingUp className="size-4 text-blue-500" />
             <span className="text-xs font-bold text-slate-600">
               {totalRecords} Total Records
             </span>
@@ -616,7 +616,7 @@ export function AdminBorrowingHistory() {
             value: activeCount,
             icon: BookOpen,
             from: "from-blue-500",
-            to: "to-indigo-600",
+            to: "to-blue-600",
             shadow: "shadow-blue-200",
             bg: "bg-blue-50",
             text: "text-blue-700",
@@ -625,31 +625,31 @@ export function AdminBorrowingHistory() {
             label: "Overdue",
             value: overdueCount,
             icon: AlertTriangle,
-            from: "from-rose-500",
+            from: "from-error-bg0",
             to: "to-pink-600",
-            shadow: "shadow-rose-200",
-            bg: "bg-rose-50",
-            text: "text-rose-700",
+            shadow: "shadow-error-bg",
+            bg: "bg-error-bg",
+            text: "text-error-text",
           },
           {
             label: "Renewed",
             value: renewedCount,
             icon: RefreshCw,
-            from: "from-violet-500",
-            to: "to-purple-600",
-            shadow: "shadow-violet-200",
-            bg: "bg-violet-50",
-            text: "text-violet-700",
+            from: "from-slate-500",
+            to: "to-slate-600",
+            shadow: "shadow-slate-200",
+            bg: "bg-slate-50",
+            text: "text-slate-700",
           },
           {
             label: "Returned",
             value: returnedCount,
             icon: CheckCircle2,
-            from: "from-emerald-500",
-            to: "to-teal-600",
-            shadow: "shadow-emerald-200",
-            bg: "bg-emerald-50",
-            text: "text-emerald-700",
+            from: "from-success-bg0",
+            to: "to-blue-600",
+            shadow: "shadow-success-bg",
+            bg: "bg-success-bg",
+            text: "text-success-text",
           },
         ].map((card) => {
           const Icon = card.icon;
@@ -704,7 +704,7 @@ export function AdminBorrowingHistory() {
                       }}
                       className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all duration-200 ${
                         isActive
-                          ? "bg-white text-indigo-600 shadow-sm"
+                          ? "bg-white text-blue-600 shadow-sm"
                           : "text-slate-500 hover:text-slate-700"
                       }`}
                     >
@@ -712,7 +712,7 @@ export function AdminBorrowingHistory() {
                       <span
                         className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
                           isActive
-                            ? "bg-indigo-100 text-indigo-600"
+                            ? "bg-blue-100 text-blue-600"
                             : "bg-slate-200 text-slate-500"
                         }`}
                       >
@@ -735,7 +735,7 @@ export function AdminBorrowingHistory() {
                     setPage(1);
                   }}
                   placeholder="Search books, users, ID…"
-                  className="h-10 w-full rounded-xl border-slate-200 pl-9 text-sm focus-visible:border-indigo-400 focus-visible:ring-indigo-400/20 sm:w-56"
+                  className="h-10 w-full rounded-xl border-slate-200 pl-9 text-sm focus-visible:border-blue-400 focus-visible:ring-blue-400/20 sm:w-56"
                 />
                 {search && (
                   <button
@@ -756,7 +756,7 @@ export function AdminBorrowingHistory() {
                     setPage(1);
                   }}
                 >
-                  <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 text-sm focus:ring-indigo-400/20">
+                  <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 text-sm focus:ring-blue-400/20">
                     <Filter className="mr-1.5 size-3.5 text-slate-400" />
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
@@ -788,7 +788,7 @@ export function AdminBorrowingHistory() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 text-sm focus:ring-indigo-400/20 sm:w-36">
+                <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 text-sm focus:ring-blue-400/20 sm:w-36">
                   <Filter className="mr-1.5 size-3.5 text-slate-400" />
                   <SelectValue placeholder="Role" />
                 </SelectTrigger>
@@ -963,17 +963,17 @@ export function AdminBorrowingHistory() {
                               <div
                                 className={`flex items-center gap-1.5 text-sm font-medium ${
                                   record.status === "overdue"
-                                    ? "text-rose-600"
+                                    ? "text-error-text"
                                     : "text-slate-600"
                                 }`}
                               >
                                 <Clock
-                                  className={`size-3.5 ${record.status === "overdue" ? "text-rose-400" : "text-slate-400"}`}
+                                  className={`size-3.5 ${record.status === "overdue" ? "text-error-text" : "text-slate-400"}`}
                                 />
                                 {record.dueDate}
                                 {record.status === "overdue" &&
                                   record.overdueDays && (
-                                    <span className="ml-1 rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-black text-rose-600">
+                                    <span className="ml-1 rounded-full bg-error-bg px-1.5 py-0.5 text-[10px] font-black text-error-text">
                                       +{record.overdueDays}d
                                     </span>
                                   )}
@@ -1007,7 +1007,7 @@ export function AdminBorrowingHistory() {
                               e.stopPropagation();
                               openDetail(record);
                             }}
-                            className={`h-8 w-8 rounded-xl p-0 transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-600 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                            className={`h-8 w-8 rounded-xl p-0 transition-all duration-200 hover:bg-blue-50 hover:text-blue-600 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                           >
                             <Eye className="size-4" />
                           </Button>
@@ -1050,13 +1050,13 @@ export function AdminBorrowingHistory() {
                                 </span>
                                 <div className="flex items-center gap-2">
                                   <span
-                                    className={`font-bold ${record.status === "overdue" ? "text-rose-600" : "text-slate-800"}`}
+                                    className={`font-bold ${record.status === "overdue" ? "text-error-text" : "text-slate-800"}`}
                                   >
                                     {record.dueDate}
                                   </span>
                                   {record.status === "overdue" &&
                                     record.overdueDays && (
-                                      <span className="rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-black text-rose-600">
+                                      <span className="rounded-full bg-error-bg px-1.5 py-0.5 text-[10px] font-black text-error-text">
                                         +{record.overdueDays}d
                                       </span>
                                     )}
@@ -1103,7 +1103,7 @@ export function AdminBorrowingHistory() {
               size="sm"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="h-8 w-8 rounded-xl border-slate-200 p-0 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-40"
+              className="h-8 w-8 rounded-xl border-slate-200 p-0 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-40"
             >
               <ChevronLeft className="size-4" />
             </Button>
@@ -1127,7 +1127,7 @@ export function AdminBorrowingHistory() {
               size="sm"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="h-8 w-8 rounded-xl border-slate-200 p-0 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-40"
+              className="h-8 w-8 rounded-xl border-slate-200 p-0 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-40"
             >
               <ChevronRight className="size-4" />
             </Button>

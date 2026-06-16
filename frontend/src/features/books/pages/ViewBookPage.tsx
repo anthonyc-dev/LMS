@@ -39,7 +39,7 @@ export function ViewBookPage() {
   if (isError || !book) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
-        <XCircle className="size-16 text-rose-500" />
+        <XCircle className="text-error-bg0 size-16" />
         <h2 className="text-2xl font-bold text-slate-800">Book Not Found</h2>
         <p className="text-slate-500">
           We couldn't find the book you are looking for.
@@ -86,8 +86,8 @@ export function ViewBookPage() {
                 <Badge
                   className={`rounded-full border-none px-3.5 py-1 text-xs font-bold tracking-wide shadow-lg backdrop-blur-md ${
                     isAvailable
-                      ? "bg-emerald-500/90 text-white"
-                      : "bg-rose-500/90 text-white"
+                      ? "bg-success-bg0/90 text-white"
+                      : "bg-error-bg0/90 text-white"
                   }`}
                 >
                   {book?.availabilityLabel}
@@ -103,6 +103,8 @@ export function ViewBookPage() {
               </div>
             </div>
           </div>
+
+          <Button className="mt-4 w-full">Borrow Book</Button>
         </div>
 
         {/* Right Column: Structured details */}
@@ -123,7 +125,7 @@ export function ViewBookPage() {
           {/* About/Description Card */}
           <div className="space-y-3 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-100/50">
             <h3 className="flex items-center gap-2 border-b border-slate-100 pb-2 text-base font-black text-slate-900">
-              <BookOpen className="size-5 text-indigo-500" /> About this book
+              <BookOpen className="size-5 text-blue-500" /> About this book
             </h3>
             <p className="text-sm leading-relaxed text-slate-600 md:text-base">
               {book.description || "No description provided for this book."}
@@ -133,8 +135,7 @@ export function ViewBookPage() {
           {/* Specifications Card */}
           <div className="space-y-6 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-100/50">
             <h3 className="flex items-center gap-2 border-b border-slate-100 pb-2 text-base font-black text-slate-900">
-              <FileText className="size-5 text-indigo-500" /> Book
-              Specifications
+              <FileText className="size-5 text-blue-500" /> Book Specifications
             </h3>
             <div className="grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-3">
               <div className="space-y-1">
@@ -196,7 +197,7 @@ export function ViewBookPage() {
           {/* Locations Card */}
           <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-100/50">
             <h3 className="flex items-center gap-2 border-b border-slate-100 pb-2 text-base font-black text-slate-900">
-              <MapPin className="size-5 text-purple-600" /> Copies Location
+              <MapPin className="size-5 text-slate-600" /> Copies Location
             </h3>
             <div className="flex flex-wrap gap-2">
               {book.locations && book.locations.length > 0 ? (
@@ -204,7 +205,7 @@ export function ViewBookPage() {
                   <Badge
                     key={idx}
                     variant="secondary"
-                    className="rounded-full border border-purple-100 bg-purple-50 px-3.5 py-1.5 text-xs font-semibold text-purple-700 shadow-none hover:bg-purple-100/60"
+                    className="rounded-full border border-slate-100 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-100/60"
                   >
                     {loc}
                   </Badge>

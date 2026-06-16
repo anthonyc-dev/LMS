@@ -168,24 +168,24 @@ const SchedulePage = () => {
         };
       case "meeting":
         return {
-          bg: "bg-emerald-50",
-          border: "border-emerald-100",
-          text: "text-emerald-700",
-          dot: "bg-emerald-500",
+          bg: "bg-success-bg",
+          border: "border-success-bg",
+          text: "text-success-text",
+          dot: "bg-success-bg0",
         };
       case "exam":
         return {
-          bg: "bg-rose-50",
-          border: "border-rose-100",
-          text: "text-rose-700",
-          dot: "bg-rose-500",
+          bg: "bg-error-bg",
+          border: "border-error-bg",
+          text: "text-error-text",
+          dot: "bg-error-bg0",
         };
       case "deadline":
         return {
-          bg: "bg-amber-50",
-          border: "border-amber-100",
-          text: "text-amber-700",
-          dot: "bg-amber-500",
+          bg: "bg-warning-bg",
+          border: "border-warning-bg",
+          text: "text-warning-text",
+          dot: "bg-warning-bg0",
         };
       default:
         return {
@@ -201,7 +201,7 @@ const SchedulePage = () => {
     return (
       <div className="flex flex-col items-start justify-between rounded-t-3xl border-b border-white/20 bg-white/50 p-4 backdrop-blur-xl md:flex-row md:items-center md:px-6 md:py-6">
         <div className="mb-4 flex items-center gap-4 md:mb-0">
-          <div className="rounded-2xl bg-indigo-600 p-2.5 shadow-lg shadow-indigo-200 md:p-3">
+          <div className="rounded-2xl bg-blue-600 p-2.5 shadow-lg shadow-blue-200 md:p-3">
             <CalendarIcon className="h-5 w-5 text-white md:h-6 md:w-6" />
           </div>
           <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
@@ -246,14 +246,14 @@ const SchedulePage = () => {
               variant="ghost"
               size="icon"
               onClick={prevMonth}
-              className="h-9 w-9 rounded-xl transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-600 md:h-10 md:w-10"
+              className="h-9 w-9 rounded-xl transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 md:h-10 md:w-10"
             >
               <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
             <Button
               variant="ghost"
               onClick={goToToday}
-              className="h-9 rounded-xl px-4 text-xs font-bold text-gray-600 transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-600 md:h-10 md:px-6 md:text-sm"
+              className="h-9 rounded-xl px-4 text-xs font-bold text-gray-600 transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 md:h-10 md:px-6 md:text-sm"
             >
               Today
             </Button>
@@ -261,7 +261,7 @@ const SchedulePage = () => {
               variant="ghost"
               size="icon"
               onClick={nextMonth}
-              className="h-9 w-9 rounded-xl transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-600 md:h-10 md:w-10"
+              className="h-9 w-9 rounded-xl transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 md:h-10 md:w-10"
             >
               <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
@@ -270,14 +270,14 @@ const SchedulePage = () => {
           {/* Search & Add */}
           <div className="flex w-full items-center gap-2 md:w-auto">
             <div className="group relative flex-1 md:w-64">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-indigo-500" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500" />
               <input
                 type="text"
                 placeholder="Search..."
-                className="h-10 w-full rounded-xl border border-gray-200 bg-white py-2 pr-4 pl-9 text-sm shadow-sm transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
+                className="h-10 w-full rounded-xl border border-gray-200 bg-white py-2 pr-4 pl-9 text-sm shadow-sm transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
               />
             </div>
-            <Button className="h-10 shrink-0 gap-2 rounded-xl bg-indigo-600 px-4 text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 active:scale-95 md:px-5">
+            <Button className="h-10 shrink-0 gap-2 rounded-xl bg-blue-600 px-4 text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 active:scale-95 md:px-5">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add Event</span>
             </Button>
@@ -321,12 +321,12 @@ const SchedulePage = () => {
           <div
             key={day.toString()}
             className={cn(
-              "group relative flex cursor-pointer flex-col items-center justify-start border-r border-b border-gray-100 p-1 transition-all duration-300 hover:bg-indigo-50/30 md:items-start md:p-2",
+              "group relative flex cursor-pointer flex-col items-center justify-start border-r border-b border-gray-100 p-1 transition-all duration-300 hover:bg-blue-50/30 md:items-start md:p-2",
               isMobile ? "h-16" : "min-h-[130px] xl:min-h-[140px]",
               !isSameMonth(day, monthStart)
                 ? "bg-gray-50/30 text-gray-300"
                 : "text-gray-700",
-              isSameDay(day, selectedDate) ? "bg-indigo-50/50" : "",
+              isSameDay(day, selectedDate) ? "bg-blue-50/50" : "",
             )}
             onClick={() => setSelectedDate(cloneDay)}
           >
@@ -336,16 +336,16 @@ const SchedulePage = () => {
                   "flex items-center justify-center rounded-full text-xs font-bold transition-all duration-300 md:text-sm",
                   isMobile ? "mt-1 h-7 w-7" : "h-8 w-8",
                   isToday(day)
-                    ? "scale-110 bg-indigo-600 text-white shadow-md shadow-indigo-200"
+                    ? "scale-110 bg-blue-600 text-white shadow-md shadow-blue-200"
                     : isSameDay(day, selectedDate)
-                      ? "bg-indigo-100 text-indigo-700"
+                      ? "bg-blue-100 text-blue-700"
                       : "group-hover:bg-gray-100",
                 )}
               >
                 {formattedDate}
               </span>
               {!isMobile && dayEvents.length > 0 && (
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-400" />
+                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400" />
               )}
             </div>
 
@@ -410,9 +410,9 @@ const SchedulePage = () => {
                                 {event.type}
                               </Badge>
                               {event.status === "completed" ? (
-                                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                                <CheckCircle2 className="h-4 w-4 text-success-bg0" />
                               ) : event.status === "urgent" ? (
-                                <AlertCircle className="h-4 w-4 animate-bounce text-rose-500" />
+                                <AlertCircle className="h-4 w-4 animate-bounce text-error-bg0" />
                               ) : null}
                             </div>
                             <h4 className="text-sm font-bold text-gray-900">
@@ -526,9 +526,9 @@ const SchedulePage = () => {
                           {event.type}
                         </Badge>
                         {event.status === "completed" ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                          <CheckCircle2 className="h-4 w-4 text-success-bg0" />
                         ) : event.status === "urgent" ? (
-                          <AlertCircle className="h-4 w-4 text-rose-500" />
+                          <AlertCircle className="h-4 w-4 text-error-bg0" />
                         ) : null}
                       </div>
                       <h4 className="leading-tight font-bold text-gray-900">
@@ -576,13 +576,13 @@ const SchedulePage = () => {
 
       {/* Quick Stats / Info Panel */}
       <div className="mt-6 grid grid-cols-1 gap-4 md:mt-8 md:grid-cols-3 md:gap-6">
-        <Card className="rounded-3xl border-none bg-linear-to-br from-indigo-500 to-purple-600 p-5 text-white shadow-xl shadow-indigo-100 md:rounded-4xl md:p-6">
+        <Card className="rounded-3xl border-none bg-linear-to-br from-blue-500 to-slate-600 p-5 text-white shadow-xl shadow-blue-100 md:rounded-4xl md:p-6">
           <div className="mb-4 flex items-center gap-4">
             <div className="rounded-2xl bg-white/20 p-2.5 backdrop-blur-md md:p-3">
               <Clock className="h-5 w-5 md:h-6 md:w-6" />
             </div>
             <div>
-              <p className="text-xs font-medium text-indigo-100 md:text-sm">
+              <p className="text-xs font-medium text-blue-100 md:text-sm">
                 Next Up
               </p>
               <h3 className="text-lg font-bold md:text-xl">Faculty Meeting</h3>
@@ -635,7 +635,7 @@ const SchedulePage = () => {
                   strokeLinecap="round"
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-indigo-600 md:text-xs">
+              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-blue-600 md:text-xs">
                 75%
               </span>
             </div>
@@ -660,7 +660,7 @@ const SchedulePage = () => {
               <Badge
                 key={filter}
                 variant="outline"
-                className="cursor-pointer rounded-xl border-gray-100 px-3 py-1 text-[10px] text-gray-600 transition-all hover:border-indigo-200 hover:bg-indigo-50 md:px-4 md:py-1.5 md:text-xs"
+                className="cursor-pointer rounded-xl border-gray-100 px-3 py-1 text-[10px] text-gray-600 transition-all hover:border-blue-200 hover:bg-blue-50 md:px-4 md:py-1.5 md:text-xs"
               >
                 {filter}
               </Badge>

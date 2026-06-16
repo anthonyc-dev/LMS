@@ -229,7 +229,7 @@ export function BorrowBookPage() {
         <div className="col-span-1 flex flex-col gap-6 lg:col-span-1">
           <div className="flex flex-col rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
             <div className="mb-6 flex items-center gap-3">
-              <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600">
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600">
                 <UserIcon className="size-5" />
               </div>
               <h2 className="text-lg font-bold text-slate-800">
@@ -244,13 +244,13 @@ export function BorrowBookPage() {
                   value={borrowerSearch}
                   onChange={(e) => setBorrowerSearch(e.target.value)}
                   placeholder="School ID, Email, Name..."
-                  className="h-12 rounded-xl border-slate-200 pl-10 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="h-10 rounded-lg border-slate-200 pl-10 text-sm focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                   disabled={isLoadingUsers}
                 />
                 <Button
                   type="submit"
                   size="sm"
-                  className="absolute top-1 right-1 h-10 rounded-lg bg-indigo-600 font-bold hover:bg-indigo-700"
+                  className="absolute top-1 right-1 h-8 rounded-md bg-blue-600 text-xs font-bold hover:bg-blue-700"
                 >
                   Find
                 </Button>
@@ -258,11 +258,11 @@ export function BorrowBookPage() {
             </form>
 
             {selectedUser ? (
-              <div className="flex flex-1 flex-col justify-between rounded-xl border border-indigo-100 bg-indigo-50/50 p-5">
+              <div className="flex flex-1 flex-col justify-between rounded-xl border border-blue-100 bg-blue-50/50 p-5">
                 <div className="flex items-start gap-4">
                   <Avatar className="h-16 w-16 shadow-sm ring-4 ring-white">
                     <AvatarImage src={selectedUser.avatarUrl} />
-                    <AvatarFallback className="bg-indigo-100 text-xl font-black text-indigo-700">
+                    <AvatarFallback className="bg-blue-100 text-xl font-black text-blue-700">
                       {selectedUser.fullName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -276,7 +276,7 @@ export function BorrowBookPage() {
                     <div className="mt-2 flex items-center gap-2">
                       <Badge
                         variant="outline"
-                        className="border-indigo-200 bg-white text-[10px] tracking-wider text-indigo-700 uppercase"
+                        className="border-blue-200 bg-white text-[10px] tracking-wider text-blue-700 uppercase"
                       >
                         <Shield className="mr-1 size-3" />
                         {selectedUser.Role}
@@ -296,10 +296,10 @@ export function BorrowBookPage() {
                     <div
                       className={`h-full rounded-full transition-all duration-300 ${
                         !canBorrowMore
-                          ? "bg-rose-500"
+                          ? "bg-error-text"
                           : currentBorrows + validBooksCount > limit * 0.7
-                            ? "bg-amber-500"
-                            : "bg-emerald-500"
+                            ? "bg-warning-text"
+                            : "bg-success-text"
                       }`}
                       style={{
                         width: `${Math.min(((currentBorrows + validBooksCount) / limit) * 100, 100)}%`,
@@ -307,7 +307,7 @@ export function BorrowBookPage() {
                     />
                   </div>
                   {!canBorrowMore && (
-                    <p className="flex items-center gap-1 text-xs font-bold text-rose-500">
+                    <p className="flex items-center gap-1 text-xs font-bold text-error-text">
                       <AlertTriangle className="size-3" />
                       Limit reached. Cannot add more books.
                     </p>
@@ -344,7 +344,7 @@ export function BorrowBookPage() {
         >
           <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-amber-50 p-2.5 text-amber-600">
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600">
                 <Book className="size-5" />
               </div>
               <h2 className="text-lg font-bold text-slate-800">
@@ -365,18 +365,18 @@ export function BorrowBookPage() {
                 value={barcodeSearch}
                 onChange={(e) => setBarcodeSearch(e.target.value)}
                 placeholder="Scan barcode (e.g. BC-1234)..."
-                className="h-14 rounded-xl border-slate-200 pl-10 text-lg font-bold tracking-wide focus-visible:border-amber-500 focus-visible:ring-amber-500/20"
+                className="h-10 rounded-lg border-slate-200 pl-10 text-sm font-semibold tracking-wide focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                 autoFocus={!!selectedUser}
                 disabled={!canBorrowMore || isScanning}
               />
               <Button
                 type="submit"
                 size="sm"
-                className="absolute top-2 right-2 h-10 rounded-lg bg-amber-500 px-6 font-bold text-white hover:bg-amber-600"
+                className="absolute top-1 right-1 h-8 rounded-md bg-warning-text px-4 text-xs font-bold text-white hover:bg-blue-700"
                 disabled={isScanning || !canBorrowMore}
               >
                 {isScanning ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 className="size-3.5 animate-spin" />
                 ) : (
                   "Scan"
                 )}
@@ -394,8 +394,8 @@ export function BorrowBookPage() {
                     key={bookCopy.id}
                     className={`flex items-center justify-between rounded-xl border p-4 transition-all ${
                       isAvailable
-                        ? "border-amber-100 bg-amber-50/30 hover:bg-amber-50/80"
-                        : "border-rose-200 bg-rose-50/50"
+                        ? "border-blue-100 bg-blue-50/30 hover:bg-blue-50/80"
+                        : "border-error-bg bg-error-bg/50"
                     }`}
                   >
                     <div className="flex items-center gap-4">
@@ -407,7 +407,7 @@ export function BorrowBookPage() {
                             className={`h-full w-full object-cover ${!isAvailable && "opacity-50 grayscale"}`}
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-amber-100 text-amber-500">
+                          <div className="flex h-full w-full items-center justify-center bg-blue-100 text-blue-500">
                             <Book className="size-4" />
                           </div>
                         )}
@@ -437,7 +437,7 @@ export function BorrowBookPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-rose-400 hover:bg-rose-100 hover:text-rose-600"
+                      className="text-error-text hover:bg-error-bg hover:text-error-text"
                       onClick={() => handleRemoveBook(bookCopy.id)}
                     >
                       <Trash2 className="size-4" />
@@ -462,7 +462,7 @@ export function BorrowBookPage() {
       <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-900 p-6 shadow-lg">
         <div className="flex items-center gap-4 text-white">
           <div className="rounded-full bg-slate-800 p-3">
-            <Clock className="size-6 text-emerald-400" />
+            <Clock className="size-6 text-blue-400" />
           </div>
           <div>
             <p className="text-sm font-medium text-slate-400">Due Date</p>
@@ -489,12 +489,12 @@ export function BorrowBookPage() {
             hasInvalidBooks ||
             borrowBulkMutation.isPending
           }
-          className="h-14 rounded-xl bg-emerald-500 px-8 text-lg font-black tracking-wide text-white shadow-md shadow-emerald-500/20 transition-all hover:scale-105 hover:bg-emerald-600 disabled:opacity-50 disabled:hover:scale-100"
+          className="h-10 rounded-lg bg-blue-600 px-6 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all hover:scale-102 hover:bg-blue-700 disabled:opacity-50 disabled:hover:scale-100"
         >
           {borrowBulkMutation.isPending ? (
-            <Loader2 className="mr-2 size-5 animate-spin" />
+            <Loader2 className="mr-1.5 size-4 animate-spin" />
           ) : (
-            <CheckCircle2 className="mr-2 size-5" />
+            <CheckCircle2 className="mr-1.5 size-4" />
           )}
           Confirm {scannedBooks.length > 0 ? scannedBooks.length : ""} Borrow
           {scannedBooks.length > 1 ? "s" : ""}

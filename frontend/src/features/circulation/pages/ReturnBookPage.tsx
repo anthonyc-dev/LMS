@@ -88,11 +88,11 @@ export function ReturnBookPage() {
   const { isOverdue, days, penalty } = calculateOverdue();
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-4xl space-y-6 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-6xl space-y-6 duration-700">
       <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
         <div>
           <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-            <RotateCcw className="size-8 text-indigo-600" />
+            <RotateCcw className="size-8 text-blue-600" />
             Return Book
           </h1>
           <p className="mt-1 font-medium text-slate-500">
@@ -111,21 +111,21 @@ export function ReturnBookPage() {
             </h2>
             <form onSubmit={handleBarcodeSubmit}>
               <div className="relative">
-                <Barcode className="absolute top-1/2 left-4 size-5 -translate-y-1/2 text-slate-400" />
+                <Barcode className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   value={barcodeSearch}
                   onChange={(e) => setBarcodeSearch(e.target.value)}
                   placeholder="Scan book barcode (e.g. BC-1234)..."
-                  className="h-14 rounded-xl border-2 border-slate-200 pl-12 text-lg font-bold tracking-wide focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="h-10 rounded-lg border border-slate-200 pl-10 text-sm font-semibold tracking-wide focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                   autoFocus
                 />
                 <Button
                   type="submit"
-                  className="absolute top-1.5 right-1.5 h-11 rounded-lg bg-indigo-600 px-6 font-bold text-white hover:bg-indigo-700"
+                  className="absolute top-1 right-1 h-8 rounded-md bg-blue-600 px-4 text-xs font-bold text-white hover:bg-blue-700"
                   disabled={isFetching}
                 >
                   {isFetching ? (
-                    <Loader2 className="size-5 animate-spin" />
+                    <Loader2 className="size-3.5 animate-spin" />
                   ) : (
                     "Process"
                   )}
@@ -151,7 +151,7 @@ export function ReturnBookPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-indigo-50 text-indigo-300">
+                    <div className="flex h-full w-full items-center justify-center bg-blue-50 text-blue-300">
                       <Book className="size-8" />
                     </div>
                   )}
@@ -180,15 +180,15 @@ export function ReturnBookPage() {
                       </p>
                     </div>
                     <div
-                      className={`rounded-xl border p-3 ${isOverdue ? "border-rose-200 bg-rose-50" : "border-slate-100 bg-slate-50"}`}
+                      className={`rounded-xl border p-3 ${isOverdue ? "border-error-bg bg-error-bg" : "border-slate-100 bg-slate-50"}`}
                     >
                       <p
-                        className={`flex items-center gap-1 text-xs font-bold tracking-wider uppercase ${isOverdue ? "text-rose-500" : "text-slate-400"}`}
+                        className={`flex items-center gap-1 text-xs font-bold tracking-wider uppercase ${isOverdue ? "text-error-text" : "text-slate-400"}`}
                       >
                         <Calendar className="size-3" /> Due Date
                       </p>
                       <p
-                        className={`mt-1 font-bold ${isOverdue ? "text-rose-700" : "text-slate-700"}`}
+                        className={`mt-1 font-bold ${isOverdue ? "text-error-text" : "text-slate-700"}`}
                       >
                         {new Date(borrowing.dueDate).toLocaleDateString()}
                       </p>
@@ -198,18 +198,18 @@ export function ReturnBookPage() {
               </div>
             </div>
           ) : scannedBarcode && !isFetching && error ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-rose-200 bg-rose-50 py-16 text-center">
-              <XCircle className="mb-4 size-12 text-rose-300" />
-              <p className="text-lg font-bold text-rose-600">
+            <div className="border-error-bg bg-error-bg flex flex-col items-center justify-center rounded-2xl border border-dashed py-16 text-center">
+              <XCircle className="text-error-text mb-4 size-12" />
+              <p className="text-error-text text-lg font-bold">
                 No active borrowing found
               </p>
-              <p className="mt-1 text-sm text-rose-400">
+              <p className="text-error-text mt-1 text-sm">
                 Barcode '{scannedBarcode}' does not have an active borrowing
                 record.
               </p>
               <Button
                 variant="outline"
-                className="mt-6 border-rose-200 font-bold text-rose-600 hover:bg-rose-100"
+                className="border-error-bg text-error-text hover:bg-error-bg mt-6 font-bold"
                 onClick={() => setScannedBarcode("")}
               >
                 Clear Search
@@ -244,7 +244,7 @@ export function ReturnBookPage() {
                 <div className="mb-6 flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
                   <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
                     <AvatarImage src={borrowing.user.avatarUrl} />
-                    <AvatarFallback className="bg-indigo-100 font-bold text-indigo-700">
+                    <AvatarFallback className="bg-blue-100 font-bold text-blue-700">
                       {borrowing.user.fullName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
@@ -266,7 +266,7 @@ export function ReturnBookPage() {
                   </span>
                   <Badge
                     variant="outline"
-                    className="border-emerald-200 bg-emerald-50 text-emerald-700"
+                    className="border-success-bg bg-success-bg text-success-text"
                   >
                     Good
                   </Badge>
@@ -277,7 +277,7 @@ export function ReturnBookPage() {
                     Overdue Days
                   </span>
                   <span
-                    className={`font-bold ${isOverdue ? "text-rose-600" : "text-slate-900"}`}
+                    className={`font-bold ${isOverdue ? "text-error-text" : "text-slate-900"}`}
                   >
                     {days} Days
                   </span>
@@ -286,7 +286,7 @@ export function ReturnBookPage() {
                 <div className="flex items-center justify-between pt-2">
                   <span className="font-bold text-slate-900">Total Fines</span>
                   <span
-                    className={`text-xl font-black ${penalty > 0 ? "text-rose-600" : "text-emerald-600"}`}
+                    className={`text-xl font-black ${penalty > 0 ? "text-error-text" : "text-success-text"}`}
                   >
                     ₱{penalty.toFixed(2)}
                   </span>
@@ -295,7 +295,7 @@ export function ReturnBookPage() {
 
               <div className="space-y-3 pt-6">
                 {isOverdue && (
-                  <div className="mb-4 flex items-start gap-2 rounded-lg bg-rose-50 p-3 text-sm text-rose-700">
+                  <div className="bg-error-bg text-error-text mb-4 flex items-start gap-2 rounded-lg p-3 text-sm">
                     <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                     <p>
                       This book is overdue. Please ensure fines are collected if
@@ -306,19 +306,19 @@ export function ReturnBookPage() {
                 <Button
                   onClick={handleConfirmReturn}
                   disabled={!borrowing || returnMutation.isPending}
-                  className="h-12 w-full rounded-xl bg-indigo-600 text-base font-bold shadow-md shadow-indigo-600/20 hover:bg-indigo-700"
+                  className="h-10 w-full rounded-lg bg-blue-600 text-sm font-bold shadow-md shadow-blue-600/20 hover:bg-blue-700"
                 >
                   {returnMutation.isPending ? (
-                    <Loader2 className="mr-2 size-5 animate-spin" />
+                    <Loader2 className="mr-1.5 size-4 animate-spin" />
                   ) : (
-                    <CheckCircle2 className="mr-2 size-5" />
+                    <CheckCircle2 className="mr-1.5 size-4" />
                   )}
                   Confirm Return
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setScannedBarcode("")}
-                  className="h-12 w-full rounded-xl font-bold text-slate-600"
+                  className="h-10 w-full rounded-lg text-sm font-bold text-slate-600"
                 >
                   Cancel
                 </Button>

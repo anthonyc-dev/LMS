@@ -190,7 +190,7 @@ export function CategoryPage() {
       <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
         <div>
           <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-            <div className="rounded-xl bg-violet-50 p-2">
+            <div className="rounded-xl bg-slate-50 p-2">
               <Tag className="size-7" />
             </div>
             Category Management
@@ -202,7 +202,7 @@ export function CategoryPage() {
         <Button
           onClick={openCreate}
           id="create-category-btn"
-          className="h-11 gap-2 rounded-xl bg-slate-900 px-6 font-bold text-white shadow-lg shadow-violet-200 transition-all hover:scale-105 hover:bg-slate-800 active:scale-95"
+          className="h-11 gap-2 rounded-xl bg-slate-900 px-6 font-bold text-white shadow-lg shadow-slate-200 transition-all hover:scale-105 hover:bg-slate-800 active:scale-95"
         >
           <Plus className="size-4" /> New Category
         </Button>
@@ -210,9 +210,9 @@ export function CategoryPage() {
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Card className="group border-slate-100 bg-white transition-all hover:border-violet-200 hover:shadow-md">
+        <Card className="group border-slate-100 bg-white transition-all hover:border-slate-200 hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="shrink-0 rounded-xl bg-violet-50 p-3 text-violet-600 transition-transform group-hover:scale-110">
+            <div className="shrink-0 rounded-xl bg-slate-50 p-3 text-slate-600 transition-transform group-hover:scale-110">
               <Tag className="size-5" />
             </div>
             <div>
@@ -226,9 +226,9 @@ export function CategoryPage() {
           </CardContent>
         </Card>
 
-        <Card className="group border-slate-100 bg-white transition-all hover:border-indigo-200 hover:shadow-md">
+        <Card className="group border-slate-100 bg-white transition-all hover:border-blue-200 hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="shrink-0 rounded-xl bg-indigo-50 p-3 text-indigo-600 transition-transform group-hover:scale-110">
+            <div className="shrink-0 rounded-xl bg-blue-50 p-3 text-blue-600 transition-transform group-hover:scale-110">
               <BookOpen className="size-5" />
             </div>
             <div>
@@ -242,9 +242,9 @@ export function CategoryPage() {
           </CardContent>
         </Card>
 
-        <Card className="group border-slate-100 bg-white transition-all hover:border-emerald-200 hover:shadow-md">
+        <Card className="group border-slate-100 bg-white transition-all hover:border-success-bg hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="shrink-0 rounded-xl bg-emerald-50 p-3 text-emerald-600 transition-transform group-hover:scale-110">
+            <div className="shrink-0 rounded-xl bg-success-bg p-3 text-success-text transition-transform group-hover:scale-110">
               <TrendingUp className="size-5" />
             </div>
             <div>
@@ -261,9 +261,9 @@ export function CategoryPage() {
           </CardContent>
         </Card>
 
-        <Card className="group border-slate-100 bg-white transition-all hover:border-amber-200 hover:shadow-md">
+        <Card className="group border-slate-100 bg-white transition-all hover:border-warning-bg hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="shrink-0 rounded-xl bg-amber-50 p-3 text-amber-600 transition-transform group-hover:scale-110">
+            <div className="shrink-0 rounded-xl bg-warning-bg p-3 text-warning-text transition-transform group-hover:scale-110">
               <BarChart3 className="size-5" />
             </div>
             <div>
@@ -289,7 +289,7 @@ export function CategoryPage() {
             <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
             <Input
               placeholder="Search categories…"
-              className="h-11 rounded-xl border-slate-200 bg-white pl-10 focus-visible:border-violet-500 focus-visible:ring-violet-500/20"
+              className="h-11 rounded-xl border-slate-200 bg-white pl-10 focus-visible:border-slate-500 focus-visible:ring-slate-500/20"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -363,14 +363,14 @@ export function CategoryPage() {
                         >
                           <DropdownMenuItem
                             onClick={() => openEdit(cat)}
-                            className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
+                            className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600"
                           >
                             <Edit3 className="size-3.5" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="my-1 bg-slate-100" />
                           <DropdownMenuItem
                             onClick={() => openDelete(cat)}
-                            className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-rose-600 hover:bg-rose-50"
+                            className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-error-text hover:bg-error-bg"
                           >
                             <Trash2 className="size-3.5" /> Delete
                           </DropdownMenuItem>
@@ -425,7 +425,7 @@ export function CategoryPage() {
         <Card className="sticky top-4 h-fit border-slate-100 bg-white shadow-xs transition-shadow hover:shadow-md">
           <CardHeader className="border-b border-slate-50 pb-4">
             <CardTitle className="flex items-center gap-2 text-base font-black text-slate-800">
-              <Layers className="size-4 text-violet-500" /> Distribution
+              <Layers className="size-4 text-slate-500" /> Distribution
             </CardTitle>
             <p className="text-xs font-medium text-slate-400">
               Books per category

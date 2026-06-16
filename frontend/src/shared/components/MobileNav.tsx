@@ -176,7 +176,7 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
 
                 {/* Profile Info */}
                 <div className="mb-3 flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-tr from-blue-600 to-indigo-500 text-white shadow-md">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-tr from-blue-600 to-blue-500 text-white shadow-md">
                     <User className="size-5" />
                   </div>
                   <div className="flex min-w-0 flex-col text-left">

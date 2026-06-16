@@ -118,7 +118,7 @@ export function EditBookModal({
             <DialogTitle className="flex items-center gap-2 text-xl font-black text-white">
               <Edit className="size-5" /> Edit Book Metadata
             </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-indigo-200">
+            <DialogDescription className="text-sm font-medium text-blue-200">
               Update the metadata for "{book.title}".
             </DialogDescription>
           </DialogHeader>
@@ -128,7 +128,7 @@ export function EditBookModal({
           <div className="flex items-start gap-5">
             <div className="w-24 shrink-0 space-y-2">
               <div
-                className="group relative flex aspect-3/4 w-full cursor-pointer overflow-hidden rounded-xl border border-slate-200/50 shadow-md transition-all hover:border-indigo-400"
+                className="group relative flex aspect-3/4 w-full cursor-pointer overflow-hidden rounded-xl border border-slate-200/50 shadow-md transition-all hover:border-blue-400"
                 onClick={() => !isUpdating && fileRef.current?.click()}
               >
                 {coverPreview ? (
@@ -152,9 +152,9 @@ export function EditBookModal({
                     )}
                   </>
                 ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center bg-slate-50 transition-colors group-hover:bg-indigo-50">
-                    <BookOpen className="size-5 text-slate-300 group-hover:text-indigo-400" />
-                    <span className="mt-2 text-[10px] font-bold text-slate-400 group-hover:text-indigo-600">
+                  <div className="flex h-full w-full flex-col items-center justify-center bg-slate-50 transition-colors group-hover:bg-blue-50">
+                    <BookOpen className="size-5 text-slate-300 group-hover:text-blue-400" />
+                    <span className="mt-2 text-[10px] font-bold text-slate-400 group-hover:text-blue-600">
                       Upload
                     </span>
                   </div>
@@ -177,13 +177,13 @@ export function EditBookModal({
             <div className="flex-1 space-y-4">
               <div className="space-y-1.5">
                 <Label className="text-sm font-bold text-slate-700">
-                  Title <span className="text-rose-500">*</span>
+                  Title <span className="text-error-bg0">*</span>
                 </Label>
                 <Input
                   disabled={isUpdating}
                   value={form.title}
                   onChange={(e) => f("title")(e.target.value)}
-                  className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                 />
               </div>
               <div className="space-y-1.5">
@@ -194,7 +194,7 @@ export function EditBookModal({
                   disabled={isUpdating}
                   value={form.author}
                   onChange={(e) => f("author")(e.target.value)}
-                  className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                 />
               </div>
             </div>
@@ -203,14 +203,14 @@ export function EditBookModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
-                Category <span className="text-rose-500">*</span>
+                Category <span className="text-error-bg0">*</span>
               </Label>
               <Select
                 disabled={isUpdating}
                 value={form.categoryId}
                 onValueChange={f("categoryId")}
               >
-                <SelectTrigger className="w-full rounded-xl border-slate-200 focus:ring-indigo-500/20">
+                <SelectTrigger className="w-full rounded-xl border-slate-200 focus:ring-blue-500/20">
                   <SelectValue
                     placeholder={
                       isLoadingCategories ? "Loading..." : "Select a category"
@@ -235,14 +235,14 @@ export function EditBookModal({
             </div>
             <div className="space-y-1.5">
               <Label className="text-sm font-bold text-slate-700">
-                ISBN <span className="text-rose-500">*</span>
+                ISBN <span className="text-error-bg0">*</span>
               </Label>
               <Input
                 disabled={isUpdating}
                 value={form.isbn}
                 onChange={(e) => f("isbn")(e.target.value)}
                 placeholder="978-…"
-                className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               />
             </div>
             <div className="space-y-1.5">
@@ -253,7 +253,7 @@ export function EditBookModal({
                 disabled={isUpdating}
                 value={form.publisher}
                 onChange={(e) => f("publisher")(e.target.value)}
-                className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               />
             </div>
             <div className="space-y-1.5">
@@ -264,7 +264,7 @@ export function EditBookModal({
                 min="0"
                 value={form.pages}
                 onChange={(e) => f("pages")(e.target.value)}
-                className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               />
             </div>
           </div>
@@ -278,7 +278,7 @@ export function EditBookModal({
               value={form.description}
               onChange={(e) => f("description")(e.target.value)}
               placeholder="Brief summary…"
-              className="h-20 resize-none rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              className="h-20 resize-none rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
             />
           </div>
         </div>
