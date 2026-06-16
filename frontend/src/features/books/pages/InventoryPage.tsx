@@ -266,19 +266,19 @@ function getStockStatus(book: InventoryBook) {
 const statusConfig = {
   good: {
     label: "In Stock",
-    cls: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    cls: "bg-success-bg text-success-text border-success-bg",
   },
   medium: {
     label: "Moderate",
-    cls: "bg-amber-100  text-amber-800  border-amber-200",
+    cls: "bg-warning-bg  text-warning-text  border-warning-bg",
   },
   low: {
     label: "Low Stock",
-    cls: "bg-orange-100 text-orange-800 border-orange-200",
+    cls: "bg-warning-bg text-warning-text border-warning-bg",
   },
   out: {
     label: "Out of Stock",
-    cls: "bg-rose-100   text-rose-800   border-rose-200",
+    cls: "bg-error-bg   text-error-text   border-error-bg",
   },
 };
 
@@ -348,14 +348,14 @@ function AdjustStockModal({ book, open, onClose, onSave }: AdjustModalProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-w-md">
         {/* Header */}
-        <div className="relative overflow-hidden bg-linear-to-br from-indigo-600 to-violet-600 p-6 text-white">
+        <div className="relative overflow-hidden bg-linear-to-br from-blue-600 to-slate-600 p-6 text-white">
           <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
           <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-white/5" />
           <DialogHeader className="relative z-10 space-y-1">
             <DialogTitle className="flex items-center gap-2 text-xl font-black text-white">
               <Edit3 className="size-5" /> Adjust Stock
             </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-indigo-200">
+            <DialogDescription className="text-sm font-medium text-blue-200">
               {book.title}
             </DialogDescription>
           </DialogHeader>
@@ -393,20 +393,20 @@ function AdjustStockModal({ book, open, onClose, onSave }: AdjustModalProps) {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setDelta((d) => d - 1)}
-                className="flex size-10 items-center justify-center rounded-xl bg-rose-50 text-lg font-bold text-rose-600 transition-colors hover:bg-rose-100"
+                className="flex size-10 items-center justify-center rounded-xl bg-error-bg text-lg font-bold text-error-text transition-colors hover:bg-error-bg"
               >
                 <Minus className="size-4" />
               </button>
               <div className="flex-1 text-center">
                 <span
-                  className={`text-3xl font-black ${delta > 0 ? "text-emerald-600" : delta < 0 ? "text-rose-600" : "text-slate-400"}`}
+                  className={`text-3xl font-black ${delta > 0 ? "text-success-text" : delta < 0 ? "text-error-text" : "text-slate-400"}`}
                 >
                   {delta > 0 ? `+${delta}` : delta}
                 </span>
               </div>
               <button
                 onClick={() => setDelta((d) => d + 1)}
-                className="flex size-10 items-center justify-center rounded-xl bg-emerald-50 text-lg font-bold text-emerald-600 transition-colors hover:bg-emerald-100"
+                className="flex size-10 items-center justify-center rounded-xl bg-success-bg text-lg font-bold text-success-text transition-colors hover:bg-success-bg"
               >
                 <Plus className="size-4" />
               </button>
@@ -427,7 +427,7 @@ function AdjustStockModal({ book, open, onClose, onSave }: AdjustModalProps) {
                 After
               </p>
               <p
-                className={`text-2xl ${previewVal !== currentVal ? "text-indigo-600" : "text-slate-800"}`}
+                className={`text-2xl ${previewVal !== currentVal ? "text-blue-600" : "text-slate-800"}`}
               >
                 {previewVal}
               </p>
@@ -442,7 +442,7 @@ function AdjustStockModal({ book, open, onClose, onSave }: AdjustModalProps) {
             </label>
             <Input
               placeholder="e.g. New shipment received, damaged during shelving…"
-              className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             />
@@ -459,7 +459,7 @@ function AdjustStockModal({ book, open, onClose, onSave }: AdjustModalProps) {
           </Button>
           <Button
             onClick={handleSave}
-            className="flex-1 rounded-xl bg-indigo-600 font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700"
+            className="flex-1 rounded-xl bg-blue-600 font-bold text-white shadow-md shadow-blue-200 hover:bg-blue-700"
           >
             Save Changes
           </Button>
@@ -602,7 +602,7 @@ export function InventoryPage() {
       <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
         <div>
           <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-            <div className="rounded-xl bg-indigo-50 p-2">
+            <div className="rounded-xl bg-blue-50 p-2">
               <Package className="size-7" />
             </div>
             Inventory Management
@@ -636,9 +636,9 @@ export function InventoryPage() {
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {/* Total Volumes */}
-        <Card className="group transition-all duration-300 hover:border-indigo-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-blue-200 hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="shrink-0 rounded-xl bg-indigo-50 p-3 text-indigo-600 transition-transform group-hover:scale-110">
+            <div className="shrink-0 rounded-xl bg-blue-50 p-3 text-blue-600 transition-transform group-hover:scale-110">
               <Layers className="size-5" />
             </div>
             <div>
@@ -656,9 +656,9 @@ export function InventoryPage() {
         </Card>
 
         {/* Available */}
-        <Card className="group transition-all duration-300 hover:border-emerald-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-success-bg hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="shrink-0 rounded-xl bg-emerald-50 p-3 text-emerald-600 transition-transform group-hover:scale-110">
+            <div className="shrink-0 rounded-xl bg-success-bg p-3 text-success-text transition-transform group-hover:scale-110">
               <CheckCircle2 className="size-5" />
             </div>
             <div>
@@ -669,8 +669,8 @@ export function InventoryPage() {
                 {totalAvailable.toLocaleString()}
               </h3>
               <div className="mt-0.5 flex items-center gap-1">
-                <ArrowUpRight className="size-3 text-emerald-500" />
-                <span className="text-[11px] font-bold text-emerald-600">
+                <ArrowUpRight className="size-3 text-success-bg0" />
+                <span className="text-[11px] font-bold text-success-text">
                   {Math.round((totalAvailable / totalVolumes) * 100)}% of stock
                 </span>
               </div>
@@ -706,16 +706,16 @@ export function InventoryPage() {
         </Card>
 
         {/* Alerts */}
-        <Card className="group transition-all duration-300 hover:border-rose-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-error-bg hover:shadow-md">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="shrink-0 rounded-xl bg-rose-50 p-3 text-rose-600 transition-transform group-hover:scale-110">
+            <div className="shrink-0 rounded-xl bg-error-bg p-3 text-error-text transition-transform group-hover:scale-110">
               <AlertTriangle className="size-5" />
             </div>
             <div>
               <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
                 Needs Attention
               </p>
-              <h3 className="text-2xl font-black text-rose-600">
+              <h3 className="text-2xl font-black text-error-text">
                 {lowStockCount}
               </h3>
               <p className="mt-0.5 text-[11px] text-slate-400">
@@ -733,7 +733,7 @@ export function InventoryPage() {
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-black text-slate-800">
-                <BarChart3 className="size-4 text-indigo-500" /> Stock by
+                <BarChart3 className="size-4 text-blue-500" /> Stock by
                 Category
               </CardTitle>
               <p className="text-xs font-medium text-slate-400">
@@ -824,13 +824,13 @@ export function InventoryPage() {
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
               <CardTitle className="flex items-center gap-2 text-base font-black text-slate-800">
-                <AlertTriangle className="size-4 text-rose-500" /> Stock Alerts
+                <AlertTriangle className="size-4 text-error-bg0" /> Stock Alerts
               </CardTitle>
               <p className="text-xs font-medium text-slate-400">
                 Titles needing restocking
               </p>
             </div>
-            <Badge className="border-none bg-rose-50 font-bold text-rose-600">
+            <Badge className="border-none bg-error-bg font-bold text-error-text">
               {lowStockCount} items
             </Badge>
           </CardHeader>
@@ -873,7 +873,7 @@ export function InventoryPage() {
               })}
             {lowStockCount === 0 && (
               <div className="flex h-full flex-col items-center justify-center gap-2 text-slate-400">
-                <CheckCircle2 className="size-8 text-emerald-400" />
+                <CheckCircle2 className="size-8 text-success-text" />
                 <p className="text-sm font-medium">
                   All titles are well-stocked!
                 </p>
@@ -901,7 +901,7 @@ export function InventoryPage() {
               <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
               <Input
                 placeholder="Search title, author, ISBN…"
-                className="h-10 rounded-xl border-slate-200 pl-10 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                className="h-10 rounded-xl border-slate-200 pl-10 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
               />
@@ -986,12 +986,12 @@ export function InventoryPage() {
                 );
                 const progressCl =
                   st === "out"
-                    ? "bg-rose-500"
+                    ? "bg-error-bg0"
                     : st === "low"
-                      ? "bg-orange-500"
+                      ? "bg-warning-bg0"
                       : st === "medium"
-                        ? "bg-amber-500"
-                        : "bg-emerald-500";
+                        ? "bg-warning-bg0"
+                        : "bg-success-bg0";
 
                 const isExpanded = isMobile && expandedRow === book.id;
 
@@ -1057,7 +1057,7 @@ export function InventoryPage() {
                             </span>
                           </TableCell>
                           <TableCell className="text-center">
-                            <span className="font-black text-emerald-700">
+                            <span className="font-black text-success-text">
                               {book.availableCopies}
                             </span>
                           </TableCell>
@@ -1068,7 +1068,7 @@ export function InventoryPage() {
                           </TableCell>
                           <TableCell className="text-center">
                             <span
-                              className={`font-black ${book.damagedCopies > 0 ? "text-rose-600" : "text-slate-400"}`}
+                              className={`font-black ${book.damagedCopies > 0 ? "text-error-text" : "text-slate-400"}`}
                             >
                               {book.damagedCopies}
                             </span>
@@ -1109,7 +1109,7 @@ export function InventoryPage() {
                             e.stopPropagation();
                             handleAdjust(book);
                           }}
-                          className={`h-8 gap-1.5 rounded-lg text-xs font-bold text-slate-500 transition-opacity hover:bg-indigo-50 hover:text-indigo-600 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                          className={`h-8 gap-1.5 rounded-lg text-xs font-bold text-slate-500 transition-opacity hover:bg-blue-50 hover:text-blue-600 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                         >
                           <Edit3 className="size-3.5" /> Adjust
                         </Button>
@@ -1150,7 +1150,7 @@ export function InventoryPage() {
                               <span className="font-medium text-slate-500">
                                 Available
                               </span>
-                              <span className="font-black text-emerald-700">
+                              <span className="font-black text-success-text">
                                 {book.availableCopies}
                               </span>
                             </div>
@@ -1167,7 +1167,7 @@ export function InventoryPage() {
                                 Damaged
                               </span>
                               <span
-                                className={`font-black ${book.damagedCopies > 0 ? "text-rose-600" : "text-slate-400"}`}
+                                className={`font-black ${book.damagedCopies > 0 ? "text-error-text" : "text-slate-400"}`}
                               >
                                 {book.damagedCopies}
                               </span>
@@ -1251,7 +1251,7 @@ export function InventoryPage() {
                 key={p}
                 variant={p === page ? "default" : "outline"}
                 size="icon"
-                className={`h-8 w-8 rounded-lg text-xs font-bold ${p === page ? "border-slate-900 bg-slate-900 shadow-sm shadow-indigo-200 hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                className={`h-8 w-8 rounded-lg text-xs font-bold ${p === page ? "border-slate-900 bg-slate-900 shadow-sm shadow-blue-200 hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                 onClick={() => setPage(p)}
               >
                 {p}

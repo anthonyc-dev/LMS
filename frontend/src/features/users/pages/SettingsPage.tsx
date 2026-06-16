@@ -32,7 +32,7 @@ export function SettingsPage() {
   return (
     <div className="mx-auto max-w-[800px] space-y-8 pb-12 font-sans">
       {/* Page Title */}
-      <h1 className="text-lg font-semibold text-emerald-700">Settings</h1>
+      <h1 className="text-lg font-semibold text-blue-700">Settings</h1>
       {/* Account Security Card */}
       <Card className="overflow-hidden border-slate-200 bg-white shadow-sm">
         <CardHeader className="px-6 py-5">
@@ -86,7 +86,7 @@ export function SettingsPage() {
                 <span className="text-sm font-semibold tracking-tight text-slate-900">
                   2-step verification
                 </span>
-                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
                   Enabled
                 </span>
               </div>
@@ -149,7 +149,7 @@ export function SettingsPage() {
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200/50">
                   {/* Custom icon placeholder for Arc */}
                   <div className="relative flex h-5 w-5 items-center justify-center overflow-hidden">
-                    <div className="absolute h-full w-full rounded border-2 border-rose-500 bg-indigo-500 opacity-80 mix-blend-multiply" />
+                    <div className="absolute h-full w-full rounded border-2 border-red-500 bg-blue-500 opacity-80 mix-blend-multiply" />
                     <span className="relative z-10 text-[10px] font-bold text-white">
                       A
                     </span>

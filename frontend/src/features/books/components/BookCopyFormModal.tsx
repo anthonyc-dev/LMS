@@ -64,7 +64,7 @@ function Field({
         {label}
       </Label>
       {children}
-      {err && <p className="text-xs font-medium text-rose-500">{err}</p>}
+      {err && <p className="text-xs font-medium text-error-bg0">{err}</p>}
     </div>
   );
 }
@@ -403,7 +403,7 @@ export function BookCopyFormModal({
                     id="count"
                     type="number"
                     min="2"
-                    className="h-10 rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                    className="h-10 rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                     value={count}
                     onChange={(e) => {
                       setCount(e.target.value);
@@ -558,7 +558,7 @@ export function BookCopyFormModal({
                 <Input
                   id="acquired-at"
                   type="date"
-                  className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                   value={form.acquiredAt}
                   onChange={(e) => set("acquiredAt")(e.target.value)}
                 />
@@ -574,7 +574,7 @@ export function BookCopyFormModal({
                   type="number"
                   step="0.01"
                   min="0"
-                  className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                  className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                   value={form.purchasePrice}
                   onChange={(e) => set("purchasePrice")(e.target.value)}
                 />
@@ -586,7 +586,7 @@ export function BookCopyFormModal({
             <Input
               id="notes"
               placeholder="Any remarks..."
-              className="rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               value={form.notes}
               onChange={(e) => set("notes")(e.target.value)}
             />

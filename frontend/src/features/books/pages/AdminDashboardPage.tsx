@@ -59,11 +59,11 @@ const trafficData = [
 ];
 
 const categoryDistribution = [
-  { name: "Technology", value: 35, color: "#3b82f6" },
-  { name: "Science", value: 25, color: "#10b981" },
-  { name: "Fiction", value: 20, color: "#8b5cf6" },
-  { name: "History", value: 15, color: "#f59e0b" },
-  { name: "Arts", value: 5, color: "#ec4899" },
+  { name: "Technology", value: 35, color: "#2563EB" },
+  { name: "Science", value: 25, color: "#3B82F6" },
+  { name: "Fiction", value: 20, color: "#60A5FA" },
+  { name: "History", value: 15, color: "#94A3B8" },
+  { name: "Arts", value: 5, color: "#CBD5E1" },
 ];
 
 const recentLogs = [
@@ -146,15 +146,15 @@ export function AdminDashboardPage() {
       <div className="relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-xl md:flex-row md:items-center">
         {/* Animated Background Elements */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 -left-24 h-96 w-96 animate-pulse rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="absolute -right-24 -bottom-24 h-96 w-96 animate-pulse rounded-full bg-indigo-500/10 blur-3xl delay-1000" />
-          <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 animate-[spin_10s_linear_infinite] rounded-full bg-emerald-500/5 blur-3xl" />
+          <div className="absolute -top-24 -left-24 h-96 w-96 animate-pulse rounded-full bg-blue-500/5 blur-3xl" />
+          <div className="absolute -right-24 -bottom-24 h-96 w-96 animate-pulse rounded-full bg-blue-500/5 blur-3xl delay-1000" />
+          <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 animate-[spin_10s_linear_infinite] rounded-full bg-slate-500/5 blur-3xl" />
         </div>
 
         <div className="z-10 space-y-1.5">
           <h1 className="text-2xl font-black tracking-tight text-white md:text-3xl">
             Welcome back,{" "}
-            <span className="bg-linear-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-blue-400 to-blue-400 bg-clip-text text-transparent">
               {user?.fullName || "Administrator"}
             </span>
           </h1>
@@ -178,7 +178,7 @@ export function AdminDashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
-            <Database className="size-4 text-emerald-400" />
+            <Database className="size-4 text-success-text" />
             <div className="flex flex-col">
               <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
                 DB Latency
@@ -189,14 +189,14 @@ export function AdminDashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
-            <Wifi className="size-4 animate-pulse text-indigo-400" />
+            <Wifi className="size-4 animate-pulse text-blue-400" />
             <div className="flex flex-col">
               <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
                 Gateway
               </span>
-              <span className="flex items-center gap-1 text-xs leading-normal font-bold text-emerald-400">
+              <span className="flex items-center gap-1 text-xs leading-normal font-bold text-success-text">
                 Active{" "}
-                <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-emerald-400" />
+                <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-success-text" />
               </span>
             </div>
           </div>
@@ -233,13 +233,13 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Active Members */}
-        <Card className="group transition-all duration-300 hover:border-indigo-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-blue-200 hover:shadow-md">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform group-hover:scale-110">
                 <Users className="size-5" />
               </div>
-              <Badge className="border-none bg-emerald-50 text-[10px] font-bold text-emerald-700 hover:bg-emerald-50">
+              <Badge className="border-none bg-success-bg text-[10px] font-bold text-success-text hover:bg-success-bg">
                 +12% Growth
               </Badge>
             </div>
@@ -257,13 +257,13 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Active Borrowed Books */}
-        <Card className="group transition-all duration-300 hover:border-emerald-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-success-bg hover:shadow-md">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-success-bg p-2.5 text-success-text transition-transform group-hover:scale-110">
                 <BookOpen className="size-5" />
               </div>
-              <Badge className="border-none bg-emerald-50 text-[10px] font-bold text-emerald-700 hover:bg-emerald-50">
+              <Badge className="border-none bg-success-bg text-[10px] font-bold text-success-text hover:bg-success-bg">
                 +24% checked
               </Badge>
             </div>
@@ -284,13 +284,13 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Overdue/Alert Books */}
-        <Card className="group transition-all duration-300 hover:border-rose-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-error-bg hover:shadow-md">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-rose-50 p-2.5 text-rose-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-error-bg p-2.5 text-error-text transition-transform group-hover:scale-110">
                 <AlertTriangle className="size-5" />
               </div>
-              <Badge className="border-none bg-rose-50 text-[10px] font-bold text-rose-700 hover:bg-rose-50">
+              <Badge className="border-none bg-error-bg text-[10px] font-bold text-error-text hover:bg-error-bg">
                 Action Required
               </Badge>
             </div>
@@ -298,23 +298,23 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Overdue Alert
               </span>
-              <h3 className="text-2xl font-black text-rose-600">42</h3>
+              <h3 className="text-2xl font-black text-error-text">42</h3>
             </div>
             <p className="text-[11px] font-medium text-slate-500">
               Overdue rate:{" "}
-              <span className="font-bold text-rose-500">4.9% of loans</span>
+              <span className="font-bold text-error-bg0">4.9% of loans</span>
             </p>
           </CardContent>
         </Card>
 
         {/* Fine Collection */}
-        <Card className="group transition-all duration-300 hover:border-amber-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-warning-bg hover:shadow-md">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-amber-50 p-2.5 text-amber-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-warning-bg p-2.5 text-warning-text transition-transform group-hover:scale-110">
                 <DollarSign className="size-5" />
               </div>
-              <Badge className="border-none bg-amber-50 text-[10px] font-bold text-amber-700 hover:bg-amber-50">
+              <Badge className="border-none bg-warning-bg text-[10px] font-bold text-warning-text hover:bg-warning-bg">
                 Month-to-Date
               </Badge>
             </div>
@@ -363,12 +363,12 @@ export function AdminDashboardPage() {
               <BarChart data={borrowingTrendsData} barGap={6}>
                 <defs>
                   <linearGradient id="checkoutGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0.3} />
+                    <stop offset="0%" stopColor="#2563EB" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0.3} />
                   </linearGradient>
                   <linearGradient id="returnGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
-                    <stop offset="100%" stopColor="#059669" stopOpacity={0.3} />
+                    <stop offset="0%" stopColor="#94A3B8" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="#94A3B8" stopOpacity={0.3} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -445,8 +445,8 @@ export function AdminDashboardPage() {
               <AreaChart data={trafficData}>
                 <defs>
                   <linearGradient id="trafficGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.0} />
+                    <stop offset="0%" stopColor="#2563EB" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -477,12 +477,12 @@ export function AdminDashboardPage() {
                   type="monotone"
                   name="Visitors"
                   dataKey="visitors"
-                  stroke="#8b5cf6"
+                  stroke="#2563EB"
                   strokeWidth={2.5}
                   fillOpacity={1}
                   fill="url(#trafficGrad)"
                   dot={{
-                    stroke: "#8b5cf6",
+                    stroke: "#2563EB",
                     strokeWidth: 2,
                     fill: "#fff",
                     r: 4,
@@ -562,8 +562,8 @@ export function AdminDashboardPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success-text opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-success-bg0"></span>
               </span>
               <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                 Live Logs
@@ -580,7 +580,7 @@ export function AdminDashboardPage() {
                   <div className="flex gap-3">
                     <div className="mt-1">
                       {log.type === "loan" && (
-                        <div className="rounded-lg bg-emerald-50 p-1.5 text-emerald-600">
+                        <div className="rounded-lg bg-success-bg p-1.5 text-success-text">
                           <CheckCircle2 className="size-4" />
                         </div>
                       )}
@@ -590,17 +590,17 @@ export function AdminDashboardPage() {
                         </div>
                       )}
                       {log.type === "overdue" && (
-                        <div className="rounded-lg bg-rose-50 p-1.5 text-rose-600">
+                        <div className="rounded-lg bg-error-bg p-1.5 text-error-text">
                           <AlertTriangle className="size-4" />
                         </div>
                       )}
                       {log.type === "user" && (
-                        <div className="rounded-lg bg-indigo-50 p-1.5 text-indigo-600">
+                        <div className="rounded-lg bg-blue-50 p-1.5 text-blue-600">
                           <Users className="size-4" />
                         </div>
                       )}
                       {log.type === "acquisition" && (
-                        <div className="rounded-lg bg-purple-50 p-1.5 text-purple-600">
+                        <div className="rounded-lg bg-slate-50 p-1.5 text-slate-600">
                           <Sparkles className="size-4" />
                         </div>
                       )}
@@ -618,12 +618,12 @@ export function AdminDashboardPage() {
                     <Badge
                       className={`border-none px-2 py-0.5 text-[8px] font-bold tracking-wider uppercase ${
                         log.status === "success"
-                          ? "bg-emerald-500/10 text-emerald-500"
+                          ? "bg-success-bg0/10 text-success-bg0"
                           : log.status === "info"
                             ? "bg-blue-500/10 text-blue-500"
                             : log.status === "warning"
-                              ? "bg-rose-500/10 text-rose-500"
-                              : "bg-purple-500/10 text-purple-500"
+                              ? "bg-error-bg0/10 text-error-bg0"
+                              : "bg-slate-500/10 text-slate-500"
                       }`}
                     >
                       {log.type}

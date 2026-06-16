@@ -59,12 +59,12 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 
 const statusCfg: Record<BookCopyStatus, { label: string; cls: string }> = {
-  AVAILABLE: { label: "Available", cls: "bg-emerald-100 text-emerald-800" },
-  BORROWED: { label: "Borrowed", cls: "bg-indigo-100 text-indigo-800" },
+  AVAILABLE: { label: "Available", cls: "bg-success-bg text-success-text" },
+  BORROWED: { label: "Borrowed", cls: "bg-blue-100 text-blue-800" },
   RESERVED: { label: "Reserved", cls: "bg-blue-100 text-blue-800" },
-  LOST: { label: "Lost", cls: "bg-rose-100 text-rose-800" },
-  DAMAGED: { label: "Damaged", cls: "bg-orange-100 text-orange-800" },
-  MAINTENANCE: { label: "Maintenance", cls: "bg-amber-100 text-amber-800" },
+  LOST: { label: "Lost", cls: "bg-error-bg text-error-text" },
+  DAMAGED: { label: "Damaged", cls: "bg-warning-bg text-warning-text" },
+  MAINTENANCE: { label: "Maintenance", cls: "bg-warning-bg text-warning-text" },
 };
 
 const ROWS_PER_PAGE = 8;
@@ -494,7 +494,7 @@ export function BookCopiesPage() {
                             >
                               <DropdownMenuItem
                                 onClick={() => openEdit(bc)}
-                                className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
+                                className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600"
                               >
                                 <Edit3 className="size-3.5" /> Edit
                               </DropdownMenuItem>
@@ -507,7 +507,7 @@ export function BookCopiesPage() {
                               <DropdownMenuSeparator className="my-1 bg-slate-100" />
                               <DropdownMenuItem
                                 onClick={() => openDelete(bc)}
-                                className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50"
+                                className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-error-text hover:bg-error-bg"
                               >
                                 <Trash2 className="size-3.5" /> Delete
                               </DropdownMenuItem>

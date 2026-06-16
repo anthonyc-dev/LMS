@@ -139,15 +139,15 @@ export function AdminLayout() {
           />
         </Sidebar>
         <main className="flex flex-1 flex-col pb-20 md:pb-0">
-          <header className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b bg-white/50 px-4 backdrop-blur-md lg:px-6">
+          <header className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b bg-white/80 px-4 backdrop-blur-md lg:px-6">
             <div className="hidden md:block">
               <SidebarTrigger />
             </div>
-            <h1 className="text-lg font-semibold capitalize">
+            <h1 className="text-foreground text-lg font-semibold capitalize">
               {getPageTitle(location.pathname)}
             </h1>
           </header>
-          <div className="flex-1 overflow-auto bg-gray-100 p-4 lg:p-6">
+          <div className="bg-background flex-1 overflow-auto p-4 lg:p-6 lg:px-8">
             <Outlet />
           </div>
         </main>

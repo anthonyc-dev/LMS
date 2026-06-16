@@ -91,12 +91,12 @@ export interface User {
 }
 
 const AVATAR_COLORS = [
-  "bg-violet-500",
+  "bg-blue-600",
   "bg-blue-500",
-  "bg-emerald-500",
-  "bg-amber-500",
-  "bg-rose-500",
-  "bg-indigo-500",
+  "bg-slate-600",
+  "bg-slate-400",
+  "bg-blue-400",
+  "bg-blue-500",
   "bg-cyan-500",
   "bg-pink-500",
 ];
@@ -152,8 +152,8 @@ export function roleConfig(role: Role) {
       return {
         label: "Admin",
         icon: Crown,
-        cls: "bg-violet-100 text-violet-700 border-violet-200",
-        iconCls: "text-violet-500",
+        cls: "bg-blue-50 text-blue-700 border-blue-200",
+        iconCls: "text-blue-500",
       };
     case "faculty":
       return {
@@ -166,8 +166,8 @@ export function roleConfig(role: Role) {
       return {
         label: "Student",
         icon: BookOpen,
-        cls: "bg-emerald-100 text-emerald-700 border-emerald-200",
-        iconCls: "text-emerald-500",
+        cls: "bg-slate-100 text-slate-700 border-slate-200",
+        iconCls: "text-slate-500",
       };
   }
 }
@@ -387,7 +387,7 @@ export function UserManagement() {
     return (
       <div className="mx-auto flex max-w-[1600px] items-center justify-center py-32">
         <div className="flex flex-col items-center gap-4 text-center">
-          <AlertCircle className="size-12 text-rose-500" />
+          <AlertCircle className="size-12 text-red-500" />
           <p className="text-lg font-bold text-slate-800">
             Failed to load users
           </p>
@@ -413,12 +413,12 @@ export function UserManagement() {
       {/* ── Page Header ── */}
       <div className="relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
         {/* Decorative blobs */}
-        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-indigo-400/5 blur-3xl" />
-        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-violet-400/5 blur-3xl" />
+        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-blue-400/5 blur-3xl" />
+        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-blue-400/5 blur-3xl" />
 
         <div className="relative z-10 space-y-1">
           <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-            <div className="rounded-xl bg-indigo-50 p-2">
+            <div className="rounded-xl bg-blue-50 p-2">
               <Users className="size-7 text-slate-900" />
             </div>
             User Management
@@ -441,8 +441,8 @@ export function UserManagement() {
       {/* ── KPI Stats ── */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {/* Total */}
-        <div className="group col-span-1 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md">
-          <div className="shrink-0 rounded-xl bg-indigo-50 p-3 text-indigo-600 transition-transform group-hover:scale-110">
+        <div className="group col-span-1 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
+          <div className="shrink-0 rounded-xl bg-blue-50 p-3 text-blue-600 transition-transform group-hover:scale-110">
             <Users className="size-5" />
           </div>
           <div>
@@ -454,17 +454,15 @@ export function UserManagement() {
         </div>
 
         {/* Admins */}
-        <div className="group col-span-1 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-violet-200 hover:shadow-md">
-          <div className="shrink-0 rounded-xl bg-violet-50 p-3 text-violet-600 transition-transform group-hover:scale-110">
+        <div className="group col-span-1 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-blue-200 hover:shadow-md">
+          <div className="shrink-0 rounded-xl bg-blue-50 p-3 text-blue-600 transition-transform group-hover:scale-110">
             <Crown className="size-5" />
           </div>
           <div>
             <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
               Admins
             </p>
-            <h3 className="text-2xl font-black text-violet-700">
-              {adminCount}
-            </h3>
+            <h3 className="text-2xl font-black text-blue-700">{adminCount}</h3>
           </div>
         </div>
 
@@ -484,15 +482,15 @@ export function UserManagement() {
         </div>
 
         {/* Students */}
-        <div className="group col-span-1 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-emerald-200 hover:shadow-md">
-          <div className="shrink-0 rounded-xl bg-emerald-50 p-3 text-emerald-600 transition-transform group-hover:scale-110">
+        <div className="group col-span-1 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all hover:border-slate-200 hover:shadow-md">
+          <div className="shrink-0 rounded-xl bg-slate-50 p-3 text-slate-600 transition-transform group-hover:scale-110">
             <BookOpen className="size-5" />
           </div>
           <div>
             <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
               Students
             </p>
-            <h3 className="text-2xl font-black text-emerald-700">
+            <h3 className="text-2xl font-black text-slate-700">
               {studentCount}
             </h3>
           </div>
@@ -513,7 +511,7 @@ export function UserManagement() {
                   onClick={() => onRoleTab(tab.value)}
                   className={`flex items-center gap-2 rounded-t-lg px-4 py-2.5 text-xs font-bold transition-all ${
                     isActive
-                      ? "border border-b-0 border-slate-200 bg-white text-indigo-600 shadow-sm"
+                      ? "border border-b-0 border-slate-200 bg-white text-blue-600 shadow-sm"
                       : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
@@ -522,7 +520,7 @@ export function UserManagement() {
                   <span
                     className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
                       isActive
-                        ? "bg-indigo-100 text-indigo-600"
+                        ? "bg-blue-100 text-blue-600"
                         : "bg-slate-200 text-slate-500"
                     }`}
                   >
@@ -555,7 +553,7 @@ export function UserManagement() {
               <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
               <Input
                 placeholder="Search name, email, phone…"
-                className="h-10 rounded-xl border-slate-200 pl-10 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+                className="h-10 rounded-xl border-slate-200 pl-10 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
                 value={search}
                 onChange={(e) => onSearch(e.target.value)}
               />
@@ -683,13 +681,13 @@ export function UserManagement() {
                             >
                               <Avatar className="h-10 w-10 shadow ring-2 ring-slate-100">
                                 <AvatarImage src={user?.avatarUrl} />
-                                <AvatarFallback className="bg-amber-100 text-lg font-bold text-amber-700">
+                                <AvatarFallback className="bg-slate-100 text-lg font-bold text-slate-700">
                                   {user?.fullName?.charAt(0).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
                             </div>
                             <div className="min-w-0">
-                              <p className="max-w-[160px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
+                              <p className="max-w-[160px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-blue-600">
                                 {user.fullName}
                               </p>
                               <p className="truncate text-xs font-medium text-slate-500">
@@ -779,14 +777,14 @@ export function UserManagement() {
                               >
                                 <DropdownMenuItem
                                   onClick={() => openViewModal(user)}
-                                  className="gap-2 rounded-lg font-semibold text-slate-700 focus:bg-indigo-50 focus:text-indigo-700"
+                                  className="gap-2 rounded-lg font-semibold text-slate-700 focus:bg-blue-50 focus:text-blue-700"
                                 >
                                   <Eye className="size-4" />
                                   View User
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => openEditModal(user)}
-                                  className="gap-2 rounded-lg font-semibold text-slate-700 focus:bg-indigo-50 focus:text-indigo-700"
+                                  className="gap-2 rounded-lg font-semibold text-slate-700 focus:bg-blue-50 focus:text-blue-700"
                                 >
                                   <Edit className="size-4" />
                                   Edit User
@@ -794,7 +792,7 @@ export function UserManagement() {
                                 <DropdownMenuSeparator className="bg-slate-100" />
                                 <DropdownMenuItem
                                   onClick={() => openDeleteModal(user)}
-                                  className="gap-2 rounded-lg font-semibold text-rose-600 focus:bg-rose-50 focus:text-rose-700"
+                                  className="gap-2 rounded-lg font-semibold text-red-600 focus:bg-red-50 focus:text-red-700"
                                 >
                                   <Trash2 className="size-4" />
                                   Delete User

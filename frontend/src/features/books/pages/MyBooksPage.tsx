@@ -34,7 +34,7 @@ const MY_BOOKS = [
     image: book1Img,
     category: "Classic Literature",
     rating: 4.9,
-    color: "from-amber-50 to-orange-50",
+    color: "from-warning-bg to-warning-bg",
   },
   {
     id: 2,
@@ -49,7 +49,7 @@ const MY_BOOKS = [
     image: book2Img,
     category: "Self-Improvement",
     rating: 5.0,
-    color: "from-emerald-50 to-teal-50",
+    color: "from-success-bg to-blue-50",
   },
 ];
 
@@ -63,7 +63,7 @@ export function MyBooksPage() {
       {/* ── Welcome Section ───────────────────────────────────────── */}
       <section className="space-y-2">
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl md:text-4xl">
-          Hello, <span className="text-emerald-600">{firstName}</span>.
+          Hello, <span className="text-success-text">{firstName}</span>.
         </h1>
         <p className="max-w-2xl text-sm leading-relaxed text-slate-500 sm:text-base md:text-lg">
           You have{" "}
@@ -71,7 +71,7 @@ export function MyBooksPage() {
             {MY_BOOKS.length} books
           </span>{" "}
           currently in progress. Your next deadline is in{" "}
-          <span className="font-semibold text-amber-600">
+          <span className="font-semibold text-warning-text">
             {MY_BOOKS[0].daysLeft} days
           </span>
           .
@@ -87,7 +87,7 @@ export function MyBooksPage() {
               <div className="rounded-xl bg-white/10 p-3">
                 <BookOpen size={22} />
               </div>
-              <Badge className="border-0 bg-emerald-500/15 px-3 py-1 text-[10px] font-bold text-emerald-400">
+              <Badge className="border-0 bg-success-bg0/15 px-3 py-1 text-[10px] font-bold text-success-text">
                 ACTIVE
               </Badge>
             </div>
@@ -107,10 +107,10 @@ export function MyBooksPage() {
         <Card className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow hover:shadow-lg">
           <CardContent className="space-y-5 p-6">
             <div className="flex items-center justify-between">
-              <div className="rounded-xl bg-amber-50 p-3">
-                <Clock size={22} className="text-amber-600" />
+              <div className="rounded-xl bg-warning-bg p-3">
+                <Clock size={22} className="text-warning-text" />
               </div>
-              <Badge className="border-0 bg-amber-500/10 px-3 py-1 text-[10px] font-bold text-amber-600">
+              <Badge className="border-0 bg-warning-bg0/10 px-3 py-1 text-[10px] font-bold text-warning-text">
                 PENDING
               </Badge>
             </div>
@@ -133,8 +133,8 @@ export function MyBooksPage() {
         <Card className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-shadow hover:shadow-lg sm:col-span-2 lg:col-span-1">
           <CardContent className="space-y-5 p-6">
             <div className="flex items-center justify-between">
-              <div className="rounded-xl bg-emerald-50 p-3">
-                <Library size={22} className="text-emerald-600" />
+              <div className="rounded-xl bg-success-bg p-3">
+                <Library size={22} className="text-success-text" />
               </div>
               <Badge className="border-0 bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-600">
                 HISTORY
@@ -171,7 +171,7 @@ export function MyBooksPage() {
           </h2>
           <Button
             variant="ghost"
-            className="gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+            className="gap-1.5 text-sm font-semibold text-success-text hover:text-success-text"
           >
             View All <ArrowRight size={14} />
           </Button>
@@ -215,7 +215,7 @@ export function MyBooksPage() {
                     >
                       {book.category}
                     </Badge>
-                    <div className="flex items-center gap-1 text-amber-500">
+                    <div className="flex items-center gap-1 text-warning-bg0">
                       <Star size={12} className="fill-current" />
                       <span className="text-xs font-bold">{book.rating}</span>
                     </div>
@@ -240,8 +240,8 @@ export function MyBooksPage() {
                     <Badge
                       className={`rounded-md border-0 px-2 py-0.5 text-[10px] font-bold ${
                         book.daysLeft <= 5
-                          ? "bg-amber-500/10 text-amber-600"
-                          : "bg-emerald-500/10 text-emerald-600"
+                          ? "bg-warning-bg0/10 text-warning-text"
+                          : "bg-success-bg0/10 text-success-text"
                       }`}
                     >
                       {book.daysLeft} DAYS LEFT
@@ -255,7 +255,7 @@ export function MyBooksPage() {
                     <span className="font-semibold text-slate-700">
                       Progress
                     </span>
-                    <span className="font-bold text-emerald-600">
+                    <span className="font-bold text-success-text">
                       {book.progress}%
                     </span>
                   </div>
@@ -267,7 +267,7 @@ export function MyBooksPage() {
 
                 {/* Actions */}
                 <div className="mt-5 flex flex-wrap items-center gap-2.5">
-                  <Button className="h-10 rounded-xl bg-slate-900 px-5 text-xs font-bold text-white transition-all hover:bg-emerald-600 active:scale-[0.98] sm:text-sm">
+                  <Button className="h-10 rounded-xl bg-slate-900 px-5 text-xs font-bold text-white transition-all hover:bg-success-text active:scale-[0.98] sm:text-sm">
                     Continue Reading
                   </Button>
                   <Button
@@ -291,16 +291,16 @@ export function MyBooksPage() {
       </section>
 
       {/* ── Recommendation CTA ────────────────────────────────────── */}
-      <section className="relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-900 to-emerald-950 p-6 sm:p-8 md:p-10">
+      <section className="relative overflow-hidden rounded-2xl bg-linear-to-br from-slate-900 via-slate-900 to-success-text p-6 sm:p-8 md:p-10">
         <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:gap-12">
           <div className="flex-1 space-y-4 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400">
+            <div className="inline-flex items-center gap-2 rounded-full bg-success-bg0/10 px-3 py-1.5 text-xs font-semibold text-success-text">
               <Sparkles size={12} />
               Recommended For You
             </div>
             <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
               Discover your next{" "}
-              <span className="bg-linear-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-success-text to-blue-400 bg-clip-text text-transparent">
                 Masterpiece
               </span>
             </h2>
@@ -316,9 +316,9 @@ export function MyBooksPage() {
           {/* Stacked book previews */}
           <div className="relative flex shrink-0 -space-x-8 sm:-space-x-10 md:-space-x-12">
             {[
-              { bg: "from-amber-100 to-amber-200", rotate: "-rotate-6" },
-              { bg: "from-indigo-100 to-indigo-200", rotate: "-rotate-2" },
-              { bg: "from-emerald-100 to-emerald-200", rotate: "rotate-2" },
+              { bg: "from-warning-bg to-warning-bg", rotate: "-rotate-6" },
+              { bg: "from-blue-100 to-blue-200", rotate: "-rotate-2" },
+              { bg: "from-success-bg to-success-bg", rotate: "rotate-2" },
             ].map((item, i) => (
               <div
                 key={i}
@@ -329,8 +329,8 @@ export function MyBooksPage() {
         </div>
 
         {/* Background glow */}
-        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-emerald-600/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-teal-600/10 blur-3xl" />
+        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-success-text/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-blue-600/10 blur-3xl" />
       </section>
     </div>
   );

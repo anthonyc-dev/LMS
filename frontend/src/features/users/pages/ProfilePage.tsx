@@ -97,7 +97,7 @@ export function ProfilePage() {
       /> */}
       <div className="mx-auto max-w-[1000px] space-y-6 pb-12">
         {/* Page Title */}
-        <h1 className="text-lg font-semibold text-emerald-700">My Profile</h1>
+        <h1 className="text-lg font-semibold text-blue-700">My Profile</h1>
         {/* Profile Header Card */}
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -106,11 +106,11 @@ export function ProfilePage() {
               <div className="group relative shrink-0">
                 <Avatar className="h-20 w-20 shadow ring-2 ring-slate-100">
                   <AvatarImage src={user?.avatarUrl} />
-                  <AvatarFallback className="bg-amber-100 text-lg font-bold text-amber-700">
+                  <AvatarFallback className="bg-slate-100 text-lg font-bold text-slate-700">
                     {user?.fullName?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <button className="absolute -right-0.5 bottom-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white bg-emerald-600 text-white shadow-sm transition-colors hover:bg-emerald-700">
+                <button className="absolute -right-0.5 bottom-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white bg-blue-600 text-white shadow-sm transition-colors hover:bg-blue-700">
                   <Camera className="size-3" />
                 </button>
               </div>
@@ -143,49 +143,49 @@ export function ProfilePage() {
 
         {/* Digital Library ID Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-5 text-base font-semibold text-emerald-700">
+          <h3 className="mb-5 text-base font-semibold text-blue-700">
             Digital Library Card
           </h3>
           <div className="flex flex-col items-center gap-8 md:flex-row md:items-start">
             {/* The Library ID Card */}
-            <div className="group relative flex aspect-[1.586/1] w-full max-w-[340px] shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-emerald-700/35 bg-linear-to-br from-emerald-800 via-emerald-950 to-slate-900 p-4 text-white shadow-md transition-all duration-300 select-none hover:scale-[1.01] hover:shadow-lg">
+            <div className="group relative flex aspect-[1.586/1] w-full max-w-[340px] shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-blue-700/35 bg-linear-to-br from-blue-800 via-blue-950 to-slate-900 p-4 text-white shadow-md transition-all duration-300 select-none hover:scale-[1.01] hover:shadow-lg">
               {/* Glossy sheen */}
               <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-transparent" />
               {/* Watermark decors */}
-              <div className="pointer-events-none absolute -right-6 -bottom-6 h-28 w-28 rounded-full bg-emerald-500/10 blur-xl" />
+              <div className="pointer-events-none absolute -right-6 -bottom-6 h-28 w-28 rounded-full bg-blue-500/10 blur-xl" />
               <div className="pointer-events-none absolute -top-6 -left-6 h-28 w-28 rounded-full bg-teal-500/10 blur-xl" />
 
               {/* Card Top */}
               <div className="z-10 flex items-start justify-between">
                 <div className="space-y-0.5">
-                  <p className="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">
+                  <p className="text-[10px] font-bold tracking-widest text-blue-400 uppercase">
                     LMS Library Card
                   </p>
-                  <p className="text-[8px] font-medium tracking-wider text-emerald-200/50 uppercase">
+                  <p className="text-[8px] font-medium tracking-wider text-blue-200/50 uppercase">
                     Official Library ID
                   </p>
                 </div>
-                <div className="rounded-full border border-emerald-500/20 bg-emerald-950/40 px-2 py-0.5 text-[9px] font-semibold text-emerald-400/80">
+                <div className="rounded-full border border-blue-500/20 bg-blue-950/40 px-2 py-0.5 text-[9px] font-semibold text-blue-400/80">
                   ACTIVE
                 </div>
               </div>
 
               {/* Card Middle (User Info - Read Only) */}
               <div className="z-10 my-1.5 flex items-center gap-3">
-                <Avatar className="h-12 w-12 shrink-0 shadow-sm ring-2 ring-emerald-400/20">
+                <Avatar className="h-12 w-12 shrink-0 shadow-sm ring-2 ring-blue-400/20">
                   <AvatarImage src={user?.avatarUrl} />
-                  <AvatarFallback className="bg-emerald-950 text-xs font-bold text-emerald-300">
+                  <AvatarFallback className="bg-blue-950 text-xs font-bold text-blue-300">
                     {user?.fullName?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
-                  <h3 className="truncate text-xs font-bold tracking-wide text-emerald-50">
+                  <h3 className="truncate text-xs font-bold tracking-wide text-blue-50">
                     {user?.fullName ?? "Member Name"}
                   </h3>
-                  <p className="mt-0.5 text-[9px] font-semibold tracking-wider text-emerald-300/70 uppercase">
+                  <p className="mt-0.5 text-[9px] font-semibold tracking-wider text-blue-300/70 uppercase">
                     {roleLabel}
                   </p>
-                  <p className="mt-0.5 font-mono text-[9px] text-emerald-200/40">
+                  <p className="mt-0.5 font-mono text-[9px] text-blue-200/40">
                     ID: {user?.schoolId || "—"}
                   </p>
                 </div>
@@ -201,8 +201,8 @@ export function ProfilePage() {
                   />
                 </div>
               ) : (
-                <div className="z-10 flex h-8 items-center justify-center rounded border border-dashed border-emerald-600/30 bg-emerald-950/20">
-                  <span className="text-[10px] font-medium text-emerald-300/40">
+                <div className="z-10 flex h-8 items-center justify-center rounded border border-dashed border-blue-600/30 bg-blue-950/20">
+                  <span className="text-[10px] font-medium text-blue-300/40">
                     No Barcode Available
                   </span>
                 </div>
@@ -212,8 +212,8 @@ export function ProfilePage() {
             {/* Description / Instructions */}
             <div className="w-full flex-1 space-y-4 pt-2">
               <div className="space-y-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/10 ring-inset">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-600/10 ring-inset">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
                   Active Library Account
                 </span>
                 <h4 className="text-base font-bold text-slate-800">
@@ -234,7 +234,7 @@ export function ProfilePage() {
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           {/* Card Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h3 className="text-base font-semibold text-emerald-700">
+            <h3 className="text-base font-semibold text-blue-700">
               Personal Information
             </h3>
             {isEditingPersonal ? (
@@ -248,7 +248,7 @@ export function ProfilePage() {
                 </Button>
                 <Button
                   onClick={handleSavePersonal}
-                  className="h-8 cursor-pointer rounded-lg bg-emerald-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-emerald-700"
+                  className="h-8 cursor-pointer rounded-lg bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
                 >
                   Save
                 </Button>
@@ -354,9 +354,7 @@ export function ProfilePage() {
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           {/* Card Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h3 className="text-base font-semibold text-emerald-700">
-              Address
-            </h3>
+            <h3 className="text-base font-semibold text-blue-700">Address</h3>
             {isEditingAddress ? (
               <div className="flex items-center gap-2">
                 <Button
@@ -368,7 +366,7 @@ export function ProfilePage() {
                 </Button>
                 <Button
                   onClick={handleSaveAddress}
-                  className="h-8 cursor-pointer rounded-lg bg-emerald-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-emerald-700"
+                  className="h-8 cursor-pointer rounded-lg bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
                 >
                   Save
                 </Button>

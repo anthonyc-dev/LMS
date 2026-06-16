@@ -128,7 +128,7 @@ export function ForgotPassword() {
       </div>
 
       {/* Right Column: Form Wizard */}
-      <div className="flex flex-col items-center justify-center bg-slate-900/5 p-6 sm:p-10 dark:bg-slate-950/20">
+      <div className="flex flex-col items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-md">
           {/* Logo on Mobile */}
           <div className="mb-8 flex flex-col items-center text-center lg:hidden">

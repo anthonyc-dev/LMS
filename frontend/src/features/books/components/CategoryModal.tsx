@@ -78,13 +78,13 @@ export function CategoryModal({
           {/* Name */}
           <div className="space-y-2">
             <Label className="text-sm font-bold text-slate-700">
-              Category Name <span className="text-rose-500">*</span>
+              Category Name <span className="text-error-bg0">*</span>
             </Label>
             <Input
               id="cat-name"
               disabled={isLoading}
               placeholder="e.g. Science Fiction"
-              className={`rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20 ${nameErr ? "border-rose-400 focus-visible:border-rose-500" : ""}`}
+              className={`rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20 ${nameErr ? "border-error-text focus-visible:border-error-bg0" : ""}`}
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
@@ -92,7 +92,7 @@ export function CategoryModal({
               }}
             />
             {nameErr && (
-              <p className="text-xs font-medium text-rose-500">
+              <p className="text-xs font-medium text-error-bg0">
                 Name is required.
               </p>
             )}
@@ -107,7 +107,7 @@ export function CategoryModal({
               id="cat-desc"
               disabled={isLoading}
               placeholder="Brief description of this category…"
-              className="h-20 resize-none rounded-xl border-slate-200 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              className="h-20 resize-none rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
             />

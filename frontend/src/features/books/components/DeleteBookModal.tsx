@@ -22,7 +22,7 @@ export function DeleteBookModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-w-sm">
         <div className="space-y-5 p-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-500">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-error-bg text-error-bg0">
             <AlertCircle size={32} />
           </div>
           <div className="space-y-2">
@@ -47,7 +47,7 @@ export function DeleteBookModal({
             <Button
               disabled={isDeleting}
               onClick={onConfirm}
-              className="h-11 flex-1 rounded-xl bg-rose-500 font-bold text-white shadow-md shadow-rose-200 hover:bg-rose-600"
+              className="h-11 flex-1 rounded-xl bg-error-bg0 font-bold text-white shadow-md shadow-error-bg hover:bg-error-text"
             >
               {isDeleting ? <Spinner className="mr-2" /> : null}
               Delete
