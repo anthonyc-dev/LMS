@@ -24,6 +24,7 @@ import { TerminusModule } from '@nestjs/terminus';
 import { ShelvesModule } from './modules/shelves/shelves.module';
 import { BookCopiesModule } from './modules/book-copies/book-copies.module';
 import { ShelfSectionsModule } from './modules/shelf-sections/shelf-sections.module';
+import { FinesModule } from './modules/fines/fines.module';
 import dns from 'dns';
 
 dns.setDefaultResultOrder('ipv4first');
@@ -58,6 +59,7 @@ dns.setDefaultResultOrder('ipv4first');
     ShelvesModule,
     BookCopiesModule,
     ShelfSectionsModule,
+    FinesModule,
   ],
   controllers: [AppController],
   providers: [

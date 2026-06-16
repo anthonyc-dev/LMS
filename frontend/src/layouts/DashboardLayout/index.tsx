@@ -40,7 +40,7 @@ const menuItems = [
   {
     icon: Book,
     label: "My Books",
-    path: "/student/books",
+    path: "/student/my-books",
     roles: ["student", "faculty"], // Example: might not need this for admin if admin has Admin Books
   },
   {
@@ -51,7 +51,7 @@ const menuItems = [
   },
   {
     icon: Users,
-    label: "User Management",
+    label: "Users",
     path: "/admin/users",
     roles: ["admin"],
   },
@@ -89,7 +89,7 @@ const menuItems = [
     icon: RefreshCw,
     label: "Circulation",
     path: "/admin/circulation",
-    roles: ["admin", "faculty"],
+    roles: ["admin"],
     items: [
       { label: "Borrow Book", path: "/admin/circulation/borrow" },
       { label: "Return Book", path: "/admin/circulation/return" },
@@ -126,7 +126,7 @@ export function AdminLayout() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-svh w-full">
+      <div className="flex h-svh w-full overflow-hidden">
         <Sidebar
           collapsible="icon"
           variant="sidebar"
@@ -138,8 +138,8 @@ export function AdminLayout() {
             menuItems={filteredMenuItems}
           />
         </Sidebar>
-        <main className="flex flex-1 flex-col pb-20 md:pb-0">
-          <header className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b bg-white/80 px-4 backdrop-blur-md lg:px-6">
+        <main className="relative flex flex-1 flex-col overflow-hidden pb-20 md:pb-0">
+          <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center gap-4 border-b bg-white/80 px-4 backdrop-blur-md lg:px-6">
             <div className="hidden md:block">
               <SidebarTrigger />
             </div>
@@ -147,7 +147,7 @@ export function AdminLayout() {
               {getPageTitle(location.pathname)}
             </h1>
           </header>
-          <div className="bg-background flex-1 overflow-auto p-4 lg:p-6 lg:px-8">
+          <div className="bg-background flex-1 overflow-x-hidden overflow-y-auto p-4 lg:p-6 lg:px-8">
             <Outlet />
           </div>
         </main>
