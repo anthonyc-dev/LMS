@@ -136,7 +136,7 @@ export function BrowseBooksPage() {
 
       {/* ── Search Bar ─────────────────────────────────────────────── */}
       <section className="space-y-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-center">
           {/* Search Input */}
           <div className="relative w-full md:max-w-md lg:max-w-lg">
             <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
@@ -175,7 +175,7 @@ export function BrowseBooksPage() {
         </div>
 
         {/* Category Pills */}
-        <div className="flex flex-wrap gap-2 pb-1">
+        <div className="flex flex-wrap justify-center gap-2 pb-1">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
@@ -245,7 +245,7 @@ export function BrowseBooksPage() {
                       {/* Hover Overlay Actions */}
                       <div className="absolute inset-0 flex items-start justify-end bg-linear-to-t from-black/50 via-transparent to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                         <div className="flex flex-col gap-2">
-                          <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-error-bg0">
+                          <button className="hover:text-error-bg0 flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white">
                             <Heart size={14} />
                           </button>
                           <button className="flex size-8 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md backdrop-blur-sm transition-colors hover:bg-white hover:text-blue-600">

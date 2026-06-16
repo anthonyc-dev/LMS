@@ -24,6 +24,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/shared/components/ui/collapsible";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 
 type MenuItem = {
   icon: LucideIcon;
@@ -41,6 +46,9 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
   const { user, logout } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [activeSheet, setActiveSheet] = useState<string | null>(null);
+
+  const bottomBarItems = menuItems.slice(0, 4);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -63,6 +71,14 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
     setIsOpen(false);
   };
 
+  const isItemActive = (item: MenuItem) => {
+    const hasSubItems = item.items && item.items.length > 0;
+    const isSubItemActive =
+      hasSubItems &&
+      item.items?.some((subItem) => location.pathname === subItem.path);
+    return location.pathname === item.path || isSubItemActive;
+  };
+
   return (
     <>
       <LoadingOverlay
@@ -70,13 +86,119 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
         label="Signing Out"
         sublabel="Clearing your session..."
       />
-      <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 md:hidden">
+
+      {/* Bottom Navigation Bar */}
+      <nav className="pb-safe fixed right-0 bottom-0 left-0 z-50 flex h-18 items-center justify-around border-t border-slate-200 bg-white px-2 pt-1 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] md:hidden">
+        {bottomBarItems.map((item) => {
+          const active = isItemActive(item);
+          const hasSubItems = item.items && item.items.length > 0;
+          const isThisSheetOpen = activeSheet === item.label;
+
+          if (hasSubItems) {
+            return (
+              <Sheet
+                key={item.label}
+                open={isThisSheetOpen}
+                onOpenChange={(open) =>
+                  setActiveSheet(open ? item.label : null)
+                }
+              >
+                <SheetTrigger
+                  render={
+                    <button className="flex flex-1 flex-col items-center justify-center gap-1 overflow-hidden px-1">
+                      <div
+                        className={`flex h-8 w-14 items-center justify-center rounded-full transition-all ${
+                          active
+                            ? "bg-blue-100 text-blue-700"
+                            : "text-slate-500"
+                        }`}
+                      >
+                        <item.icon
+                          className="size-5"
+                          strokeWidth={active ? 2.5 : 2}
+                        />
+                      </div>
+                      <span
+                        className={`truncate text-[10px] font-medium tracking-wide ${
+                          active ? "font-bold text-blue-700" : "text-slate-500"
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                    </button>
+                  }
+                />
+                <SheetContent
+                  side="bottom"
+                  className="flex max-h-[85vh] flex-col rounded-t-3xl bg-white p-0"
+                >
+                  <SheetHeader className="border-b border-slate-100 p-4 text-left">
+                    <SheetTitle className="text-lg font-bold">
+                      {item.label}
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-2 overflow-y-auto p-4 pb-8">
+                    {item.items?.map((subItem) => (
+                      <button
+                        key={subItem.label}
+                        onClick={() => {
+                          setActiveSheet(null);
+                          handleNavigate(subItem.path);
+                        }}
+                        className={`flex w-full items-center rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
+                          location.pathname === subItem.path
+                            ? "bg-blue-50 text-blue-700"
+                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        }`}
+                      >
+                        {subItem.label}
+                      </button>
+                    ))}
+                  </div>
+                </SheetContent>
+              </Sheet>
+            );
+          }
+
+          return (
+            <button
+              key={item.label}
+              onClick={() => handleNavigate(item.path)}
+              className="flex flex-1 flex-col items-center justify-center gap-1 overflow-hidden px-1"
+            >
+              <div
+                className={`flex h-8 w-14 items-center justify-center rounded-full transition-all ${
+                  active ? "bg-blue-100 text-blue-700" : "text-slate-500"
+                }`}
+              >
+                <item.icon className="size-5" strokeWidth={active ? 2.5 : 2} />
+              </div>
+              <span
+                className={`truncate text-[10px] font-medium tracking-wide ${
+                  active ? "font-bold text-blue-700" : "text-slate-500"
+                }`}
+              >
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* More Menu Trigger */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger
             render={
-              <button className="flex items-center gap-2.5 rounded-full bg-slate-900 px-6 py-3.5 text-sm font-semibold tracking-wide text-white shadow-2xl transition-transform hover:scale-105 active:scale-95">
-                <Menu className="size-5" />
-                Menu
+              <button className="flex flex-1 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-slate-500">
+                <div
+                  className={`flex h-8 w-14 items-center justify-center rounded-full transition-all ${
+                    isOpen ? "bg-slate-100 text-slate-900" : ""
+                  }`}
+                >
+                  <Menu className="size-5" />
+                </div>
+                <span className="truncate text-[10px] font-medium tracking-wide text-slate-500">
+                  Menu
+                </span>
               </button>
             }
           />
@@ -96,32 +218,26 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
                 </span>
                 {menuItems.map((item) => {
                   const hasSubItems = item.items && item.items.length > 0;
-                  const isSubItemActive =
-                    hasSubItems &&
-                    item.items?.some(
-                      (subItem) => location.pathname === subItem.path,
-                    );
-                  const isActive =
-                    location.pathname === item.path || isSubItemActive;
+                  const active = isItemActive(item);
 
                   if (hasSubItems) {
                     return (
                       <Collapsible
                         key={item.label}
-                        defaultOpen={isSubItemActive}
+                        defaultOpen={active}
                         className="group/collapsible rounded-xl"
                       >
                         <CollapsibleTrigger
                           render={
                             <button
                               className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                                isActive
+                                active
                                   ? "bg-blue-50 text-blue-700"
                                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                               }`}
                             >
                               <item.icon
-                                className={`size-5 ${isActive ? "text-blue-600" : ""}`}
+                                className={`size-5 ${active ? "text-blue-600" : ""}`}
                               />
                               {item.label}
                               <ChevronRight className="ml-auto size-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
@@ -155,13 +271,13 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
                       key={item.label}
                       onClick={() => handleNavigate(item.path)}
                       className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors ${
-                        isActive
+                        active
                           ? "bg-blue-50 text-blue-700"
                           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                       }`}
                     >
                       <item.icon
-                        className={`size-5 ${isActive ? "text-blue-600" : ""}`}
+                        className={`size-5 ${active ? "text-blue-600" : ""}`}
                       />
                       {item.label}
                     </button>
@@ -177,7 +293,12 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
                 {/* Profile Info */}
                 <div className="mb-3 flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-tr from-blue-600 to-blue-500 text-white shadow-md">
-                    <User className="size-5" />
+                    <Avatar className="shadow ring-2 ring-slate-100">
+                      <AvatarImage src={user?.avatarUrl} />
+                      <AvatarFallback className="bg-amber-100 text-lg font-bold text-amber-700">
+                        {user?.fullName?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
                   <div className="flex min-w-0 flex-col text-left">
                     <span className="truncate text-sm font-bold text-slate-800">
@@ -215,7 +336,7 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
             </div>
           </SheetContent>
         </Sheet>
-      </div>
+      </nav>
     </>
   );
 }

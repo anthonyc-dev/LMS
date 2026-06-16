@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   format,
   addMonths,
@@ -11,20 +11,22 @@ import {
   isSameDay,
   addDays,
   isToday,
+  differenceInDays,
+  parseISO,
 } from "date-fns";
 import {
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
-  Plus,
   Search,
   Calendar as CalendarIcon,
   Clock,
-  MoreVertical,
-  Filter,
   CheckCircle2,
   AlertCircle,
-  MapPin,
+  User as UserIcon,
+  Hash,
+  AlertTriangle,
+  RotateCcw,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
@@ -41,114 +43,98 @@ import {
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
 import { Calendar } from "@/shared/components/ui/calendar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/shared/components/ui/dialog";
 import { cn } from "@/shared/lib/utils";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { useAuthStore } from "@/app/store/authStore";
+import {
+  useBorrowings,
+  useReturnBook,
+  type Borrowing,
+} from "@/features/circulation/api/circulation";
+import { toast } from "sonner";
+import LoadingSpinner from "@/shared/components/GlobalLoading";
 
-// Types for our events
+type EventType = "borrowed" | "due-soon" | "overdue" | "returned" | "reserved";
+
 interface CalendarEvent {
   id: string;
   title: string;
-  start: Date;
-  end: Date;
-  type: "class" | "meeting" | "exam" | "deadline";
-  status: "pending" | "completed" | "urgent";
-  description?: string;
+  date: Date;
+  type: EventType;
+  originalData: Borrowing;
 }
 
 const SchedulePage = () => {
-  usePageTitle("Schedule");
+  usePageTitle("Library Calendar");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null,
+  );
+  const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
 
-  // Dummy Data
-  const events: CalendarEvent[] = [
-    {
-      id: "1",
-      title: "Advanced Web Architecture",
-      start: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        12,
-        10,
-        0,
-      ),
-      end: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        12,
-        12,
-        0,
-      ),
-      type: "class",
-      status: "completed",
-      description: "Room 402 - Main Building",
-    },
-    {
-      id: "2",
-      title: "Faculty Meeting",
-      start: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        12,
-        14,
-        0,
-      ),
-      end: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        12,
-        15,
-        30,
-      ),
-      type: "meeting",
-      status: "pending",
-      description: "Virtual Meeting via Zoom",
-    },
-    {
-      id: "3",
-      title: "Mid-term Data Structures",
-      start: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        15,
-        9,
-        0,
-      ),
-      end: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        15,
-        12,
-        0,
-      ),
-      type: "exam",
-      status: "urgent",
-      description: "Grand Hall",
-    },
-    {
-      id: "4",
-      title: "Project Submission",
-      start: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        20,
-        23,
-        59,
-      ),
-      end: new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        20,
-        23,
-        59,
-      ),
-      type: "deadline",
-      status: "urgent",
-    },
-  ];
+  const { user } = useAuthStore();
+  const { data: allBorrowings = [], isLoading } = useBorrowings();
+  const returnMutation = useReturnBook();
+
+  // Map borrowings to events
+  const events = useMemo(() => {
+    let filtered = allBorrowings as Borrowing[];
+
+    // Role-based filtering
+    if (user?.role === "student" || user?.role === "faculty") {
+      filtered = filtered.filter((b) => b.user?.id === user.id);
+    }
+
+    // Search filtering
+    if (searchQuery.trim() !== "") {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (b) =>
+          b.bookCopy?.book.title.toLowerCase().includes(q) ||
+          b.user?.fullName.toLowerCase().includes(q) ||
+          b.bookCopy?.barcode.toLowerCase().includes(q),
+      );
+    }
+
+    return filtered.map((b) => {
+      let type: EventType = "borrowed";
+      let eventDate = parseISO(b.dueDate);
+
+      if (b.status === "pending") {
+        type = "reserved";
+        eventDate = parseISO(b.borrowDate);
+      } else if (b.status === "returned") {
+        type = "returned";
+        eventDate = parseISO(b.returnedDate || b.dueDate);
+      } else if (
+        b.status === "overdue" ||
+        differenceInDays(eventDate, new Date()) < 0
+      ) {
+        type = "overdue";
+      } else if (differenceInDays(eventDate, new Date()) <= 3) {
+        type = "due-soon";
+      }
+
+      return {
+        id: b.id,
+        title: b.bookCopy?.book.title || "Unknown Book",
+        date: eventDate,
+        type,
+        originalData: b,
+      };
+    });
+  }, [allBorrowings, user, searchQuery]);
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -157,130 +143,155 @@ const SchedulePage = () => {
     setSelectedDate(new Date());
   };
 
-  const getEventColors = (type: CalendarEvent["type"]) => {
+  const getEventColors = (type: EventType) => {
     switch (type) {
-      case "class":
+      case "reserved":
         return {
           bg: "bg-blue-50",
-          border: "border-blue-100",
+          border: "border-blue-200",
           text: "text-blue-700",
           dot: "bg-blue-500",
+          label: "Reserved",
         };
-      case "meeting":
+      case "borrowed":
         return {
-          bg: "bg-success-bg",
-          border: "border-success-bg",
-          text: "text-success-text",
-          dot: "bg-success-bg0",
+          bg: "bg-emerald-50",
+          border: "border-emerald-200",
+          text: "text-emerald-700",
+          dot: "bg-emerald-500",
+          label: "Borrowed",
         };
-      case "exam":
+      case "due-soon":
         return {
-          bg: "bg-error-bg",
-          border: "border-error-bg",
-          text: "text-error-text",
-          dot: "bg-error-bg0",
+          bg: "bg-amber-50",
+          border: "border-amber-200",
+          text: "text-amber-700",
+          dot: "bg-amber-500",
+          label: "Due Soon",
         };
-      case "deadline":
+      case "overdue":
         return {
-          bg: "bg-warning-bg",
-          border: "border-warning-bg",
-          text: "text-warning-text",
-          dot: "bg-warning-bg0",
+          bg: "bg-red-50",
+          border: "border-red-200",
+          text: "text-red-700",
+          dot: "bg-red-500",
+          label: "Overdue",
         };
+      case "returned":
       default:
         return {
-          bg: "bg-gray-50",
-          border: "border-gray-100",
-          text: "text-gray-700",
-          dot: "bg-gray-500",
+          bg: "bg-slate-50",
+          border: "border-slate-200",
+          text: "text-slate-600",
+          dot: "bg-slate-400",
+          label: "Returned",
         };
+    }
+  };
+
+  const handleReturn = async (id: string) => {
+    try {
+      await returnMutation.mutateAsync(id);
+      toast.success("Book returned successfully");
+      setSelectedEvent(null);
+    } catch (error) {
+      toast.error("Failed to return book");
     }
   };
 
   const renderHeader = () => {
     return (
-      <div className="flex flex-col items-start justify-between rounded-t-3xl border-b border-white/20 bg-white/50 p-4 backdrop-blur-xl md:flex-row md:items-center md:px-6 md:py-6">
+      <div className="flex flex-col items-start justify-between rounded-t-3xl border-b border-slate-200/50 bg-white/80 p-4 backdrop-blur-xl md:flex-row md:items-center md:px-6 md:py-6">
         <div className="mb-4 flex items-center gap-4 md:mb-0">
-          <div className="rounded-2xl bg-blue-600 p-2.5 shadow-lg shadow-blue-200 md:p-3">
-            <CalendarIcon className="h-5 w-5 text-white md:h-6 md:w-6" />
+          <div className="rounded-2xl bg-slate-900 p-2.5 shadow-slate-200 md:p-3">
+            <CalendarDays className="h-5 w-5 text-white md:h-6 md:w-6" />
           </div>
-          <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-            <PopoverTrigger
-              render={
-                <button className="flex flex-col items-start text-left transition-opacity hover:opacity-80">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl leading-tight font-bold text-gray-900 md:text-2xl">
-                      {format(currentDate, "MMMM yyyy")}
-                    </h2>
-                    <ChevronDown className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <p className="text-xs font-medium text-gray-500 md:text-sm">
-                    Manage your academic schedule
-                  </p>
-                </button>
-              }
-            />
-
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                defaultMonth={currentDate}
-                onSelect={(date) => {
-                  if (date) {
-                    setCurrentDate(date);
-                    setSelectedDate(date);
-                    setIsDatePickerOpen(false);
-                  }
-                }}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <div className="flex flex-col items-start text-left">
+            <h2 className="text-xl leading-tight font-bold text-slate-900 md:text-2xl">
+              Library Schedule
+            </h2>
+            <p className="text-xs font-medium text-slate-500 md:text-sm">
+              {user?.role === "admin"
+                ? "Manage global library schedule"
+                : "Track your borrowed books"}
+            </p>
+          </div>
         </div>
 
-        <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-center md:gap-6">
-          {/* Pagination Controls */}
-          <div className="flex items-center justify-between gap-1 rounded-2xl border border-gray-100 bg-white p-1 shadow-sm md:justify-center md:p-1.5">
+        <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-center md:gap-4">
+          {/* Calendar Controls Group */}
+          <div className="flex w-full items-center justify-between gap-1 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-sm md:w-auto md:justify-center">
             <Button
               variant="ghost"
               size="icon"
               onClick={prevMonth}
-              className="h-9 w-9 rounded-xl transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 md:h-10 md:w-10"
+              className="h-10 w-10 shrink-0 rounded-xl transition-all duration-300 hover:bg-slate-100"
             >
-              <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
+              <ChevronLeft className="h-5 w-5" />
             </Button>
-            <Button
-              variant="ghost"
-              onClick={goToToday}
-              className="h-9 rounded-xl px-4 text-xs font-bold text-gray-600 transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 md:h-10 md:px-6 md:text-sm"
-            >
-              Today
-            </Button>
+
+            <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    className="h-10 flex-1 rounded-xl px-2 text-sm font-bold text-slate-600 transition-all duration-300 hover:bg-slate-100 sm:px-4 md:flex-none"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                    <span className="truncate">
+                      {format(currentDate, "MMMM yyyy")}
+                    </span>
+                  </Button>
+                }
+              />
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  defaultMonth={currentDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setCurrentDate(date);
+                      setSelectedDate(date);
+                      setIsDatePickerOpen(false);
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
             <Button
               variant="ghost"
               size="icon"
               onClick={nextMonth}
-              className="h-9 w-9 rounded-xl transition-all duration-300 hover:bg-blue-50 hover:text-blue-600 md:h-10 md:w-10"
+              className="h-10 w-10 shrink-0 rounded-xl transition-all duration-300 hover:bg-slate-100"
             >
-              <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
+              <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
 
-          {/* Search & Add */}
+          {/* Today Button */}
+          <Button
+            variant="outline"
+            onClick={goToToday}
+            className="flex h-10 w-full rounded-xl px-4 text-sm font-bold md:w-auto"
+          >
+            Today
+          </Button>
+
+          {/* Search Bar */}
           <div className="flex w-full items-center gap-2 md:w-auto">
             <div className="group relative flex-1 md:w-64">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600" />
               <input
                 type="text"
-                placeholder="Search..."
-                className="h-10 w-full rounded-xl border border-gray-200 bg-white py-2 pr-4 pl-9 text-sm shadow-sm transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                placeholder="Search books or users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-10 w-full rounded-xl border border-slate-200 bg-white py-2 pr-4 pl-9 text-sm shadow-sm transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 focus:outline-none"
               />
             </div>
-            <Button className="h-10 shrink-0 gap-2 rounded-xl bg-blue-600 px-4 text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 active:scale-95 md:px-5">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Event</span>
-            </Button>
           </div>
         </div>
       </div>
@@ -290,10 +301,10 @@ const SchedulePage = () => {
   const renderDays = () => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     return (
-      <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50/50">
+      <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50">
         {days.map((day) => (
           <div key={day} className="py-2 text-center md:py-4">
-            <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase md:text-xs">
+            <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase md:text-xs">
               {isMobile ? day.charAt(0) : day}
             </span>
           </div>
@@ -303,6 +314,14 @@ const SchedulePage = () => {
   };
 
   const renderCells = () => {
+    if (isLoading) {
+      return (
+        <div className="flex min-h-[400px] items-center justify-center bg-white">
+          <LoadingSpinner />
+        </div>
+      );
+    }
+
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart);
@@ -315,18 +334,20 @@ const SchedulePage = () => {
       for (let i = 0; i < 7; i++) {
         const formattedDate = format(day, "d");
         const cloneDay = day;
-        const dayEvents = events.filter((e) => isSameDay(e.start, cloneDay));
+        const dayEvents = events.filter((e) => isSameDay(e.date, cloneDay));
 
         days.push(
           <div
             key={day.toString()}
             className={cn(
-              "group relative flex cursor-pointer flex-col items-center justify-start border-r border-b border-gray-100 p-1 transition-all duration-300 hover:bg-blue-50/30 md:items-start md:p-2",
+              "group relative flex cursor-pointer flex-col items-center justify-start border-r border-b border-slate-100 p-1 transition-all duration-300 hover:bg-slate-50/50 md:items-start md:p-2",
               isMobile ? "h-16" : "min-h-[130px] xl:min-h-[140px]",
               !isSameMonth(day, monthStart)
-                ? "bg-gray-50/30 text-gray-300"
-                : "text-gray-700",
-              isSameDay(day, selectedDate) ? "bg-blue-50/50" : "",
+                ? "bg-slate-50/30 text-slate-300"
+                : "text-slate-700",
+              isSameDay(day, selectedDate)
+                ? "bg-blue-50/40 ring-1 ring-blue-100 ring-inset"
+                : "",
             )}
             onClick={() => setSelectedDate(cloneDay)}
           >
@@ -336,16 +357,16 @@ const SchedulePage = () => {
                   "flex items-center justify-center rounded-full text-xs font-bold transition-all duration-300 md:text-sm",
                   isMobile ? "mt-1 h-7 w-7" : "h-8 w-8",
                   isToday(day)
-                    ? "scale-110 bg-blue-600 text-white shadow-md shadow-blue-200"
+                    ? "scale-110 bg-slate-900 text-white shadow-md"
                     : isSameDay(day, selectedDate)
-                      ? "bg-blue-100 text-blue-700"
-                      : "group-hover:bg-gray-100",
+                      ? "bg-slate-200 text-slate-900"
+                      : "group-hover:bg-slate-100",
                 )}
               >
                 {formattedDate}
               </span>
               {!isMobile && dayEvents.length > 0 && (
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-400" />
+                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-slate-400" />
               )}
             </div>
 
@@ -362,7 +383,7 @@ const SchedulePage = () => {
                   />
                 ))}
                 {dayEvents.length > 3 && (
-                  <div className="h-1.5 w-1.5 rounded-full bg-gray-300" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
                 )}
               </div>
             )}
@@ -378,14 +399,18 @@ const SchedulePage = () => {
                         <TooltipTrigger
                           render={
                             <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedEvent(event);
+                              }}
                               className={cn(
-                                "w-full cursor-pointer truncate rounded-lg px-2 py-1.5 text-[10px] leading-tight font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95",
+                                "w-full cursor-pointer truncate rounded-lg border px-2 py-1.5 text-[10px] leading-tight font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95",
                                 colors.bg,
                                 colors.border,
                                 colors.text,
                               )}
                             >
-                              <div className="flex items-center gap-1 truncate">
+                              <div className="flex items-center gap-1.5 truncate">
                                 <div
                                   className={cn(
                                     "h-1.5 w-1.5 shrink-0 rounded-full",
@@ -399,7 +424,7 @@ const SchedulePage = () => {
                         />
                         <TooltipContent
                           side="right"
-                          className="z-50 max-w-xs rounded-xl border border-gray-200 bg-white p-3 shadow-xl"
+                          className="z-50 max-w-xs rounded-xl border border-slate-200 bg-white p-3 shadow-xl"
                         >
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
@@ -407,27 +432,18 @@ const SchedulePage = () => {
                                 variant="outline"
                                 className="text-[10px] capitalize"
                               >
-                                {event.type}
+                                {colors.label}
                               </Badge>
-                              {event.status === "completed" ? (
-                                <CheckCircle2 className="h-4 w-4 text-success-bg0" />
-                              ) : event.status === "urgent" ? (
-                                <AlertCircle className="h-4 w-4 animate-bounce text-error-bg0" />
-                              ) : null}
+                              {event.type === "overdue" && (
+                                <AlertCircle className="h-4 w-4 animate-pulse text-red-500" />
+                              )}
                             </div>
-                            <h4 className="text-sm font-bold text-gray-900">
+                            <h4 className="text-sm font-bold text-slate-900">
                               {event.title}
                             </h4>
-                            <div className="flex items-center gap-2 text-[11px] text-gray-500">
-                              <Clock className="h-3 w-3" />
-                              {format(event.start, "h:mm a")} -{" "}
-                              {format(event.end, "h:mm a")}
-                            </div>
-                            {event.description && (
-                              <p className="border-t pt-2 text-[11px] text-gray-500 italic">
-                                {event.description}
-                              </p>
-                            )}
+                            <p className="text-[11px] text-slate-500">
+                              Borrower: {event.originalData.user?.fullName}
+                            </p>
                           </div>
                         </TooltipContent>
                       </Tooltip>
@@ -435,17 +451,11 @@ const SchedulePage = () => {
                   );
                 })}
                 {dayEvents.length > 3 && (
-                  <div className="px-1 text-[10px] font-semibold text-gray-400">
-                    +{dayEvents.length - 3} more
+                  <div className="px-1 text-[10px] font-semibold text-slate-400">
+                    +{dayEvents.length - 3} more items
                   </div>
                 )}
               </div>
-            )}
-
-            {!isMobile && (
-              <button className="absolute right-2 bottom-2 rounded-md p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-200">
-                <Plus className="h-3 w-3 text-gray-400" />
-              </button>
             )}
           </div>,
         );
@@ -463,36 +473,36 @@ const SchedulePage = () => {
 
   const renderAgenda = () => {
     const selectedEvents = events.filter((e) =>
-      isSameDay(e.start, selectedDate),
+      isSameDay(e.date, selectedDate),
     );
 
     return (
       <div className="mt-6 md:mt-8">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-gray-900">
+          <h3 className="text-lg font-bold text-slate-900">
             {isSameDay(selectedDate, new Date())
               ? "Today's Agenda"
               : format(selectedDate, "EEEE, MMMM do")}
           </h3>
           <Badge
             variant="secondary"
-            className="rounded-full px-3 py-1 text-xs font-bold"
+            className="rounded-full px-3 py-1 text-xs font-bold text-slate-700"
           >
             {selectedEvents.length}{" "}
-            {selectedEvents.length === 1 ? "Event" : "Events"}
+            {selectedEvents.length === 1 ? "Item" : "Items"}
           </Badge>
         </div>
 
         {selectedEvents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-gray-200 bg-gray-50/50 p-8 text-center">
-            <div className="mb-3 rounded-full bg-gray-100 p-3">
-              <CalendarIcon className="h-6 w-6 text-gray-400" />
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/50 p-8 text-center">
+            <div className="mb-3 rounded-full bg-slate-100 p-3">
+              <CalendarIcon className="h-6 w-6 text-slate-400" />
             </div>
-            <p className="text-sm font-semibold text-gray-900">
-              No events scheduled
+            <p className="text-sm font-semibold text-slate-900">
+              No items for this date
             </p>
-            <p className="text-xs text-gray-500">
-              Enjoy your free time or add a new event.
+            <p className="text-xs text-slate-500">
+              Select another day to view due dates or reservations.
             </p>
           </div>
         ) : (
@@ -502,51 +512,54 @@ const SchedulePage = () => {
               return (
                 <Card
                   key={event.id}
+                  onClick={() => setSelectedEvent(event)}
                   className={cn(
-                    "relative overflow-hidden rounded-2xl border-none p-4 shadow-sm transition-all hover:shadow-md",
-                    colors.bg,
+                    "relative cursor-pointer overflow-hidden rounded-2xl border border-slate-100 p-4 shadow-sm transition-all hover:shadow-md",
+                    "bg-white hover:bg-slate-50",
                   )}
                 >
                   <div
                     className={cn(
-                      "absolute top-0 left-0 h-full w-1",
+                      "absolute top-0 left-0 h-full w-1.5",
                       colors.dot,
                     )}
                   />
-                  <div className="flex h-full flex-col justify-between gap-4">
+                  <div className="flex h-full flex-col justify-between gap-4 pl-2">
                     <div>
                       <div className="mb-2 flex items-start justify-between">
                         <Badge
                           variant="outline"
                           className={cn(
-                            "border-white/50 bg-white/50 text-[10px] capitalize",
+                            "border-transparent text-[10px] capitalize",
+                            colors.bg,
                             colors.text,
                           )}
                         >
-                          {event.type}
+                          {colors.label}
                         </Badge>
-                        {event.status === "completed" ? (
-                          <CheckCircle2 className="h-4 w-4 text-success-bg0" />
-                        ) : event.status === "urgent" ? (
-                          <AlertCircle className="h-4 w-4 text-error-bg0" />
-                        ) : null}
+                        {event.type === "returned" && (
+                          <CheckCircle2 className="h-4 w-4 text-slate-400" />
+                        )}
+                        {event.type === "overdue" && (
+                          <AlertTriangle className="h-4 w-4 animate-pulse text-red-500" />
+                        )}
                       </div>
-                      <h4 className="leading-tight font-bold text-gray-900">
+                      <h4 className="line-clamp-1 leading-tight font-bold text-slate-900">
                         {event.title}
                       </h4>
                     </div>
 
                     <div className="space-y-1.5">
-                      <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                      <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
                         <Clock className="h-3.5 w-3.5" />
-                        {format(event.start, "h:mm a")} -{" "}
-                        {format(event.end, "h:mm a")}
+                        {event.type === "reserved" ? "Reserved on: " : "Due: "}
+                        {format(event.date, "MMM dd, yyyy")}
                       </div>
-                      {event.description && (
-                        <div className="flex items-start gap-2 text-xs text-gray-500">
-                          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                          <span className="line-clamp-2">
-                            {event.description}
+                      {user?.role === "admin" && (
+                        <div className="flex items-start gap-2 text-xs text-slate-500">
+                          <UserIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                          <span className="line-clamp-1">
+                            {event.originalData.user?.fullName}
                           </span>
                         </div>
                       )}
@@ -561,9 +574,118 @@ const SchedulePage = () => {
     );
   };
 
+  const renderEventModal = () => {
+    if (!selectedEvent) return null;
+    const { originalData: data, title, type } = selectedEvent;
+    const colors = getEventColors(type);
+
+    return (
+      <Dialog
+        open={!!selectedEvent}
+        onOpenChange={(o) => !o && setSelectedEvent(null)}
+      >
+        <DialogContent className="overflow-hidden rounded-3xl border-none p-0 shadow-2xl sm:max-w-[425px]">
+          <div className={cn("h-3 w-full", colors.bg)} />
+          <div className="p-6">
+            <DialogHeader className="mb-6">
+              <div className="mb-2 flex items-center justify-between">
+                <Badge
+                  className={cn(
+                    "rounded-lg border-transparent shadow-none",
+                    colors.bg,
+                    colors.text,
+                  )}
+                >
+                  {colors.label}
+                </Badge>
+                {data.fines ? (
+                  <Badge
+                    variant="destructive"
+                    className="rounded-lg shadow-none"
+                  >
+                    Fine: ${data.fines.toFixed(2)}
+                  </Badge>
+                ) : null}
+              </div>
+              <DialogTitle className="text-xl leading-tight font-bold text-slate-900">
+                {title}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <div className="rounded-lg bg-white p-2 shadow-sm">
+                  <UserIcon className="h-5 w-5 text-slate-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                    Borrower
+                  </p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {data.user?.fullName}
+                  </p>
+                  <p className="text-xs text-slate-500">{data.user?.email}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                  <div className="mb-1 flex items-center gap-1.5 text-slate-500">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span className="text-[10px] font-bold tracking-wider uppercase">
+                      Due Date
+                    </span>
+                  </div>
+                  <span className="text-sm font-semibold text-slate-800">
+                    {format(parseISO(data.dueDate), "MMM dd, yyyy")}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                  <div className="mb-1 flex items-center gap-1.5 text-slate-500">
+                    <Hash className="h-3.5 w-3.5" />
+                    <span className="text-[10px] font-bold tracking-wider uppercase">
+                      Copy Barcode
+                    </span>
+                  </div>
+                  <span className="text-sm font-semibold text-slate-800">
+                    {data.bookCopy?.barcode || "N/A"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="mt-8 flex gap-2 sm:justify-end">
+              <Button
+                variant="outline"
+                className="w-full rounded-xl sm:w-auto"
+                onClick={() => setSelectedEvent(null)}
+              >
+                Close
+              </Button>
+              {user?.role === "admin" && data.status !== "returned" && (
+                <Button
+                  onClick={() => handleReturn(data.id)}
+                  disabled={returnMutation.isPending}
+                  className="w-full rounded-xl bg-slate-900 text-white hover:bg-slate-800 sm:w-auto"
+                >
+                  {returnMutation.isPending ? (
+                    <LoadingSpinner />
+                  ) : (
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                  )}
+                  Mark as Returned
+                </Button>
+              )}
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1600px] duration-700">
-      <Card className="overflow-hidden rounded-3xl border border-none border-white/40 bg-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-sm md:rounded-4xl">
+      <Card className="overflow-hidden rounded-3xl border border-slate-200/60 bg-white/80 shadow-xl shadow-slate-200/20 backdrop-blur-sm md:rounded-4xl">
         {renderHeader()}
         <div className="p-0">
           {renderDays()}
@@ -571,103 +693,8 @@ const SchedulePage = () => {
         </div>
       </Card>
 
-      {/* Render Agenda List below calendar (Essential for Mobile, nice for Desktop) */}
       {renderAgenda()}
-
-      {/* Quick Stats / Info Panel */}
-      <div className="mt-6 grid grid-cols-1 gap-4 md:mt-8 md:grid-cols-3 md:gap-6">
-        <Card className="rounded-3xl border-none bg-linear-to-br from-blue-500 to-slate-600 p-5 text-white shadow-xl shadow-blue-100 md:rounded-4xl md:p-6">
-          <div className="mb-4 flex items-center gap-4">
-            <div className="rounded-2xl bg-white/20 p-2.5 backdrop-blur-md md:p-3">
-              <Clock className="h-5 w-5 md:h-6 md:w-6" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-blue-100 md:text-sm">
-                Next Up
-              </p>
-              <h3 className="text-lg font-bold md:text-xl">Faculty Meeting</h3>
-            </div>
-          </div>
-          <div className="space-y-2 md:space-y-3">
-            <div className="flex items-center justify-between text-xs md:text-sm">
-              <span>Time: 14:00 PM</span>
-              <Badge className="border-none bg-white/20 px-2 py-0.5 text-[10px] hover:bg-white/30 md:px-2.5 md:py-1 md:text-xs">
-                15 min left
-              </Badge>
-            </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-              <div className="h-full w-2/3 rounded-full bg-white" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="rounded-3xl border-none bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:rounded-4xl md:p-6">
-          <div className="mb-4 flex items-center justify-between md:mb-6">
-            <h3 className="font-bold text-gray-900">Weekly Progress</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-full"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative h-14 w-14 md:h-16 md:w-16">
-              <svg className="h-full w-full -rotate-90">
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="40%"
-                  fill="none"
-                  stroke="#f3f4f6"
-                  strokeWidth="8"
-                />
-                <circle
-                  cx="50%"
-                  cy="50%"
-                  r="40%"
-                  fill="none"
-                  stroke="#6366f1"
-                  strokeWidth="8"
-                  strokeDasharray="175"
-                  strokeDashoffset="44"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-blue-600 md:text-xs">
-                75%
-              </span>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-900 md:text-sm">
-                3 of 4 Tasks Done
-              </p>
-              <p className="text-[10px] text-gray-500 md:text-xs">
-                Keep it up! You're almost there.
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="rounded-3xl border-none bg-white p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:rounded-4xl md:p-6">
-          <div className="mb-4 flex items-center justify-between md:mb-6">
-            <h3 className="font-bold text-gray-900">Quick Filters</h3>
-            <Filter className="h-4 w-4 text-gray-400" />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {["Classes", "Exams", "Meetings", "Deadlines"].map((filter) => (
-              <Badge
-                key={filter}
-                variant="outline"
-                className="cursor-pointer rounded-xl border-gray-100 px-3 py-1 text-[10px] text-gray-600 transition-all hover:border-blue-200 hover:bg-blue-50 md:px-4 md:py-1.5 md:text-xs"
-              >
-                {filter}
-              </Badge>
-            ))}
-          </div>
-        </Card>
-      </div>
+      {renderEventModal()}
     </div>
   );
 };

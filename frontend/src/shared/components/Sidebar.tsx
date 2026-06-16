@@ -37,12 +37,12 @@ import {
 } from "@/shared/components/ui/collapsible";
 import { useAuthStore } from "@/app/store/authStore";
 import api from "@/shared/lib/axios";
-import { toast } from "sonner";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
+import { toast } from "sonner";
 
 type MenuItem = {
   icon: LucideIcon;
@@ -205,7 +205,7 @@ export function SidebarContentInner({
                   className={`flex items-center ${isCollapsed ? "" : "w-full gap-3"}`}
                 >
                   <div
-                    className={`flex shrink-0 items-center justify-center overflow-hidden shadow-inner transition-all duration-300 group-hover:scale-105 ${isCollapsed ? "size-10 p-2" : "size-16 p-2"}`}
+                    className={`flex shrink-0 items-center justify-center overflow-hidden shadow-inner transition-all duration-300 group-hover:scale-105 ${isCollapsed ? "size-10 p-2" : "size-14 p-2"}`}
                   >
                     <img
                       src="/img/logo.png"

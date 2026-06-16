@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BorrowingStatus } from 'src/common/enums/enum.enums';
 import { BookCopy } from 'src/modules/book-copies/entities/book-copy.entity';
+import { Fine } from 'src/modules/fines/entities/fine.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   Column,
@@ -9,6 +10,7 @@ import {
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -63,4 +65,7 @@ export class Borrowing {
     onDelete: 'CASCADE',
   })
   bookCopy: BookCopy;
+
+  @OneToMany(() => Fine, (fine) => fine.borrowing)
+  fines: Fine[];
 }

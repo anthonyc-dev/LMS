@@ -186,17 +186,15 @@ function App() {
   return (
     <BrowserRouter>
       <Toaster
-        position="top-center"
+        position="top-right"
         theme="dark"
         toastOptions={{
-          style: {
-            background: "#000000",
-            color: "#ffffff",
-            border: "1px solid #27272a",
-          },
           classNames: {
-            success: "!text-[#22c55e] !border-[#22c55e] !bg-[#000000]",
-            error: "!text-[#ef4444] !border-[#ef4444] !bg-[#000000]",
+            toast: "!border !rounded-2xl transition-all",
+            success: "!bg-green-600 !border-green-700 !text-white",
+            error: "!bg-red-600 !border-red-700 !text-white",
+            warning: "!bg-orange-500 !border-orange-600 !text-white",
+            info: "!bg-blue-600 !border-blue-700 !text-white",
           },
         }}
       />
@@ -250,12 +248,12 @@ function App() {
               />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="books">
-                <Route index element={<MyBooksPage />} />
                 <Route path="browse" element={<BrowseBooksPage />} />
                 <Route path="details/:id" element={<ViewBookPage />} />
                 <Route path="borrow" element={<BorrowBooksPage />} />
                 <Route path="history" element={<BorrowingHistoryPage />} />
               </Route>
+              <Route path="my-books" element={<MyBooksPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="schedule" element={<SchedulePage />} />
@@ -276,9 +274,18 @@ function App() {
                 path="borrowing-history"
                 element={<AdminBorrowingHistoryPage />}
               />
-              <Route path="circulation/borrow" element={<CirculationBorrowPage />} />
-              <Route path="circulation/return" element={<CirculationReturnPage />} />
-              <Route path="circulation/records" element={<CirculationRecordsPage />} />
+              <Route
+                path="circulation/borrow"
+                element={<CirculationBorrowPage />}
+              />
+              <Route
+                path="circulation/return"
+                element={<CirculationReturnPage />}
+              />
+              <Route
+                path="circulation/records"
+                element={<CirculationRecordsPage />}
+              />
             </Route>
           </Route>
 
