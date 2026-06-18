@@ -191,7 +191,7 @@ const SchedulePage = () => {
 
   const handleReturn = async (id: string) => {
     try {
-      await returnMutation.mutateAsync(id);
+      await returnMutation.mutateAsync({ borrowingId: id });
       toast.success("Book returned successfully");
       setSelectedEvent(null);
     } catch (error) {
@@ -598,12 +598,15 @@ const SchedulePage = () => {
                 >
                   {colors.label}
                 </Badge>
-                {data.fines ? (
+                {data.fines && data.fines.length > 0 ? (
                   <Badge
                     variant="destructive"
                     className="rounded-lg shadow-none"
                   >
-                    Fine: ${data.fines.toFixed(2)}
+                    Fine:
+                    {data.fines
+                      .reduce((sum, f) => sum + Number(f.amount), 0)
+                      .toFixed(2)}
                   </Badge>
                 ) : null}
               </div>

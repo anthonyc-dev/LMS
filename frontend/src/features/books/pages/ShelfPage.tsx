@@ -265,7 +265,7 @@ export function ShelfPage() {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+      {/* <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         <Card className="group border-slate-100 bg-white transition-all hover:border-slate-300 hover:shadow-md">
           <CardContent className="flex items-center gap-3 p-5">
             <div className="shrink-0 rounded-xl bg-slate-100 p-3 text-slate-600 transition-transform group-hover:scale-110">
@@ -281,7 +281,7 @@ export function ShelfPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
       {/* ── Toolbar ── */}
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
@@ -402,7 +402,7 @@ export function ShelfPage() {
                                     {shelf.name}
                                   </p>
                                   {shelf.notes && (
-                                    <p className="max-w-[160px] truncate text-[11px] font-medium text-success-text">
+                                    <p className="text-success-text max-w-[160px] truncate text-[11px] font-medium">
                                       <Form className="mr-1 inline size-3" />{" "}
                                       {shelf.notes}
                                     </p>
@@ -424,7 +424,7 @@ export function ShelfPage() {
                                 {shelf.name}
                               </p>
                               {shelf.notes && (
-                                <p className="max-w-[160px] truncate text-[11px] font-medium text-success-text">
+                                <p className="text-success-text max-w-[160px] truncate text-[11px] font-medium">
                                   <Form className="mr-1 inline size-3" />{" "}
                                   {shelf.notes}
                                 </p>
@@ -477,7 +477,7 @@ export function ShelfPage() {
                                 <DropdownMenuSeparator className="my-1 bg-slate-100" />
                                 <DropdownMenuItem
                                   onClick={() => openDelete(shelf)}
-                                  className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-error-text hover:bg-error-bg"
+                                  className="text-error-text hover:bg-error-bg cursor-pointer gap-2 rounded-lg py-2 font-medium"
                                 >
                                   <Trash2 className="size-3.5" /> Delete
                                 </DropdownMenuItem>
@@ -598,7 +598,7 @@ export function ShelfPage() {
                           <DropdownMenuSeparator className="my-1 bg-slate-100" />
                           <DropdownMenuItem
                             onClick={() => openDelete(shelf)}
-                            className="cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium text-error-text hover:bg-error-bg"
+                            className="text-error-text hover:bg-error-bg cursor-pointer gap-2 rounded-lg py-2 text-xs font-medium"
                           >
                             <Trash2 className="size-3" /> Delete
                           </DropdownMenuItem>
@@ -618,7 +618,7 @@ export function ShelfPage() {
                   </div>
 
                   {shelf.notes && (
-                    <p className="rounded-lg border border-warning-bg bg-warning-bg px-2 py-1 text-[10px] font-medium text-success-text">
+                    <p className="border-warning-bg bg-warning-bg text-success-text rounded-lg border px-2 py-1 text-[10px] font-medium">
                       <Form className="mr-1 inline size-3" /> {shelf.notes}
                     </p>
                   )}

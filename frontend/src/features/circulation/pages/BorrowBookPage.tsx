@@ -3,13 +3,13 @@ import {
   Search,
   User as UserIcon,
   Book,
-  Barcode,
   CheckCircle2,
   Clock,
   Shield,
   Loader2,
   AlertTriangle,
   Trash2,
+  ScanBarcode,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -56,6 +56,12 @@ export function BorrowBookPage() {
     e.preventDefault();
     if (!users) return;
     const q = borrowerSearch.toLowerCase().trim();
+
+    if (!q) {
+      toast.error("Please scan School ID or enter a search term");
+      return;
+    }
+
     const found = users.find(
       (u) =>
         u.schoolId.toLowerCase() === q ||
@@ -307,7 +313,7 @@ export function BorrowBookPage() {
                     />
                   </div>
                   {!canBorrowMore && (
-                    <p className="flex items-center gap-1 text-xs font-bold text-error-text">
+                    <p className="text-error-text flex items-center gap-1 text-xs font-bold">
                       <AlertTriangle className="size-3" />
                       Limit reached. Cannot add more books.
                     </p>
@@ -360,7 +366,7 @@ export function BorrowBookPage() {
 
           <form onSubmit={handleBarcodeSubmit} className="mb-6">
             <div className="relative">
-              <Barcode className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+              <ScanBarcode className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
               <Input
                 value={barcodeSearch}
                 onChange={(e) => setBarcodeSearch(e.target.value)}
@@ -372,7 +378,7 @@ export function BorrowBookPage() {
               <Button
                 type="submit"
                 size="sm"
-                className="absolute top-1 right-1 h-8 rounded-md bg-warning-text px-4 text-xs font-bold text-white hover:bg-blue-700"
+                className="bg-warning-text absolute top-1 right-1 h-8 rounded-md px-4 text-xs font-bold text-white hover:bg-blue-700"
                 disabled={isScanning || !canBorrowMore}
               >
                 {isScanning ? (
@@ -448,7 +454,7 @@ export function BorrowBookPage() {
             </div>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 py-12 text-center">
-              <Barcode className="mb-3 size-10 text-slate-300" />
+              <ScanBarcode className="mb-3 size-10 text-slate-300" />
               <p className="font-bold text-slate-500">Queue is empty</p>
               <p className="text-xs text-slate-400">
                 Scan book barcodes to add them to the checkout queue.

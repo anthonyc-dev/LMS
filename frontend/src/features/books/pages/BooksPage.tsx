@@ -12,7 +12,6 @@ import {
   Hash,
   ChevronDown,
   Library,
-  BookText,
 } from "lucide-react";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Button } from "@/shared/components/ui/button";
@@ -160,7 +159,7 @@ export function BooksPage() {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {/* <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {isLoading ? (
           <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
             <Skeleton className="h-11 w-11 rounded-xl" />
@@ -184,7 +183,7 @@ export function BooksPage() {
             </div>
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* ── Main Table Card ── */}
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
@@ -406,7 +405,7 @@ export function BooksPage() {
                                   setDeleteBook(book);
                                   setDeleteOpen(true);
                                 }}
-                                className="cursor-pointer gap-2 rounded-lg py-2 font-medium text-error-text hover:bg-error-bg"
+                                className="text-error-text hover:bg-error-bg cursor-pointer gap-2 rounded-lg py-2 font-medium"
                               >
                                 <Trash2 className="size-3.5" /> Delete Entry
                               </DropdownMenuItem>

@@ -8,11 +8,16 @@ import {
 import { CreateBorrowingDto } from './dto/create-borrowing.dto';
 import { UpdateBorrowingDto } from './dto/update-borrowing.dto';
 import { CreateBulkBorrowingDto } from './dto/create-bulk-borrowing.dto';
+import { ReturnBorrowingDto } from './dto/return-borrowing.dto';
 import { DataSource, Repository, In } from 'typeorm';
 import { Borrowing } from './entities/borrowing.entity';
 import { LessThan, Not } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { BookCopyStatus, BorrowingStatus } from 'src/common/enums/enum.enums';
+import {
+  BookCopyStatus,
+  BorrowingStatus,
+  BookCondition,
+} from 'src/common/enums/enum.enums';
 import { Role } from 'src/common/enums/role.enum';
 import { User } from '../users/entities/user.entity';
 import { BookCopy } from '../book-copies/entities/book-copy.entity';
@@ -270,6 +275,7 @@ export class BorrowingsService {
         bookCopy: {
           book: true,
         },
+        fines: true,
       },
     });
   }
@@ -283,6 +289,7 @@ export class BorrowingsService {
         bookCopy: {
           book: true,
         },
+        fines: true,
       },
     });
   }
@@ -306,6 +313,7 @@ export class BorrowingsService {
         bookCopy: {
           book: true,
         },
+        fines: true,
       },
       order: { returnedDate: 'DESC' },
     });
@@ -320,6 +328,7 @@ export class BorrowingsService {
         bookCopy: {
           book: true,
         },
+        fines: true,
       },
       order: { borrowDate: 'DESC' },
     });
@@ -340,12 +349,13 @@ export class BorrowingsService {
         bookCopy: {
           book: true,
         },
+        fines: true,
       },
       order: { dueDate: 'ASC' },
     });
   }
 
-  async returnBorrowing(id: string) {
+  async returnBorrowing(id: string, returnDto?: ReturnBorrowingDto) {
     this.logger.log(`Returning borrowing with id ${id}`);
 
     return this.dataSource.transaction(async (manager) => {
@@ -368,7 +378,20 @@ export class BorrowingsService {
 
       // Update Book Copy Status
       if (borrowing.bookCopy) {
-        borrowing.bookCopy.status = BookCopyStatus.AVAILABLE;
+        if (returnDto?.condition) {
+          borrowing.bookCopy.condition = returnDto.condition;
+          if (
+            returnDto.condition === BookCondition.DAMAGED ||
+            returnDto.condition === BookCondition.POOR
+          ) {
+            borrowing.bookCopy.status = BookCopyStatus.DAMAGED;
+          } else {
+            borrowing.bookCopy.status = BookCopyStatus.AVAILABLE;
+          }
+        } else {
+          borrowing.bookCopy.status = BookCopyStatus.AVAILABLE;
+        }
+
         await bookCopyRepository.save(borrowing.bookCopy);
       }
 

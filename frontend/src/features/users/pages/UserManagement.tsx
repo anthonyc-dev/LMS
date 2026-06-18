@@ -610,6 +610,9 @@ export function UserManagement() {
                 {!isMobile && (
                   <>
                     <TableHead className="py-4 text-xs font-bold tracking-wider text-slate-500 uppercase">
+                      Contact
+                    </TableHead>
+                    <TableHead className="py-4 text-xs font-bold tracking-wider text-slate-500 uppercase">
                       Role
                     </TableHead>
                   </>
@@ -691,13 +694,13 @@ export function UserManagement() {
                                 {user.fullName}
                               </p>
                               <p className="truncate text-xs font-medium text-slate-500">
-                                {user.email}
+                                {user.schoolId}
                               </p>
-                              {user.phone && (
+                              {/* {user.phone && (
                                 <p className="text-[10px] text-slate-400">
                                   {user.phone}
                                 </p>
-                              )}
+                              )} */}
                             </div>
                             {isMobile && (
                               <div className="ml-auto flex items-center justify-end">
@@ -712,6 +715,17 @@ export function UserManagement() {
                         {/* Role */}
                         {!isMobile && (
                           <>
+                            {/* Contact */}
+                            <TableCell className="text-sm text-slate-500">
+                              <p className="truncate text-xs font-medium text-slate-500">
+                                {user.email}
+                              </p>
+                              {user.phone && (
+                                <p className="text-[10px] text-slate-400">
+                                  {user.phone}
+                                </p>
+                              )}
+                            </TableCell>
                             <TableCell>
                               <Badge
                                 className={`flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold shadow-sm ${rc.cls}`}
@@ -809,6 +823,23 @@ export function UserManagement() {
                             className="border-b border-slate-100 p-0"
                           >
                             <div className="flex flex-col gap-3 px-5 py-4 text-sm">
+                              <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                                <span className="font-medium text-slate-500">
+                                  Contact
+                                </span>
+                                <div className="flex flex-col items-end gap-2">
+                                  <Badge
+                                    className={`flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold shadow-sm ${rc.cls}`}
+                                  >
+                                    {user.email}
+                                  </Badge>
+                                  <Badge
+                                    className={`flex w-fit items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-bold shadow-sm ${rc.cls}`}
+                                  >
+                                    {user.phone}
+                                  </Badge>
+                                </div>
+                              </div>
                               <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
                                 <span className="font-medium text-slate-500">
                                   Role

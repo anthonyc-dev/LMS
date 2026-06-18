@@ -13,6 +13,7 @@ import { BorrowingsService } from './borrowings.service';
 import { CreateBorrowingDto } from './dto/create-borrowing.dto';
 import { CreateBulkBorrowingDto } from './dto/create-bulk-borrowing.dto';
 import { UpdateBorrowingDto } from './dto/update-borrowing.dto';
+import { ReturnBorrowingDto } from './dto/return-borrowing.dto';
 import { JwtAuthGuard } from 'src/common/guard/passport-auth.guard';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { Throttle } from '@nestjs/throttler';
@@ -139,8 +140,11 @@ export class BorrowingsController {
   @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
   @Throttle({ default: { limit: 30, ttl: 60000 } })
   @Patch(':id/return')
-  returnBorrowing(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.borrowingsService.returnBorrowing(id);
+  returnBorrowing(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() returnBorrowingDto: ReturnBorrowingDto,
+  ) {
+    return this.borrowingsService.returnBorrowing(id, returnBorrowingDto);
   }
 
   @Roles(Role.ADMIN)
