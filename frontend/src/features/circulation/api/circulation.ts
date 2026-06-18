@@ -13,6 +13,7 @@ export interface BookCopy {
   id: string;
   barcode: string;
   status: string;
+  condition?: string;
   book: {
     id: string;
     title: string;
@@ -30,13 +31,22 @@ export interface Borrowing {
     email: string;
     schoolId: string;
     avatarUrl?: string;
+    department?: string;
+    yearLevel?: string;
   };
   bookCopy?: BookCopy;
   borrowDate: string;
   dueDate: string;
   returnedDate?: string;
   status: BorrowingStatus;
-  fines?: number;
+  fines?: {
+    borrowingId: string;
+    type: string;
+    status: string;
+    amount: string;
+    reason: string | null;
+    paidAt: string | null;
+  }[];
 }
 
 // Queries
@@ -139,14 +149,37 @@ export const useBorrowBooksBulk = () => {
 export const useReturnBook = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (borrowingId: string) => {
-      const res = await api.patch(`/borrowings/${borrowingId}/return`);
+    mutationFn: async (data: { borrowingId: string; condition?: string }) => {
+      const res = await api.patch(`/borrowings/${data.borrowingId}/return`, {
+        condition: data.condition,
+      });
       return res.data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["borrowings"] });
       qc.invalidateQueries({ queryKey: ["users"] });
       qc.invalidateQueries({ queryKey: ["book-copies"] });
+    },
+  });
+};
+//Fines--------------------------------
+export const useCreateFine = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: {
+      borrowingId: string;
+      type: "OVERDUE" | "DAMAGED" | "LOST";
+      status: "UNPAID" | "PAID" | "WAIVED";
+      amount: number;
+      reason?: string;
+    }) => {
+      const res = await api.post("/fines", data);
+      return res.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["fines"] });
+      qc.invalidateQueries({ queryKey: ["borrowings"] });
+      qc.invalidateQueries({ queryKey: ["users"] });
     },
   });
 };

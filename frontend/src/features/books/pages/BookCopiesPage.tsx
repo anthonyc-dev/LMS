@@ -5,7 +5,6 @@ import {
   Edit3,
   Trash2,
   BookCopy as BookCopyIcon,
-  Layers,
   MoreHorizontal,
   ChevronDown,
   Barcode,
@@ -15,7 +14,6 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
-import { Card, CardContent } from "@/shared/components/ui/card";
 import {
   Table,
   TableBody,
@@ -192,10 +190,12 @@ export function BookCopiesPage() {
                   });
                 }
                 return Promise.resolve([]);
-              })
+              }),
             );
             const allNewCopies = results.flat();
-            toast.success(`${totalCount} book copies created successfully across ${numSections} sections`);
+            toast.success(
+              `${totalCount} book copies created successfully across ${numSections} sections`,
+            );
             setFormOpen(false);
             setMultipleBarcodesTarget(allNewCopies);
             setMultipleBarcodesOpen(true);
@@ -205,10 +205,12 @@ export function BookCopiesPage() {
                 createMutation.mutateAsync({
                   ...rest,
                   shelfSectionId: sectionId,
-                })
-              )
+                }),
+              ),
             );
-            toast.success(`${createdCopies.length} book copies created successfully`);
+            toast.success(
+              `${createdCopies.length} book copies created successfully`,
+            );
             setFormOpen(false);
             if (createdCopies.length > 1) {
               setMultipleBarcodesTarget(createdCopies);
@@ -275,7 +277,7 @@ export function BookCopiesPage() {
       </div>
 
       {/* ── KPIs ── */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {/* <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {isLoading ? (
           <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
             <Skeleton className="h-11 w-11 rounded-xl" />
@@ -299,7 +301,7 @@ export function BookCopiesPage() {
             </CardContent>
           </Card>
         )}
-      </div>
+      </div> */}
 
       {/* ── Toolbar & Table ── */}
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
@@ -507,7 +509,7 @@ export function BookCopiesPage() {
                               <DropdownMenuSeparator className="my-1 bg-slate-100" />
                               <DropdownMenuItem
                                 onClick={() => openDelete(bc)}
-                                className="cursor-pointer gap-2 rounded-lg text-xs font-medium text-error-text hover:bg-error-bg"
+                                className="text-error-text hover:bg-error-bg cursor-pointer gap-2 rounded-lg text-xs font-medium"
                               >
                                 <Trash2 className="size-3.5" /> Delete
                               </DropdownMenuItem>

@@ -13,11 +13,20 @@ import {
   BookMarked,
   TrendingUp,
   Loader2,
+  MoreHorizontal,
+  ListTree,
 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
+import { BorrowingDetailsDialog } from "../components/BorrowingDetailsDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -39,7 +48,7 @@ const ROWS_PER_PAGE = 8;
 type SortKey = "borrowDate" | "dueDate" | "borrowerName" | "bookTitle";
 type SortDir = "asc" | "desc";
 
-function statusConfig(status: BorrowingStatus) {
+export function statusConfig(status: BorrowingStatus) {
   switch (status) {
     case "borrowed":
     case "pending":
@@ -81,6 +90,7 @@ export function BorrowingRecordsPage() {
   const [sortKey, setSortKey] = useState<SortKey>("borrowDate");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(1);
+  const [selectedRecord, setSelectedRecord] = useState<Borrowing | null>(null);
 
   const { data: borrowings, isLoading, error } = useBorrowings();
 
@@ -281,8 +291,12 @@ export function BorrowingRecordsPage() {
                 >
                   Due Date {renderSortIcon("dueDate")}
                 </TableHead>
+                <TableHead className="font-bold text-slate-500">Fine</TableHead>
                 <TableHead className="font-bold text-slate-500">
                   Status
+                </TableHead>
+                <TableHead className="font-bold text-slate-500">
+                  Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -329,6 +343,13 @@ export function BorrowingRecordsPage() {
                         </span>
                       </TableCell>
                       <TableCell>
+                        <span className="font-medium text-slate-700">
+                          {record.fines && record.fines.length > 0
+                            ? `₱${record.fines.reduce((sum, f) => sum + Number(f.amount), 0).toFixed(2)}`
+                            : "-"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
                         <Badge
                           className={`flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-bold ${sc.cls}`}
                         >
@@ -338,12 +359,35 @@ export function BorrowingRecordsPage() {
                           {sc.label}
                         </Badge>
                       </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            render={
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            }
+                          ></DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-[160px]"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => setSelectedRecord(record)}
+                            >
+                              <ListTree className="mr-2 h-4 w-4" />
+                              <span>View Details</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
                   );
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-48 text-center">
+                  <TableCell colSpan={8} className="h-48 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <Search className="mb-2 size-8 text-slate-300" />
                       <p className="font-medium">No records found</p>
@@ -394,6 +438,12 @@ export function BorrowingRecordsPage() {
           </div>
         )}
       </div>
+
+      {/* View Details Dialog */}
+      <BorrowingDetailsDialog
+        selectedRecord={selectedRecord}
+        onClose={() => setSelectedRecord(null)}
+      />
     </div>
   );
 }

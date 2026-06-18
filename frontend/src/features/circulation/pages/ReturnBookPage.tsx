@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  Barcode,
   Book,
   CheckCircle2,
   XCircle,
@@ -8,17 +7,29 @@ import {
   RotateCcw,
   Calendar,
   Loader2,
-  Receipt,
+  Plus,
+  Trash2,
+  ScanBarcode,
+  ArrowLeftRight,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Badge } from "@/shared/components/ui/badge";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { toast } from "sonner";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import {
   useActiveBorrowingByBarcode,
   useReturnBook,
+  useCreateFine,
 } from "@/features/circulation/api/circulation";
 import {
   Avatar,
@@ -38,6 +49,17 @@ export function ReturnBookPage() {
     isFetching,
   } = useActiveBorrowingByBarcode(scannedBarcode);
   const returnMutation = useReturnBook();
+  const createFineMutation = useCreateFine();
+
+  type FineEntry = {
+    id: string;
+    type: "OVERDUE" | "DAMAGED" | "LOST";
+    amount: string;
+    reason: string;
+    status: "UNPAID" | "PAID" | "WAIVED";
+  };
+  const [fines, setFines] = useState<FineEntry[]>([]);
+  const [returnCondition, setReturnCondition] = useState<string>("GOOD");
 
   const handleBarcodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,21 +68,39 @@ export function ReturnBookPage() {
     setBarcodeSearch("");
   };
 
-  const handleConfirmReturn = () => {
+  const handleConfirmReturn = async () => {
     if (!borrowing) {
       toast.error("No valid borrowing record to return.");
       return;
     }
 
-    returnMutation.mutate(borrowing.id, {
-      onSuccess: () => {
-        toast.success("Book returned successfully!");
-        setScannedBarcode(""); // Reset view
-      },
-      onError: (err: any) => {
-        toast.error(err.response?.data?.message || "Failed to return book");
-      },
-    });
+    try {
+      const validFines = fines.filter((f) => Number(f.amount) > 0);
+
+      if (validFines.length > 0) {
+        await Promise.all(
+          validFines.map((fine) =>
+            createFineMutation.mutateAsync({
+              borrowingId: borrowing.id,
+              type: fine.type,
+              status: fine.status,
+              amount: Number(fine.amount),
+              reason: fine.reason || undefined,
+            }),
+          ),
+        );
+      }
+
+      await returnMutation.mutateAsync({
+        borrowingId: borrowing.id,
+        condition: returnCondition,
+      });
+      toast.success("Book returned successfully!");
+      setScannedBarcode(""); // Reset view
+      setFines([]);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to process return");
+    }
   };
 
   // Helper to calculate overdue info
@@ -87,6 +127,55 @@ export function ReturnBookPage() {
 
   const { isOverdue, days, penalty } = calculateOverdue();
 
+  useEffect(() => {
+    if (borrowing) {
+      if (borrowing.bookCopy?.condition) {
+        setReturnCondition(borrowing.bookCopy.condition);
+      } else {
+        setReturnCondition("GOOD");
+      }
+
+      if (isOverdue) {
+        setFines([
+          {
+            id: "auto-overdue",
+            type: "OVERDUE",
+            amount: String(penalty),
+            reason: `Overdue by ${days} days`,
+            status: "UNPAID",
+          },
+        ]);
+      } else {
+        setFines([]);
+      }
+    }
+  }, [borrowing, isOverdue, penalty, days]);
+
+  const handleAddFine = () => {
+    setFines([
+      ...fines,
+      {
+        id: Date.now().toString(),
+        type: "DAMAGED",
+        amount: "",
+        reason: "",
+        status: "UNPAID",
+      },
+    ]);
+  };
+
+  const handleRemoveFine = (id: string) => {
+    setFines(fines.filter((f) => f.id !== id));
+  };
+
+  const handleUpdateFine = (
+    id: string,
+    field: keyof FineEntry,
+    value: string,
+  ) => {
+    setFines(fines.map((f) => (f.id === id ? { ...f, [field]: value } : f)));
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-6xl space-y-6 duration-700">
       <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
@@ -111,7 +200,7 @@ export function ReturnBookPage() {
             </h2>
             <form onSubmit={handleBarcodeSubmit}>
               <div className="relative">
-                <Barcode className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+                <ScanBarcode className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   value={barcodeSearch}
                   onChange={(e) => setBarcodeSearch(e.target.value)}
@@ -235,7 +324,7 @@ export function ReturnBookPage() {
           <div className="sticky top-20 flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
               <h3 className="flex items-center gap-2 font-bold text-slate-700">
-                <Receipt className="size-4" /> Return Summary
+                <ArrowLeftRight className="size-4" /> Return Summary
               </h3>
             </div>
 
@@ -264,12 +353,21 @@ export function ReturnBookPage() {
                   <span className="text-sm font-medium text-slate-500">
                     Condition
                   </span>
-                  <Badge
-                    variant="outline"
-                    className="border-success-bg bg-success-bg text-success-text"
+                  <Select
+                    value={returnCondition}
+                    onValueChange={(val: string) => setReturnCondition(val)}
                   >
-                    Good
-                  </Badge>
+                    <SelectTrigger className="h-8 w-32 bg-white text-xs font-bold text-slate-700">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="NEW">New</SelectItem>
+                      <SelectItem value="GOOD">Good</SelectItem>
+                      <SelectItem value="FAIR">Fair</SelectItem>
+                      <SelectItem value="POOR">Poor</SelectItem>
+                      <SelectItem value="DAMAGED">Damaged</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="flex items-center justify-between border-b border-dashed border-slate-200 pb-4">
@@ -284,12 +382,127 @@ export function ReturnBookPage() {
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
-                  <span className="font-bold text-slate-900">Total Fines</span>
+                  <span className="font-bold text-slate-900">
+                    Calculated Penalty
+                  </span>
                   <span
                     className={`text-xl font-black ${penalty > 0 ? "text-error-text" : "text-success-text"}`}
                   >
                     ₱{penalty.toFixed(2)}
                   </span>
+                </div>
+
+                {/* Fines Section */}
+                <div className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-bold text-slate-700">Fines</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddFine}
+                      className="h-8 gap-1 text-xs"
+                    >
+                      <Plus className="size-3" />
+                      Add Fine
+                    </Button>
+                  </div>
+
+                  {fines.length === 0 && (
+                    <p className="text-sm text-slate-500">No fines added.</p>
+                  )}
+
+                  {fines.map((fine, index) => (
+                    <div
+                      key={fine.id}
+                      className="relative space-y-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
+                          Fine #{index + 1}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveFine(fine.id)}
+                          className="size-6 text-slate-400 hover:text-red-500"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      </div>
+
+                      <div className="grid w-full grid-cols-2 gap-3">
+                        <div className="w-full space-y-1">
+                          <Label className="text-xs text-slate-500">Type</Label>
+                          <Select
+                            value={fine.type}
+                            onValueChange={(val: any) =>
+                              handleUpdateFine(fine.id, "type", val)
+                            }
+                          >
+                            <SelectTrigger className="h-9 w-full bg-white text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="OVERDUE">Overdue</SelectItem>
+                              <SelectItem value="DAMAGED">Damaged</SelectItem>
+                              <SelectItem value="LOST">Lost</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-slate-500">
+                            Status
+                          </Label>
+                          <Select
+                            value={fine.status}
+                            onValueChange={(val: any) =>
+                              handleUpdateFine(fine.id, "status", val)
+                            }
+                          >
+                            <SelectTrigger className="h-9 w-full bg-white text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="UNPAID">Unpaid</SelectItem>
+                              <SelectItem value="PAID">Paid</SelectItem>
+                              <SelectItem value="WAIVED">Waived</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="col-span-2 space-y-1">
+                          <Label className="text-xs text-slate-500">
+                            Amount (₱)
+                          </Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={fine.amount}
+                            onChange={(e) =>
+                              handleUpdateFine(
+                                fine.id,
+                                "amount",
+                                e.target.value,
+                              )
+                            }
+                            className="h-9 w-full bg-white text-sm font-bold text-red-600"
+                            placeholder="0.00"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-slate-500">Reason</Label>
+                        <Textarea
+                          value={fine.reason}
+                          onChange={(e) =>
+                            handleUpdateFine(fine.id, "reason", e.target.value)
+                          }
+                          className="min-h-[60px] bg-white text-sm"
+                          placeholder="e.g. Returned with water damage"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -305,15 +518,20 @@ export function ReturnBookPage() {
                 )}
                 <Button
                   onClick={handleConfirmReturn}
-                  disabled={!borrowing || returnMutation.isPending}
+                  disabled={
+                    !borrowing ||
+                    returnMutation.isPending ||
+                    createFineMutation.isPending
+                  }
                   className="h-10 w-full rounded-lg bg-blue-600 text-sm font-bold shadow-md shadow-blue-600/20 hover:bg-blue-700"
                 >
-                  {returnMutation.isPending ? (
+                  {returnMutation.isPending || createFineMutation.isPending ? (
                     <Loader2 className="mr-1.5 size-4 animate-spin" />
                   ) : (
                     <CheckCircle2 className="mr-1.5 size-4" />
                   )}
-                  Confirm Return
+                  Confirm Return{" "}
+                  {fines.length > 0 ? `& Add ${fines.length} Fine(s)` : ""}
                 </Button>
                 <Button
                   variant="outline"

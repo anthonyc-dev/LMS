@@ -20,7 +20,7 @@ const PageLoaderContext = createContext<PageLoaderContextType | undefined>(
 
 export function PageLoaderProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
-  const [pageTitle, setPageTitle] = useState("My App");
+  const [pageTitle, setPageTitle] = useState("Library App");
 
   useEffect(() => {
     const favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");

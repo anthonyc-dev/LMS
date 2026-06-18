@@ -302,12 +302,12 @@ export function SidebarContentInner({
                         className={`flex w-full items-center ${isCollapsed ? "justify-center" : "gap-3"}`}
                       >
                         <div
-                          className={`bg-sidebar-primary flex shrink-0 items-center justify-center rounded-full shadow-sm transition-all duration-300 ${isCollapsed ? "size-8" : "size-9"}`}
+                          className={`bg-sidebar-primary flex shrink-0 items-center justify-center rounded-full shadow-md transition-all duration-300 ${isCollapsed ? "size-8" : "size-9"}`}
                         >
-                          <Avatar className="shadow ring-2 ring-slate-100">
+                          <Avatar className="shadow ring-2 ring-blue-500">
                             <AvatarImage src={user?.avatarUrl} />
                             <AvatarFallback
-                              className={`${isCollapsed ? "size-4" : "size-5"} bg-amber-100 text-lg font-bold text-amber-700`}
+                              className={`${isCollapsed ? "size-4" : "size-5"} text-lg font-bold text-blue-700`}
                             >
                               {user?.fullName?.charAt(0).toUpperCase()}
                             </AvatarFallback>
