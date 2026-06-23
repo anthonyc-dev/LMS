@@ -1,3 +1,6 @@
+// Force Node.js and node-postgres to use UTC for local dates
+process.env.TZ = 'UTC';
+
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';

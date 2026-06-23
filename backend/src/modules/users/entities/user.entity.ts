@@ -11,6 +11,7 @@ import {
   Index,
 } from 'typeorm';
 import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
+import { Visit } from 'src/modules/visits/entities/visit.entity';
 
 @Entity('users')
 @Index(['email'])
@@ -78,6 +79,9 @@ export class User {
 
   @OneToMany(() => Borrowing, (borrowing) => borrowing.user)
   borrowings: Borrowing[];
+
+  @OneToMany(() => Visit, (visit) => visit.user)
+  visits: Visit[];
 
   @Column({ type: 'varchar', nullable: true })
   resetPasswordOtp: string | null;

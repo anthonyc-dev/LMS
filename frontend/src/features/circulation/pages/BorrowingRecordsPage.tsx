@@ -20,6 +20,11 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 import { BorrowingDetailsDialog } from "../components/BorrowingDetailsDialog";
 import {
   DropdownMenu,
@@ -264,9 +269,6 @@ export function BorrowingRecordsPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-slate-100 bg-slate-50/50 hover:bg-slate-50/50">
-                <TableHead className="w-[100px] font-bold text-slate-500">
-                  ID
-                </TableHead>
                 <TableHead
                   className="cursor-pointer font-bold text-slate-500"
                   onClick={() => toggleSort("borrowerName")}
@@ -309,18 +311,27 @@ export function BorrowingRecordsPage() {
                       key={record.id}
                       className="border-slate-100 transition-colors hover:bg-slate-50/50"
                     >
-                      <TableCell className="font-medium text-slate-500">
-                        <span className="rounded-md bg-slate-100 px-2 py-1 text-[10px] font-bold tracking-wider text-slate-600 uppercase">
-                          {record.id.slice(0, 8)}
-                        </span>
-                      </TableCell>
                       <TableCell>
-                        <p className="font-bold text-slate-900">
-                          {record.user?.fullName}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {record.user?.schoolId}
-                        </p>
+                        <div className="flex items-center gap-3">
+                          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs font-black text-white shadow-sm ring-2 ring-white transition-all group-hover:scale-110">
+                            <Avatar className="h-10 w-10 shadow ring-2 ring-slate-100">
+                              <AvatarImage src={record.user?.avatarUrl} />
+                              <AvatarFallback className="bg-slate-100 text-lg font-bold text-slate-700">
+                                {record.user?.fullName
+                                  ?.charAt(0)
+                                  .toUpperCase() || "?"}
+                              </AvatarFallback>
+                            </Avatar>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="max-w-[160px] truncate text-sm font-bold text-slate-900 transition-colors group-hover:text-blue-600">
+                              {record.user?.fullName}
+                            </p>
+                            <p className="truncate text-xs font-medium text-slate-500">
+                              {record.user?.schoolId}
+                            </p>
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <p className="font-bold text-slate-900">

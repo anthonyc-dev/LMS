@@ -146,6 +146,14 @@ const CirculationRecordsPage = lazy(() =>
   })),
 );
 
+// Scan Station (Visits)
+const VisitsLogbookPage = lazy(() =>
+  import("@/features/visits/pages/VisitsLogbookPage").then((m) => ({
+    default: m.VisitsLogbookPage,
+  })),
+);
+
+
 function App() {
   const [isInitializing, setIsInitializing] = useState(true);
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -285,6 +293,10 @@ function App() {
               <Route
                 path="circulation/records"
                 element={<CirculationRecordsPage />}
+              />
+              <Route
+                path="visits-logbook"
+                element={<VisitsLogbookPage />}
               />
             </Route>
           </Route>
