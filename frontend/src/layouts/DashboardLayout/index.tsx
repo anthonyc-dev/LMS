@@ -13,6 +13,7 @@ import {
   Layers,
   Users,
   RefreshCw,
+  BookOpen,
 } from "lucide-react";
 import { useAuthStore } from "@/app/store/authStore";
 
@@ -48,6 +49,12 @@ const menuItems = [
     label: "Schedule",
     path: "/student/schedule",
     roles: ["admin", "student", "faculty"],
+  },
+  {
+    icon: BookOpen,
+    label: "Logbook",
+    path: "/admin/visits-logbook",
+    roles: ["admin"],
   },
   {
     icon: Users,

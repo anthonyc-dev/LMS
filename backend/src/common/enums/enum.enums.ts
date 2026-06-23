@@ -45,3 +45,8 @@ export enum BorrowingStatus {
   RETURNED = 'returned',
   OVERDUE = 'overdue',
 }
+
+export enum VisitStatus {
+  INSIDE = 'INSIDE',
+  EXITED = 'EXITED',
+}
