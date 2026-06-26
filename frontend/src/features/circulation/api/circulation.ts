@@ -125,6 +125,21 @@ export const useBorrowBook = () => {
   });
 };
 
+export const useSelfBorrowBook = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (bookId: string) => {
+      const res = await api.post("/borrowings/self-borrow", { bookId });
+      return res.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["borrowings"] });
+      qc.invalidateQueries({ queryKey: ["books"] });
+      qc.invalidateQueries({ queryKey: ["book-copies"] });
+    },
+  });
+};
+
 export const useBorrowBooksBulk = () => {
   const qc = useQueryClient();
   return useMutation({

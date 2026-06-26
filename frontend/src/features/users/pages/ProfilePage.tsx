@@ -97,7 +97,7 @@ export function ProfilePage() {
       /> */}
       <div className="mx-auto max-w-[1000px] space-y-6 pb-12">
         {/* Page Title */}
-        <h1 className="text-lg font-semibold text-blue-700">My Profile</h1>
+        <h1 className="text-lg font-semibold">My Profile</h1>
         {/* Profile Header Card */}
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -143,9 +143,7 @@ export function ProfilePage() {
 
         {/* Digital Library ID Card */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-5 text-base font-semibold text-blue-700">
-            Digital Library Card
-          </h3>
+          <h3 className="mb-5 text-base font-semibold">Digital Library Card</h3>
           <div className="flex flex-col items-center gap-8 md:flex-row md:items-start">
             {/* The Library ID Card */}
             <div className="group relative flex aspect-[1.586/1] w-full max-w-[340px] shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-blue-700/35 bg-linear-to-br from-blue-800 via-blue-950 to-slate-900 p-4 text-white shadow-md transition-all duration-300 select-none hover:scale-[1.01] hover:shadow-lg">
@@ -234,9 +232,7 @@ export function ProfilePage() {
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           {/* Card Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h3 className="text-base font-semibold text-blue-700">
-              Personal Information
-            </h3>
+            <h3 className="text-base font-semibold">Personal Information</h3>
             {isEditingPersonal ? (
               <div className="flex items-center gap-2">
                 <Button
@@ -354,7 +350,7 @@ export function ProfilePage() {
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           {/* Card Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h3 className="text-base font-semibold text-blue-700">Address</h3>
+            <h3 className="text-base font-semibold">Address</h3>
             {isEditingAddress ? (
               <div className="flex items-center gap-2">
                 <Button

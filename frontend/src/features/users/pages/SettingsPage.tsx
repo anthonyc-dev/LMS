@@ -32,7 +32,7 @@ export function SettingsPage() {
   return (
     <div className="mx-auto max-w-[800px] space-y-8 pb-12 font-sans">
       {/* Page Title */}
-      <h1 className="text-lg font-semibold text-blue-700">Settings</h1>
+      <h1 className="text-lg font-semibold">Settings</h1>
       {/* Account Security Card */}
       <Card className="overflow-hidden border-slate-200 bg-white shadow-sm">
         <CardHeader className="px-6 py-5">

@@ -32,6 +32,90 @@ export class BorrowingsService {
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
+  async selfBorrow(bookId: string, userId: string) {
+    this.logger.log(
+      `Self-borrow request | borrower=${userId} | book=${bookId}`,
+    );
+
+    return this.dataSource.transaction(async (manager) => {
+      const borrowingRepository = manager.getRepository(Borrowing);
+      const userRepository = manager.getRepository(User);
+      const bookCopyRepository = manager.getRepository(BookCopy);
+
+      // 1. Validate Borrower
+      const borrower = await userRepository.findOne({ where: { id: userId } });
+      if (!borrower) {
+        throw new NotFoundException('Borrower not found');
+      }
+
+      // 2. Find an available copy for this book
+      const availableCopy = await bookCopyRepository.findOne({
+        where: { bookId, status: BookCopyStatus.AVAILABLE },
+        relations: { book: true },
+      });
+
+      if (!availableCopy) {
+        throw new BadRequestException(
+          'No available copies for this book at the moment.',
+        );
+      }
+
+      // 3. Prevent borrowing the same book twice
+      const alreadyBorrowing = await borrowingRepository
+        .createQueryBuilder('b')
+        .innerJoin('b.bookCopy', 'bc')
+        .where('b.userId = :userId', { userId })
+        .andWhere('bc.bookId = :bookId', { bookId })
+        .andWhere('b.status IN (:...statuses)', {
+          statuses: [BorrowingStatus.BORROWED, BorrowingStatus.PENDING],
+        })
+        .getOne();
+
+      if (alreadyBorrowing) {
+        throw new ConflictException('You already have an active borrowing for this book.');
+      }
+
+      // 4. Borrow limit validation (role-based)
+      const activeBorrowingsCount = await borrowingRepository.count({
+        where: { userId, status: BorrowingStatus.BORROWED },
+      });
+
+      let maxLimit = 5;
+      if (borrower.role === Role.STUDENT) maxLimit = 3;
+      else if (borrower.role === Role.FACULTY) maxLimit = 5;
+
+      if (activeBorrowingsCount >= maxLimit) {
+        throw new BadRequestException(
+          `Borrow limit reached. You currently have ${activeBorrowingsCount}/${maxLimit} active borrowings.`,
+        );
+      }
+
+      // 5. Create borrowing (14-day default)
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 14);
+
+      const borrowing = borrowingRepository.create({
+        userId,
+        bookCopyId: availableCopy.id,
+        borrowDate: new Date(),
+        dueDate,
+        status: BorrowingStatus.BORROWED,
+      });
+
+      const saved = await borrowingRepository.save(borrowing);
+
+      // 6. Update copy status
+      availableCopy.status = BookCopyStatus.BORROWED;
+      await bookCopyRepository.save(availableCopy);
+
+      // 7. Return complete entity
+      return borrowingRepository.findOne({
+        where: { id: saved.id },
+        relations: { user: true, bookCopy: { book: true } },
+      });
+    });
+  }
+
   async create(createBorrowingDto: CreateBorrowingDto, processedById: string) {
     const { userId, bookCopyId, dueDate } = createBorrowingDto;
 
