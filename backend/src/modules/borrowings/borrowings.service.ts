@@ -21,6 +21,7 @@ import {
 import { Role } from 'src/common/enums/role.enum';
 import { User } from '../users/entities/user.entity';
 import { BookCopy } from '../book-copies/entities/book-copy.entity';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 
 @Injectable()
 export class BorrowingsService {
@@ -30,6 +31,7 @@ export class BorrowingsService {
     @InjectRepository(Borrowing)
     private borrowingRepository: Repository<Borrowing>,
     @InjectDataSource() private dataSource: DataSource,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async selfBorrow(bookId: string, userId: string) {
@@ -109,10 +111,34 @@ export class BorrowingsService {
       await bookCopyRepository.save(availableCopy);
 
       // 7. Return complete entity
-      return borrowingRepository.findOne({
+      const result = await borrowingRepository.findOne({
         where: { id: saved.id },
         relations: { user: true, bookCopy: { book: true } },
       });
+
+      // 8. Send real-time notifications
+      const bookTitle = availableCopy.book?.title || 'a book';
+      const dueDateStr = dueDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+
+      this.notificationsGateway.sendToUser(userId, {
+        type: 'BORROW_CONFIRMED',
+        title: 'Book Borrowed Successfully',
+        message: `You have borrowed "${bookTitle}". Due date: ${dueDateStr}.`,
+        data: { borrowingId: saved.id, bookId },
+      });
+
+      this.notificationsGateway.sendToRole('admin', {
+        type: 'NEW_BORROWING',
+        title: 'New Borrowing',
+        message: `${borrower.fullName} borrowed "${bookTitle}".`,
+        data: { borrowingId: saved.id, userId, bookId },
+      });
+
+      return result;
     });
   }
 
@@ -253,7 +279,7 @@ export class BorrowingsService {
      |--------------------------------------------------------------------------
      */
 
-      return borrowingRepository.findOne({
+      const result = await borrowingRepository.findOne({
         where: {
           id: savedBorrowing.id,
         },
@@ -264,6 +290,25 @@ export class BorrowingsService {
           },
         },
       });
+
+      // Send real-time notifications
+      const bookTitle = bookCopy.book?.title || 'a book';
+
+      this.notificationsGateway.sendToUser(userId!, {
+        type: 'BORROW_CONFIRMED',
+        title: 'Book Borrowed Successfully',
+        message: `You have borrowed "${bookTitle}".`,
+        data: { borrowingId: savedBorrowing.id },
+      });
+
+      this.notificationsGateway.sendToRole('admin', {
+        type: 'NEW_BORROWING',
+        title: 'New Borrowing',
+        message: `A student borrowed "${bookTitle}".`,
+        data: { borrowingId: savedBorrowing.id, userId },
+      });
+
+      return result;
     });
   }
 
@@ -346,6 +391,26 @@ export class BorrowingsService {
         copy.status = BookCopyStatus.BORROWED;
       }
       await bookCopyRepository.save(bookCopies);
+
+      // Send real-time notifications
+      const bookTitles = bookCopies
+        .map((c) => c.book?.title)
+        .filter(Boolean)
+        .join(', ');
+
+      this.notificationsGateway.sendToUser(userId, {
+        type: 'BORROW_CONFIRMED',
+        title: 'Books Borrowed Successfully',
+        message: `You have borrowed ${bookCopyIds.length} book(s): ${bookTitles || 'multiple books'}.`,
+        data: { borrowingIds: savedBorrowings.map((b) => b.id) },
+      });
+
+      this.notificationsGateway.sendToRole('admin', {
+        type: 'NEW_BORROWING',
+        title: 'New Bulk Borrowing',
+        message: `${borrower.fullName} borrowed ${bookCopyIds.length} book(s).`,
+        data: { borrowingIds: savedBorrowings.map((b) => b.id), userId },
+      });
 
       return savedBorrowings;
     });

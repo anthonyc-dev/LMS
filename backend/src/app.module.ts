@@ -26,6 +26,7 @@ import { BookCopiesModule } from './modules/book-copies/book-copies.module';
 import { ShelfSectionsModule } from './modules/shelf-sections/shelf-sections.module';
 import { FinesModule } from './modules/fines/fines.module';
 import { VisitsModule } from './modules/visits/visits.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import dns from 'dns';
 
 dns.setDefaultResultOrder('ipv4first');
@@ -62,6 +63,7 @@ dns.setDefaultResultOrder('ipv4first');
     ShelfSectionsModule,
     FinesModule,
     VisitsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

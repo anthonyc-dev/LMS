@@ -12,6 +12,11 @@ export class CsrfGuard implements CanActivate {
   constructor(private readonly csrfService: CsrfService) {}
 
   canActivate(context: ExecutionContext): boolean {
+    // Skip CSRF for WebSocket connections (authenticated via JWT in handshake)
+    if (context.getType() === 'ws') {
+      return true;
+    }
+
     const req = context.switchToHttp().getRequest<Request>();
 
     // skip safe methods
