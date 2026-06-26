@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/app/store/authStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
@@ -178,7 +183,7 @@ export function AdminDashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
-            <Database className="size-4 text-success-text" />
+            <Database className="text-success-text size-4" />
             <div className="flex flex-col">
               <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
                 DB Latency
@@ -194,9 +199,9 @@ export function AdminDashboardPage() {
               <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
                 Gateway
               </span>
-              <span className="flex items-center gap-1 text-xs leading-normal font-bold text-success-text">
+              <span className="text-success-text flex items-center gap-1 text-xs leading-normal font-bold">
                 Active{" "}
-                <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-success-text" />
+                <span className="bg-success-text inline-block h-1.5 w-1.5 animate-ping rounded-full" />
               </span>
             </div>
           </div>
@@ -239,7 +244,7 @@ export function AdminDashboardPage() {
               <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform group-hover:scale-110">
                 <Users className="size-5" />
               </div>
-              <Badge className="border-none bg-success-bg text-[10px] font-bold text-success-text hover:bg-success-bg">
+              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none text-[10px] font-bold">
                 +12% Growth
               </Badge>
             </div>
@@ -257,13 +262,13 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Active Borrowed Books */}
-        <Card className="group transition-all duration-300 hover:border-success-bg hover:shadow-md">
+        <Card className="group hover:border-success-bg transition-all duration-300 hover:shadow-md">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-success-bg p-2.5 text-success-text transition-transform group-hover:scale-110">
+              <div className="bg-success-bg text-success-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
                 <BookOpen className="size-5" />
               </div>
-              <Badge className="border-none bg-success-bg text-[10px] font-bold text-success-text hover:bg-success-bg">
+              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none text-[10px] font-bold">
                 +24% checked
               </Badge>
             </div>
@@ -284,13 +289,13 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Overdue/Alert Books */}
-        <Card className="group transition-all duration-300 hover:border-error-bg hover:shadow-md">
+        <Card className="group hover:border-error-bg transition-all duration-300 hover:shadow-md">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-error-bg p-2.5 text-error-text transition-transform group-hover:scale-110">
+              <div className="bg-error-bg text-error-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
                 <AlertTriangle className="size-5" />
               </div>
-              <Badge className="border-none bg-error-bg text-[10px] font-bold text-error-text hover:bg-error-bg">
+              <Badge className="bg-error-bg text-error-text hover:bg-error-bg border-none text-[10px] font-bold">
                 Action Required
               </Badge>
             </div>
@@ -298,23 +303,23 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Overdue Alert
               </span>
-              <h3 className="text-2xl font-black text-error-text">42</h3>
+              <h3 className="text-error-text text-2xl font-black">42</h3>
             </div>
             <p className="text-[11px] font-medium text-slate-500">
               Overdue rate:{" "}
-              <span className="font-bold text-error-bg0">4.9% of loans</span>
+              <span className="text-error-bg0 font-bold">4.9% of loans</span>
             </p>
           </CardContent>
         </Card>
 
         {/* Fine Collection */}
-        <Card className="group transition-all duration-300 hover:border-warning-bg hover:shadow-md">
+        <Card className="group hover:border-warning-bg transition-all duration-300 hover:shadow-md">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-warning-bg p-2.5 text-warning-text transition-transform group-hover:scale-110">
+              <div className="bg-warning-bg text-warning-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
                 <DollarSign className="size-5" />
               </div>
-              <Badge className="border-none bg-warning-bg text-[10px] font-bold text-warning-text hover:bg-warning-bg">
+              <Badge className="bg-warning-bg text-warning-text hover:bg-warning-bg border-none text-[10px] font-bold">
                 Month-to-Date
               </Badge>
             </div>
@@ -562,8 +567,8 @@ export function AdminDashboardPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success-text opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-success-bg0"></span>
+                <span className="bg-success-text absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"></span>
+                <span className="bg-success-bg0 relative inline-flex h-2 w-2 rounded-full"></span>
               </span>
               <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                 Live Logs
@@ -580,7 +585,7 @@ export function AdminDashboardPage() {
                   <div className="flex gap-3">
                     <div className="mt-1">
                       {log.type === "loan" && (
-                        <div className="rounded-lg bg-success-bg p-1.5 text-success-text">
+                        <div className="bg-success-bg text-success-text rounded-lg p-1.5">
                           <CheckCircle2 className="size-4" />
                         </div>
                       )}
@@ -590,7 +595,7 @@ export function AdminDashboardPage() {
                         </div>
                       )}
                       {log.type === "overdue" && (
-                        <div className="rounded-lg bg-error-bg p-1.5 text-error-text">
+                        <div className="bg-error-bg text-error-text rounded-lg p-1.5">
                           <AlertTriangle className="size-4" />
                         </div>
                       )}

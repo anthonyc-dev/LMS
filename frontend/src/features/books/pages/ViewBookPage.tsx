@@ -1,18 +1,60 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useBook } from "@/features/books/hooks/useBooks";
+import { useSelfBorrowBook } from "@/features/circulation/api/circulation";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import { ArrowLeft, BookOpen, XCircle, MapPin, FileText } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
+import {
+  ArrowLeft,
+  BookOpen,
+  XCircle,
+  MapPin,
+  FileText,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
+import { toast } from "sonner";
 import bookDark1Img from "@/assets/images/dashboard/book_dark1.png";
 
 export function ViewBookPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: book, isLoading, isError } = useBook(id || "");
+  const selfBorrowMutation = useSelfBorrowBook();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   usePageTitle(book ? `View Book: ${book.title}` : "View Book");
+
+  const handleBorrow = () => {
+    if (!id) return;
+
+    selfBorrowMutation.mutate(id, {
+      onSuccess: () => {
+        setDialogOpen(false);
+        toast.success("Book borrowed successfully!", {
+          description: "You can view your borrowed books in My Books.",
+        });
+      },
+      onError: (err: any) => {
+        toast.error(
+          err.response?.data?.message || "Failed to borrow book. Please try again.",
+        );
+      },
+    });
+  };
 
   if (isLoading) {
     return (
@@ -56,6 +98,16 @@ export function ViewBookPage() {
   }
 
   const isAvailable = (book.availableCopies ?? 0) > 0;
+
+  // Calculate the due date for display (14 days from now)
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + 14);
+  const dueDateFormatted = dueDate.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
   return (
     <div className="max-w-[1200px]">
@@ -104,7 +156,55 @@ export function ViewBookPage() {
             </div>
           </div>
 
-          <Button className="mt-4 w-full">Borrow Book</Button>
+          <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  className="mt-4 w-full"
+                  disabled={!isAvailable || selfBorrowMutation.isPending}
+                >
+                  {!isAvailable ? "Unavailable" : "Borrow Book"}
+                </Button>
+              }
+            />
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-lg font-black">
+                  Confirm Borrow
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  You are about to borrow{" "}
+                  <span className="font-bold text-slate-900">
+                    {book.title}
+                  </span>
+                  . The due date will be{" "}
+                  <span className="font-bold text-slate-900">
+                    {dueDateFormatted}
+                  </span>
+                  . Please return it on time to avoid fines.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={selfBorrowMutation.isPending}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleBorrow}
+                  disabled={selfBorrowMutation.isPending}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {selfBorrowMutation.isPending ? (
+                    <Loader2 className="mr-1.5 size-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="mr-1.5 size-4" />
+                  )}
+                  {selfBorrowMutation.isPending
+                    ? "Borrowing..."
+                    : "Confirm Borrow"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         {/* Right Column: Structured details */}

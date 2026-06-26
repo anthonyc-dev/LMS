@@ -28,6 +28,18 @@ import { HttpCode } from '@nestjs/common';
 export class BorrowingsController {
   constructor(private readonly borrowingsService: BorrowingsService) {}
 
+  @Roles(Role.STUDENT, Role.FACULTY)
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('self-borrow')
+  selfBorrow(
+    @Body('bookId', new ParseUUIDPipe()) bookId: string,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.borrowingsService.selfBorrow(bookId, req.user.sub);
+  }
+
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
