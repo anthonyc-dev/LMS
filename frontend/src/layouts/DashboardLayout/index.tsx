@@ -19,6 +19,8 @@ import { useAuthStore } from "@/app/store/authStore";
 
 import { SidebarContentInner } from "@/shared/components/Sidebar";
 import { MobileNav } from "@/shared/components/MobileNav";
+import { NotificationBell } from "@/shared/components/NotificationBell";
+import { useNotificationSocket } from "@/shared/hooks/useNotificationSocket";
 
 const menuItems = [
   {
@@ -110,6 +112,9 @@ export function AdminLayout() {
   const location = useLocation();
   const { user } = useAuthStore();
 
+  // Activate real-time notification listener
+  useNotificationSocket();
+
   const filteredMenuItems = menuItems.filter((item) => {
     if (!item.roles) return true;
     return item.roles.includes(user?.role || "");
@@ -153,6 +158,9 @@ export function AdminLayout() {
             <h1 className="text-foreground text-lg font-semibold capitalize">
               {getPageTitle(location.pathname)}
             </h1>
+            <div className="ml-auto">
+              <NotificationBell />
+            </div>
           </header>
           <div className="bg-background flex-1 overflow-x-hidden overflow-y-auto p-4 lg:p-6 lg:px-8">
             <Outlet />
