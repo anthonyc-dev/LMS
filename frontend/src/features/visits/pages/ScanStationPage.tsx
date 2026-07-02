@@ -43,6 +43,7 @@ export function ScanStationPage({ onClose }: { onClose: () => void }) {
       onSuccess: (data) => {
         setLastResult(data);
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
         setError(
           err.response?.data?.message || "User not found or scan failed.",

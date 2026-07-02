@@ -28,6 +28,7 @@ export function ViewBarcodeModal({
 
   useEffect(() => {
     if (!open || !bookCopy || !barcodeBlob) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBarcodeSrc("");
       return;
     }

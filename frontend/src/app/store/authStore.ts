@@ -8,6 +8,7 @@ interface User {
   schoolId?: string;
   avatarUrl?: string;
   barcode?: string;
+  phoneNumber?: string;
 }
 
 interface AuthState {

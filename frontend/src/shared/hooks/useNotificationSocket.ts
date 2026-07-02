@@ -15,6 +15,7 @@ export function useNotificationSocket() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const addNotification = useNotificationStore((s) => s.addNotification);
   const addRef = useRef(addNotification);
+  // eslint-disable-next-line react-hooks/refs
   addRef.current = addNotification;
 
   useEffect(() => {

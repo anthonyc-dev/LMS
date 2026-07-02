@@ -1,6 +1,13 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getUserAnalytics } from "@/features/books/services/dashboardApi";
 import { useAuthStore } from "@/app/store/authStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
@@ -16,7 +23,7 @@ import {
   BookMarked,
   Calendar,
   RotateCw,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import {
   BarChart,
@@ -25,7 +32,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 
@@ -38,8 +45,20 @@ const engagementData = [
 ];
 
 const mockAcquisitions = [
-  { id: 1, title: "Deep Learning with PyTorch", author: "Eli Stevens", status: "Approved", date: "May 18, 2026" },
-  { id: 2, title: "Designing Data-Intensive Applications", author: "Martin Kleppmann", status: "Cataloged", date: "Apr 29, 2026" },
+  {
+    id: 1,
+    title: "Deep Learning with PyTorch",
+    author: "Eli Stevens",
+    status: "Approved",
+    date: "May 18, 2026",
+  },
+  {
+    id: 2,
+    title: "Designing Data-Intensive Applications",
+    author: "Martin Kleppmann",
+    status: "Cataloged",
+    date: "Apr 29, 2026",
+  },
 ];
 
 export function FacultyDashboardPage() {
@@ -51,17 +70,23 @@ export function FacultyDashboardPage() {
   const [reqCourse, setReqCourse] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["user-analytics"],
+    queryFn: getUserAnalytics,
+  });
+
   // Active Loans list (Stateful so that we can trigger "Renew" interaction live!)
-  const [loans, setLoans] = useState([
-    { id: 1, title: "Clean Code: A Handbook of Agile Software Craftsmanship", author: "Robert C. Martin", dueDate: "Jun 14, 2026", daysRemaining: 21, totalDays: 30, renewCount: 0 },
-    { id: 2, title: "Introduction to Algorithms, 4th Edition", author: "Thomas H. Cormen", dueDate: "Jun 02, 2026", daysRemaining: 9, totalDays: 30, renewCount: 1 },
-    { id: 3, title: "Operating System Concepts", author: "Abraham Silberschatz", dueDate: "May 29, 2026", daysRemaining: 5, totalDays: 30, renewCount: 0 },
-  ]);
+  const loans = stats?.activeLoans || [];
 
   // Request lists
   const [acquisitions, setAcquisitions] = useState(mockAcquisitions);
 
-  const currentDate = new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   // Form submit handler
   const handleAcquisitionSubmit = (e: React.FormEvent) => {
@@ -70,7 +95,7 @@ export function FacultyDashboardPage() {
       toast.error("Please fill in all acquisition request fields.");
       return;
     }
-    
+
     setIsSubmitting(true);
     setTimeout(() => {
       const newReq = {
@@ -78,9 +103,13 @@ export function FacultyDashboardPage() {
         title: reqTitle,
         author: reqAuthor,
         status: "Submitted",
-        date: new Date().toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' })
+        date: new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
       };
-      
+
       setAcquisitions([newReq, ...acquisitions]);
       setIsSubmitting(false);
       setReqTitle("");
@@ -91,209 +120,306 @@ export function FacultyDashboardPage() {
   };
 
   // Renewal click handler (Updates remaining days and renew counter with feedback)
-  const handleRenew = (id: number) => {
-    setLoans(prev => prev.map(loan => {
-      if (loan.id === id) {
-        if (loan.renewCount >= 2) {
-          toast.warning(`Maximum renewals (2) reached for "${loan.title}". Please return the book.`);
-          return loan;
-        }
-        
-        toast.success(`"${loan.title}" renewed successfully! Extended by 14 days.`);
-        // Calculate new due date (14 days from current due date)
-        // Dummy extension date calculation
-        const newDueDate = "Jun 28, 2026";
-        return {
-          ...loan,
-          dueDate: newDueDate,
-          daysRemaining: loan.daysRemaining + 14,
-          totalDays: loan.totalDays + 14,
-          renewCount: loan.renewCount + 1
-        };
-      }
-      return loan;
-    }));
+  const handleRenew = (_id: string) => {
+    toast.info("Renew functionality will trigger a backend call in the future");
   };
 
+  if (isLoading || !stats) {
+    return (
+      <div className="flex h-screen items-center justify-center text-slate-500">
+        Loading dashboard data...
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-[1600px] mx-auto space-y-6 pb-12 animate-fade-in">
-      
+    <div className="animate-fade-in mx-auto max-w-[1600px] space-y-6 pb-12">
       {/* Welcome & Faculty Card Header */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 p-6 rounded-2xl bg-white border border-slate-100 shadow-sm relative overflow-hidden">
-        <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-slate-500/5 rounded-full blur-3xl" />
-        <div className="space-y-1.5 z-10">
+      <div className="relative flex flex-col items-stretch justify-between gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:flex-row lg:items-center">
+        <div className="absolute top-0 right-0 h-64 w-64 translate-x-12 -translate-y-12 rounded-full bg-slate-500/5 blur-3xl" />
+        <div className="z-10 space-y-1.5">
           <div className="flex items-center gap-2">
             <GraduationCap className="size-5 text-slate-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-600">Faculty Space</span>
+            <span className="text-xs font-bold tracking-widest text-slate-600 uppercase">
+              Faculty Space
+            </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-            Hello, <span className="text-transparent bg-clip-text bg-linear-to-r from-slate-600 to-blue-600">{user?.fullName || "Professor"}</span>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 md:text-3xl">
+            Hello,{" "}
+            <span className="bg-linear-to-r from-slate-600 to-blue-600 bg-clip-text text-transparent">
+              {user?.fullName || "Professor"}
+            </span>
           </h1>
-          <p className="text-slate-500 font-medium text-sm flex items-center gap-2">
+          <p className="flex items-center gap-2 text-sm font-medium text-slate-500">
             <Calendar className="size-4 text-slate-400" />
             <span>{currentDate}</span>
           </p>
         </div>
-        
-        <div className="flex items-center gap-3 bg-slate-50/50 border border-slate-100/50 p-3 rounded-xl z-10 w-full lg:w-auto">
-          <div className="h-10 w-10 bg-linear-to-tr from-slate-600 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
-            {user?.fullName ? user.fullName.split(" ").map(n => n[0]).join("") : "PF"}
+
+        <div className="z-10 flex w-full items-center gap-3 rounded-xl border border-slate-100/50 bg-slate-50/50 p-3 lg:w-auto">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-tr from-slate-600 to-blue-500 text-sm font-bold text-white">
+            {user?.fullName
+              ? user.fullName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+              : "PF"}
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs font-bold text-slate-800 leading-tight">Faculty Member</span>
-            <span className="text-[10px] text-slate-400 font-semibold truncate">{user?.email || "faculty@ncmc.edu"}</span>
+          <div className="flex min-w-0 flex-col">
+            <span className="text-xs leading-tight font-bold text-slate-800">
+              Faculty Member
+            </span>
+            <span className="truncate text-[10px] font-semibold text-slate-400">
+              {user?.email || "faculty@ncmc.edu"}
+            </span>
           </div>
         </div>
       </div>
 
       {/* KPI Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        
         {/* Active Personal Loans */}
-        <Card className="hover:shadow-md hover:border-slate-200 transition-all group">
-          <CardContent className="p-6 space-y-3">
-            <div className="flex justify-between items-start">
-              <div className="p-2.5 rounded-xl bg-slate-50 text-slate-600 group-hover:scale-110 transition-transform">
+        <Card className="group transition-all hover:border-slate-200 hover:shadow-md">
+          <CardContent className="space-y-3 p-6">
+            <div className="flex items-start justify-between">
+              <div className="rounded-xl bg-slate-50 p-2.5 text-slate-600 transition-transform group-hover:scale-110">
                 <BookOpen className="size-5" />
               </div>
-              <Badge className="bg-slate-50 text-slate-700 hover:bg-slate-50 border-none font-bold text-[10px]">Quota: 15 Max</Badge>
+              <Badge className="border-none bg-slate-50 text-[10px] font-bold text-slate-700 hover:bg-slate-50">
+                Quota: 15 Max
+              </Badge>
             </div>
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">My Active Loans</span>
-              <h3 className="text-2xl font-black text-slate-800">{loans.length} <span className="text-xs font-normal text-slate-400">books borrowed</span></h3>
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                My Active Loans
+              </span>
+              <h3 className="text-2xl font-black text-slate-800">
+                {stats.checkedOut}{" "}
+                <span className="text-xs font-normal text-slate-400">
+                  books borrowed
+                </span>
+              </h3>
             </div>
-            <Progress value={(loans.length / 15) * 100} className="h-1 bg-slate-100" />
+            <Progress
+              value={(stats.checkedOut / 15) * 100}
+              className="h-1 bg-slate-100"
+            />
           </CardContent>
         </Card>
 
         {/* Course Reserves */}
-        <Card className="hover:shadow-md hover:border-blue-200 transition-all group">
-          <CardContent className="p-6 space-y-3">
-            <div className="flex justify-between items-start">
-              <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 group-hover:scale-110 transition-transform">
+        <Card className="group transition-all hover:border-blue-200 hover:shadow-md">
+          <CardContent className="space-y-3 p-6">
+            <div className="flex items-start justify-between">
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform group-hover:scale-110">
                 <BookMarked className="size-5" />
               </div>
-              <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-none font-bold text-[10px]">Curriculum</Badge>
+              <Badge className="border-none bg-blue-50 text-[10px] font-bold text-blue-700 hover:bg-blue-50">
+                Curriculum
+              </Badge>
             </div>
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Course Reserves</span>
-              <h3 className="text-2xl font-black text-slate-800">8 <span className="text-xs font-normal text-slate-400">books pinned</span></h3>
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                Course Reserves
+              </span>
+              <h3 className="text-2xl font-black text-slate-800">
+                8{" "}
+                <span className="text-xs font-normal text-slate-400">
+                  books pinned
+                </span>
+              </h3>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium">Assigned to: <span className="font-bold text-slate-700">4 active courses</span></p>
+            <p className="text-[11px] font-medium text-slate-500">
+              Assigned to:{" "}
+              <span className="font-bold text-slate-700">4 active courses</span>
+            </p>
           </CardContent>
         </Card>
 
         {/* Book Requests */}
-        <Card className="hover:shadow-md hover:border-success-bg transition-all group">
-          <CardContent className="p-6 space-y-3">
-            <div className="flex justify-between items-start">
-              <div className="p-2.5 rounded-xl bg-success-bg text-success-text group-hover:scale-110 transition-transform">
+        <Card className="hover:border-success-bg group transition-all hover:shadow-md">
+          <CardContent className="space-y-3 p-6">
+            <div className="flex items-start justify-between">
+              <div className="bg-success-bg text-success-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
                 <PlusCircle className="size-5" />
               </div>
-              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none font-bold text-[10px]">Acquisitions</Badge>
+              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none text-[10px] font-bold">
+                Acquisitions
+              </Badge>
             </div>
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Acquisitions Requested</span>
-              <h3 className="text-2xl font-black text-slate-800">{acquisitions.length} <span className="text-xs font-normal text-slate-400">suggested</span></h3>
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                Acquisitions Requested
+              </span>
+              <h3 className="text-2xl font-black text-slate-800">
+                {acquisitions.length}{" "}
+                <span className="text-xs font-normal text-slate-400">
+                  suggested
+                </span>
+              </h3>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-              <CheckCircle2 className="size-3.5 text-success-bg0" />
-              <span>{acquisitions.filter(a => a.status === "Approved").length} approved by admin</span>
+            <p className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
+              <CheckCircle2 className="text-success-bg0 size-3.5" />
+              <span>
+                {acquisitions.filter((a) => a.status === "Approved").length}{" "}
+                approved by admin
+              </span>
             </p>
           </CardContent>
         </Card>
 
         {/* Syllabus / Reading List Views */}
-        <Card className="hover:shadow-md hover:border-pink-200 transition-all group">
-          <CardContent className="p-6 space-y-3">
-            <div className="flex justify-between items-start">
-              <div className="p-2.5 rounded-xl bg-pink-50 text-pink-600 group-hover:scale-110 transition-transform">
+        <Card className="group transition-all hover:border-pink-200 hover:shadow-md">
+          <CardContent className="space-y-3 p-6">
+            <div className="flex items-start justify-between">
+              <div className="rounded-xl bg-pink-50 p-2.5 text-pink-600 transition-transform group-hover:scale-110">
                 <Eye className="size-5" />
               </div>
-              <Badge className="bg-pink-50 text-pink-700 hover:bg-pink-50 border-none font-bold text-[10px]">Engagement</Badge>
+              <Badge className="border-none bg-pink-50 text-[10px] font-bold text-pink-700 hover:bg-pink-50">
+                Engagement
+              </Badge>
             </div>
             <div className="space-y-0.5">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Reading List Views</span>
+              <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                Reading List Views
+              </span>
               <h3 className="text-2xl font-black text-slate-800">760</h3>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium">+18% student clicks this week</p>
+            <p className="text-[11px] font-medium text-slate-500">
+              +18% student clicks this week
+            </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Core Modules: Charts & Stepper */}
       <div className="grid gap-6 md:grid-cols-3">
-        
         {/* Student syllabus engagement (2/3 width) */}
-        <Card className="md:col-span-2 shadow-xs hover:shadow-md transition-shadow">
-          <CardHeader className="border-b border-slate-50 flex flex-row items-center justify-between pb-4">
+        <Card className="shadow-xs transition-shadow hover:shadow-md md:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
-              <CardTitle className="text-base font-black text-slate-800">Course Syllabus Reading Stats</CardTitle>
-              <p className="text-xs text-slate-400 font-medium">Student resource views vs actual book borrows</p>
+              <CardTitle className="text-base font-black text-slate-800">
+                Course Syllabus Reading Stats
+              </CardTitle>
+              <p className="text-xs font-medium text-slate-400">
+                Student resource views vs actual book borrows
+              </p>
             </div>
-            <Badge variant="secondary" className="font-bold bg-slate-100 text-slate-600 border-none px-2.5 py-1">Syllabus</Badge>
+            <Badge
+              variant="secondary"
+              className="border-none bg-slate-100 px-2.5 py-1 font-bold text-slate-600"
+            >
+              Syllabus
+            </Badge>
           </CardHeader>
           <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={engagementData} barGap={4}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="course" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(255,255,255,0.95)', border: '1px solid #e2e8f0', borderRadius: '12px' }}
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#f1f5f9"
                 />
-                <Bar name="Student Clicks" dataKey="studentViews" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                <Bar name="Book Checkouts" dataKey="checkouts" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <XAxis
+                  dataKey="course"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: "#64748b", fontSize: 11, fontWeight: 600 }}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: "#64748b", fontSize: 11, fontWeight: 600 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "rgba(255,255,255,0.95)",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "12px",
+                  }}
+                />
+                <Bar
+                  name="Student Clicks"
+                  dataKey="studentViews"
+                  fill="#8b5cf6"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  name="Book Checkouts"
+                  dataKey="checkouts"
+                  fill="#3b82f6"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Acquisition Stepper HUD (1/3 width) */}
-        <Card className="shadow-xs hover:shadow-md transition-shadow">
+        <Card className="shadow-xs transition-shadow hover:shadow-md">
           <CardHeader className="border-b border-slate-50 pb-4">
-            <CardTitle className="text-base font-black text-slate-800">Acquisition Pipeline</CardTitle>
-            <p className="text-xs text-slate-400 font-medium">Tracking status of recent book proposals</p>
+            <CardTitle className="text-base font-black text-slate-800">
+              Acquisition Pipeline
+            </CardTitle>
+            <p className="text-xs font-medium text-slate-400">
+              Tracking status of recent book proposals
+            </p>
           </CardHeader>
-          <CardContent className="p-6 h-[300px] overflow-auto scrollbar-hide">
-            <div className="space-y-6 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
-              
+          <CardContent className="scrollbar-hide h-[300px] overflow-auto p-6">
+            <div className="relative space-y-6 before:absolute before:top-2 before:bottom-2 before:left-[17px] before:w-0.5 before:bg-slate-100">
               {/* Request 1 */}
-              <div className="relative flex gap-4 items-start">
-                <div className="z-10 flex items-center justify-center size-9 rounded-full bg-success-bg0 text-white shrink-0 border-4 border-white shadow-xs">
+              <div className="relative flex items-start gap-4">
+                <div className="bg-success-bg0 z-10 flex size-9 shrink-0 items-center justify-center rounded-full border-4 border-white text-white shadow-xs">
                   <CheckCircle2 className="size-4" />
                 </div>
                 <div className="space-y-1 pt-0.5">
-                  <h4 className="text-xs font-black text-slate-800 leading-tight">Deep Learning with PyTorch</h4>
-                  <p className="text-[10px] text-slate-400 font-semibold uppercase">Acquisition Stage: Approved</p>
-                  <span className="text-[9px] text-success-text font-bold bg-success-bg px-1.5 py-0.5 rounded">Awaiting cataloging</span>
+                  <h4 className="text-xs leading-tight font-black text-slate-800">
+                    Deep Learning with PyTorch
+                  </h4>
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase">
+                    Acquisition Stage: Approved
+                  </p>
+                  <span className="text-success-text bg-success-bg rounded px-1.5 py-0.5 text-[9px] font-bold">
+                    Awaiting cataloging
+                  </span>
                 </div>
               </div>
 
               {/* Request 2 */}
-              <div className="relative flex gap-4 items-start">
-                <div className="z-10 flex items-center justify-center size-9 rounded-full bg-slate-600 text-white shrink-0 border-4 border-white shadow-xs">
+              <div className="relative flex items-start gap-4">
+                <div className="z-10 flex size-9 shrink-0 items-center justify-center rounded-full border-4 border-white bg-slate-600 text-white shadow-xs">
                   <Clock className="size-4" />
                 </div>
                 <div className="space-y-1 pt-0.5">
-                  <h4 className="text-xs font-black text-slate-800 leading-tight">Neural Networks & Deep Learning</h4>
-                  <p className="text-[10px] text-slate-400 font-semibold uppercase">Acquisition Stage: Submitted</p>
-                  <span className="text-[9px] text-slate-600 font-bold bg-slate-50 px-1.5 py-0.5 rounded">Sent to Chief Librarian</span>
+                  <h4 className="text-xs leading-tight font-black text-slate-800">
+                    Neural Networks & Deep Learning
+                  </h4>
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase">
+                    Acquisition Stage: Submitted
+                  </p>
+                  <span className="rounded bg-slate-50 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
+                    Sent to Chief Librarian
+                  </span>
                 </div>
               </div>
 
               {/* Request 3 (Completed historic request) */}
-              <div className="relative flex gap-4 items-start opacity-60">
-                <div className="z-10 flex items-center justify-center size-9 rounded-full bg-slate-300 text-white shrink-0 border-4 border-white shadow-xs">
+              <div className="relative flex items-start gap-4 opacity-60">
+                <div className="z-10 flex size-9 shrink-0 items-center justify-center rounded-full border-4 border-white bg-slate-300 text-white shadow-xs">
                   <CheckCircle2 className="size-4" />
                 </div>
                 <div className="space-y-1 pt-0.5">
-                  <h4 className="text-xs font-black text-slate-800 leading-tight">Designing Data-Intensive Systems</h4>
-                  <p className="text-[10px] text-slate-400 font-semibold uppercase">Acquisition Stage: Cataloged</p>
-                  <span className="text-[9px] text-slate-600 font-bold bg-slate-100 px-1.5 py-0.5 rounded-sm">Available in stack</span>
+                  <h4 className="text-xs leading-tight font-black text-slate-800">
+                    Designing Data-Intensive Systems
+                  </h4>
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase">
+                    Acquisition Stage: Cataloged
+                  </p>
+                  <span className="rounded-sm bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
+                    Available in stack
+                  </span>
                 </div>
               </div>
-
             </div>
           </CardContent>
         </Card>
@@ -301,49 +427,56 @@ export function FacultyDashboardPage() {
 
       {/* Forms & Tables Section */}
       <div className="grid gap-6 lg:grid-cols-3">
-        
         {/* Book Request Form (1/3 size) */}
-        <Card className="shadow-xs hover:shadow-md transition-shadow">
+        <Card className="shadow-xs transition-shadow hover:shadow-md">
           <CardHeader className="border-b border-slate-50 pb-4">
-            <CardTitle className="text-base font-black text-slate-800 flex items-center gap-1.5">
+            <CardTitle className="flex items-center gap-1.5 text-base font-black text-slate-800">
               <PlusCircle className="size-4 text-slate-500" />
               <span>Acquisition Request</span>
             </CardTitle>
-            <p className="text-xs text-slate-400 font-medium">Request a new textbook for your syllabus</p>
+            <p className="text-xs font-medium text-slate-400">
+              Request a new textbook for your syllabus
+            </p>
           </CardHeader>
           <CardContent className="p-6">
             <form onSubmit={handleAcquisitionSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Book Title</label>
-                <Input 
-                  placeholder="e.g. Clean Architecture" 
-                  value={reqTitle} 
+                <label className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                  Book Title
+                </label>
+                <Input
+                  placeholder="e.g. Clean Architecture"
+                  value={reqTitle}
                   onChange={(e) => setReqTitle(e.target.value)}
-                  className="rounded-lg h-9 text-xs" 
+                  className="h-9 rounded-lg text-xs"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Author Name</label>
-                <Input 
-                  placeholder="e.g. Robert C. Martin" 
-                  value={reqAuthor} 
+                <label className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                  Author Name
+                </label>
+                <Input
+                  placeholder="e.g. Robert C. Martin"
+                  value={reqAuthor}
                   onChange={(e) => setReqAuthor(e.target.value)}
-                  className="rounded-lg h-9 text-xs" 
+                  className="h-9 rounded-lg text-xs"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Assigned Course</label>
-                <Input 
-                  placeholder="e.g. SE-201 Systems Engineering" 
-                  value={reqCourse} 
+                <label className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                  Assigned Course
+                </label>
+                <Input
+                  placeholder="e.g. SE-201 Systems Engineering"
+                  value={reqCourse}
                   onChange={(e) => setReqCourse(e.target.value)}
-                  className="rounded-lg h-9 text-xs" 
+                  className="h-9 rounded-lg text-xs"
                 />
               </div>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting} 
-                className="w-full rounded-lg bg-slate-600 hover:bg-slate-500 text-white font-bold h-9 text-xs mt-2 transition-all cursor-pointer"
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="mt-2 h-9 w-full cursor-pointer rounded-lg bg-slate-600 text-xs font-bold text-white transition-all hover:bg-slate-500"
               >
                 {isSubmitting ? "Submitting..." : "Submit Acquisition Request"}
               </Button>
@@ -352,54 +485,82 @@ export function FacultyDashboardPage() {
         </Card>
 
         {/* My Active Borrows Registry (2/3 size) */}
-        <Card className="lg:col-span-2 shadow-xs hover:shadow-md transition-shadow">
-          <CardHeader className="border-b border-slate-50 flex flex-row items-center justify-between pb-4">
+        <Card className="shadow-xs transition-shadow hover:shadow-md lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
-              <CardTitle className="text-base font-black text-slate-800">My Borrowed Books</CardTitle>
-              <p className="text-xs text-slate-400 font-medium">Currently checked out titles with interactive renewal</p>
+              <CardTitle className="text-base font-black text-slate-800">
+                My Borrowed Books
+              </CardTitle>
+              <p className="text-xs font-medium text-slate-400">
+                Currently checked out titles with interactive renewal
+              </p>
             </div>
-            <Badge variant="outline" className="font-bold border-slate-200 text-slate-500 px-2 py-0.5">Faculty Perks</Badge>
+            <Badge
+              variant="outline"
+              className="border-slate-200 px-2 py-0.5 font-bold text-slate-500"
+            >
+              Faculty Perks
+            </Badge>
           </CardHeader>
-          <CardContent className="p-0 overflow-auto scrollbar-hide">
-            <div className="divide-y divide-slate-50 min-w-[500px]">
+          <CardContent className="scrollbar-hide overflow-auto p-0">
+            <div className="min-w-[500px] divide-y divide-slate-50">
               {loans.map((loan) => (
-                <div key={loan.id} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
-                  <div className="space-y-1.5 max-w-[280px]">
-                    <h4 className="text-xs font-black text-slate-800 leading-tight truncate">{loan.title}</h4>
-                    <p className="text-[10px] text-slate-400 font-medium leading-none">{loan.author}</p>
+                <div
+                  key={loan.id}
+                  className="flex items-center justify-between p-4 transition-colors hover:bg-slate-50/50"
+                >
+                  <div className="max-w-[280px] space-y-1.5">
+                    <h4 className="truncate text-xs leading-tight font-black text-slate-800">
+                      {loan.title}
+                    </h4>
+                    <p className="text-[10px] leading-none font-medium text-slate-400">
+                      {loan.author}
+                    </p>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] text-slate-400 font-bold">Renewals: {loan.renewCount}/2</span>
+                      <span className="text-[9px] font-bold text-slate-400">
+                        Renewals: {loan.renewCount}/2
+                      </span>
                       <span className="text-slate-200">|</span>
-                      <span className="text-[9px] text-slate-400 font-bold">Due: {loan.dueDate}</span>
+                      <span className="text-[9px] font-bold text-slate-400">
+                        Due: {loan.dueDate}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex-1 max-w-[150px] px-4 space-y-1">
+                  <div className="max-w-[150px] flex-1 space-y-1 px-4">
                     <div className="flex justify-between text-[9px] font-bold text-slate-400">
                       <span>Time Remaining</span>
-                      <span className={loan.daysRemaining <= 5 ? "text-error-bg0" : "text-slate-600"}>
+                      <span
+                        className={
+                          loan.daysRemaining <= 5
+                            ? "text-error-bg0"
+                            : "text-slate-600"
+                        }
+                      >
                         {loan.daysRemaining} days
                       </span>
                     </div>
-                    <Progress 
-                      value={(loan.daysRemaining / loan.totalDays) * 100} 
+                    <Progress
+                      value={(loan.daysRemaining / loan.totalDays) * 100}
                       className={`h-1.5 rounded bg-slate-100 ${
-                        loan.daysRemaining <= 5 ? "[&>div]:bg-error-bg0" : "[&>div]:bg-slate-600"
-                      }`} 
+                        loan.daysRemaining <= 5
+                          ? "[&>div]:bg-error-bg0"
+                          : "[&>div]:bg-slate-600"
+                      }`}
                     />
                   </div>
 
                   <div className="flex items-center gap-2">
                     {loan.daysRemaining <= 5 && (
-                      <Badge className="bg-error-bg text-error-text hover:bg-error-bg border-none font-bold text-[8px] flex items-center gap-0.5">
+                      <Badge className="bg-error-bg text-error-text hover:bg-error-bg flex items-center gap-0.5 border-none text-[8px] font-bold">
                         <AlertCircle className="size-2.5 shrink-0" />
                         <span>Near Due</span>
                       </Badge>
                     )}
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => handleRenew(loan.id)}
-                      className="rounded-lg h-8 px-3 border-slate-200 text-slate-600 hover:border-slate-600 hover:text-slate-600 hover:bg-slate-50/30 transition-all font-bold text-[10px] flex items-center gap-1 cursor-pointer"
+                      className="flex h-8 cursor-pointer items-center gap-1 rounded-lg border-slate-200 px-3 text-[10px] font-bold text-slate-600 transition-all hover:border-slate-600 hover:bg-slate-50/30 hover:text-slate-600"
                     >
                       <RotateCw className="size-3" />
                       <span>Renew</span>
@@ -411,7 +572,6 @@ export function FacultyDashboardPage() {
           </CardContent>
         </Card>
       </div>
-
     </div>
   );
 }

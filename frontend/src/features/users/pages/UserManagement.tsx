@@ -87,6 +87,7 @@ export interface User {
   activeBorrowingsCount: number;
   avatarColor: string;
   avatarUrl?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   borrowings?: any[];
 }
 

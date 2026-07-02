@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuthStore } from "@/app/store/authStore";
 import {
   Avatar,
@@ -10,6 +10,7 @@ import { Input } from "@/shared/components/ui/input";
 import { toast } from "sonner";
 import { Edit3, Camera } from "lucide-react";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { useUpdateUserProfile } from "../api/users";
 
 export function ProfilePage() {
   usePageTitle("Profile");
@@ -19,18 +20,37 @@ export function ProfilePage() {
 
   // Editable field state — seeded from store
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
-  const [isEditingAddress, setIsEditingAddress] = useState(false);
+
+  const updateProfileMutation = useUpdateUserProfile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    const formData = new FormData();
+    formData.append("avatarUrl", file);
+
+    const toastId = toast.loading("Uploading avatar...");
+
+    updateProfileMutation.mutate(
+      { id: user.id, data: formData },
+      {
+        onSuccess: (updatedUser) => {
+          updateUser(updatedUser);
+          toast.success("Profile picture updated!", { id: toastId });
+        },
+        onError: () => {
+          toast.error("Failed to update profile picture", { id: toastId });
+        }
+      }
+    );
+  };
 
   // Personal info fields
   const [firstName, setFirstName] = useState(user?.fullName ?? "");
-  const [dateOfBirth, setDateOfBirth] = useState("12-10-1990");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [phoneNumber, setPhoneNumber] = useState("(+62) 821 2554-5846");
-
-  // Address fields
-  const [country, setCountry] = useState("Philippines");
-  const [city, setCity] = useState("Cabanatuan City");
-  const [postalCode, setPostalCode] = useState("3100");
+  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber ?? "");
 
   // const initials = (user?.fullName ?? "?")
   //   .split(" ")
@@ -48,28 +68,32 @@ export function ProfilePage() {
       toast.error("Name cannot be empty.");
       return;
     }
-    updateUser({
-      fullName,
-      email: email.trim(),
-    });
-    setIsEditingPersonal(false);
-    toast.success("Personal information updated!");
+    if (!user?.id) return;
+    
+    const formData = new FormData();
+    formData.append("fullName", fullName);
+    formData.append("email", email.trim());
+    if (phoneNumber) formData.append("phoneNumber", phoneNumber);
+    
+    updateProfileMutation.mutate(
+      { id: user.id, data: formData },
+      {
+        onSuccess: (updatedUser) => {
+          updateUser(updatedUser);
+          setIsEditingPersonal(false);
+          toast.success("Personal information updated!");
+        },
+        onError: () => {
+          toast.error("Failed to update personal information");
+        }
+      }
+    );
   };
 
   const handleCancelPersonal = () => {
     setFirstName((user?.fullName ?? "").split(" ")[0] ?? "");
-
     setEmail(user?.email ?? "");
     setIsEditingPersonal(false);
-  };
-
-  const handleSaveAddress = () => {
-    setIsEditingAddress(false);
-    toast.success("Address updated!");
-  };
-
-  const handleCancelAddress = () => {
-    setIsEditingAddress(false);
   };
 
   // const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -110,9 +134,19 @@ export function ProfilePage() {
                     {user?.fullName?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <button className="absolute -right-0.5 bottom-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white bg-blue-600 text-white shadow-sm transition-colors hover:bg-blue-700">
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute -right-0.5 bottom-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white bg-blue-600 text-white shadow-sm transition-colors hover:bg-blue-700"
+                >
                   <Camera className="size-3" />
                 </button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                />
               </div>
               {/* Name & meta */}
               <div className="min-w-0">
@@ -120,9 +154,6 @@ export function ProfilePage() {
                   {user?.fullName ?? "User"}
                 </h2>
                 <p className="mt-0.5 text-sm text-slate-500">{roleLabel}</p>
-                <p className="mt-0.5 text-sm text-slate-500">
-                  {city}, {country}
-                </p>
               </div>
             </div>
 
@@ -277,23 +308,7 @@ export function ProfilePage() {
                   </p>
                 )}
               </div>
-              {/* Date of Birth */}
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-slate-400">
-                  Date of Birth
-                </p>
-                {isEditingPersonal ? (
-                  <Input
-                    value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
-                    className="h-9 rounded-lg text-sm font-medium"
-                  />
-                ) : (
-                  <p className="text-sm font-semibold text-slate-800">
-                    {dateOfBirth || "—"}
-                  </p>
-                )}
-              </div>
+
               {/* Email Address */}
               <div className="space-y-1.5">
                 <p className="text-xs font-medium text-slate-400">
@@ -346,89 +361,6 @@ export function ProfilePage() {
           </div>
         </div>
 
-        {/* Address Card */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          {/* Card Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h3 className="text-base font-semibold">Address</h3>
-            {isEditingAddress ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={handleCancelAddress}
-                  className="h-8 cursor-pointer rounded-lg px-3 text-xs font-medium text-slate-500 hover:bg-slate-100"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSaveAddress}
-                  className="h-8 cursor-pointer rounded-lg bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
-                >
-                  Save
-                </Button>
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={() => setIsEditingAddress(true)}
-                className="h-8 cursor-pointer rounded-lg border-slate-300 px-4 text-xs font-medium text-slate-600 hover:bg-slate-50"
-              >
-                <Edit3 className="mr-1.5 size-3.5" />
-                Edit
-              </Button>
-            )}
-          </div>
-          {/* Card Body */}
-          <div className="px-6 py-5">
-            <div className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Country */}
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-slate-400">Country</p>
-                {isEditingAddress ? (
-                  <Input
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    className="h-9 rounded-lg text-sm font-medium"
-                  />
-                ) : (
-                  <p className="text-sm font-semibold text-slate-800">
-                    {country}
-                  </p>
-                )}
-              </div>
-              {/* City */}
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-slate-400">City</p>
-                {isEditingAddress ? (
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="h-9 rounded-lg text-sm font-medium"
-                  />
-                ) : (
-                  <p className="text-sm font-semibold text-slate-800">{city}</p>
-                )}
-              </div>
-              {/* Postal Code */}
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-slate-400">
-                  Postal Code
-                </p>
-                {isEditingAddress ? (
-                  <Input
-                    value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
-                    className="h-9 rounded-lg text-sm font-medium"
-                  />
-                ) : (
-                  <p className="text-sm font-semibold text-slate-800">
-                    {postalCode}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </>
   );

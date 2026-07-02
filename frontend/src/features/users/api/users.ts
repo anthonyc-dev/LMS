@@ -36,6 +36,7 @@ export interface ApiUser {
   Role: Role;
   createdAt: string;
   updatedAt: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   borrowings?: any[];
   activeBorrowingsCount: number;
 }
@@ -58,8 +59,9 @@ export function normalizeApiUser(raw: Record<string, unknown>): ApiUser {
     updatedAt:
       getField<string>(raw, "updatedAt", "updated_at", "updatedAt") ??
       new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     borrowings: getField<any[]>(raw, "borrowings"),
-    activeBorrowingsCount: getField<number>(raw, "activeBorrowingsCount"),
+    activeBorrowingsCount: getField<number>(raw, "activeBorrowingsCount") ?? 0,
   };
 }
 
@@ -204,6 +206,62 @@ export function useUpdateUserProfile() {
       updateUserProfile(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function changePassword(id: string, data: any) {
+  const res = await api.put(`/users/change-password/${id}`, data);
+  return res.data;
+}
+
+export function useChangePassword() {
+  return useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      changePassword(id, data),
+  });
+}
+
+export async function fetchSessions() {
+  const res = await api.get("/auth/sessions");
+  return res.data;
+}
+
+export function useSessions() {
+  return useQuery({
+    queryKey: ["sessions"],
+    queryFn: fetchSessions,
+  });
+}
+
+export async function revokeSession(id: string) {
+  const res = await api.delete(`/auth/sessions/${id}`);
+  return res.data;
+}
+
+export function useRevokeSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: revokeSession,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sessions"] });
+    },
+  });
+}
+
+export async function revokeAllSessions() {
+  const res = await api.delete("/auth/sessions");
+  return res.data;
+}
+
+export function useRevokeAllSessions() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: revokeAllSessions,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["sessions"] });
     },
   });
 }

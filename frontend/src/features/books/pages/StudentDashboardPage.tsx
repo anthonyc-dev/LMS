@@ -1,11 +1,21 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getUserAnalytics } from "@/features/books/services/dashboardApi";
 import { useAuthStore } from "@/app/store/authStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
 import { Input } from "@/shared/components/ui/input";
-import { InputGroup, InputGroupAddon } from "@/shared/components/ui/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+} from "@/shared/components/ui/input-group";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import {
@@ -119,9 +129,14 @@ export function StudentDashboardPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["user-analytics"],
+    queryFn: getUserAnalytics,
+  });
+
   // Goal tracking states
-  const readBooksCount = 5;
   const goalBooksCount = 12;
+  const readBooksCount = stats?.readBooksCount || 0;
   const progressPercent = Math.round((readBooksCount / goalBooksCount) * 100);
 
   // Math for SVG Progress ring
@@ -129,29 +144,8 @@ export function StudentDashboardPage() {
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset = ringCircumference * (1 - readBooksCount / goalBooksCount);
 
-  // Stateful books array for interactions
-  const [borrowedBooks, setBorrowedBooks] = useState([
-    {
-      id: 1,
-      title: "Steve Jobs",
-      author: "Walter Isaacson",
-      dueDate: "Jun 01, 2026",
-      daysRemaining: 8,
-      totalDays: 14,
-      cover: book1Img,
-      category: "Biography",
-    },
-    {
-      id: 2,
-      title: "Deep Work",
-      author: "Cal Newport",
-      dueDate: "May 27, 2026",
-      daysRemaining: 3,
-      totalDays: 14,
-      cover: bookDark1Img,
-      category: "Technology",
-    },
-  ]);
+  // Stateful books array for interactions (using API data as initial state)
+  const borrowedBooks = stats?.activeLoans || [];
 
   const [greeting, _setGreeting] = useState(() => {
     const h = new Date().getHours();
@@ -166,24 +160,18 @@ export function StudentDashboardPage() {
     }
   };
 
-  const handleRenewBook = (id: number) => {
-    setBorrowedBooks((prev) =>
-      prev.map((book) => {
-        if (book.id === id) {
-          toast.success(
-            `Extended checkout for "${book.title}"! Due date updated.`,
-          );
-          return {
-            ...book,
-            daysRemaining: book.daysRemaining + 7,
-            totalDays: book.totalDays + 7,
-            dueDate: "Jun 08, 2026",
-          };
-        }
-        return book;
-      }),
-    );
+  const handleRenewBook = (id: string) => {
+    // This will be replaced by a real API call later
+    toast.info(`Renew functionality for book ${id} will trigger a backend call in the future`);
   };
+
+  if (isLoading || !stats) {
+    return (
+      <div className="flex h-screen items-center justify-center text-slate-500">
+        Loading dashboard data...
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in mx-auto max-w-[1600px] space-y-6 pb-12">
@@ -258,7 +246,7 @@ export function StudentDashboardPage() {
                 Checked Out
               </span>
               <h3 className="text-2xl leading-normal font-black text-slate-800">
-                {borrowedBooks.length}{" "}
+                {stats.checkedOut}{" "}
                 <span className="text-xs font-semibold text-slate-400">
                   books
                 </span>
@@ -278,24 +266,24 @@ export function StudentDashboardPage() {
         </Card>
 
         {/* Return Countdown Deadline */}
-        <Card className="group transition-all duration-300 hover:border-warning-bg hover:shadow-md">
+        <Card className="group hover:border-warning-bg transition-all duration-300 hover:shadow-md">
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div className="space-y-1">
               <span className="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
                 Next Deadline
               </span>
               <h3 className="text-2xl leading-normal font-black text-slate-800">
-                {borrowedBooks.length > 0
-                  ? `${Math.min(...borrowedBooks.map((b) => b.daysRemaining))} Days`
+                {stats.nextDeadlineDays !== "None"
+                  ? `${stats.nextDeadlineDays} Days`
                   : "None"}
               </h3>
               <p className="text-[10px] font-semibold text-slate-500">
-                {borrowedBooks.length > 0
-                  ? `Due: ${borrowedBooks.reduce((min, b) => (b.daysRemaining < min.daysRemaining ? b : min), borrowedBooks[0]).dueDate}`
+                {stats.nextDeadlineDate !== "All clear"
+                  ? `Due: ${stats.nextDeadlineDate}`
                   : "All clear"}
               </p>
             </div>
-            <div className="animate-pulse rounded-xl bg-warning-bg p-3 text-warning-text transition-transform group-hover:scale-110">
+            <div className="bg-warning-bg text-warning-text animate-pulse rounded-xl p-3 transition-transform group-hover:scale-110">
               <Clock className="size-5" />
             </div>
           </CardContent>
@@ -350,21 +338,28 @@ export function StudentDashboardPage() {
         </Card>
 
         {/* Fines & Violations Status */}
-        <Card className="group transition-all duration-300 hover:border-success-bg hover:shadow-md">
+        <Card className="group hover:border-success-bg transition-all duration-300 hover:shadow-md">
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div className="space-y-1">
               <span className="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
                 Outstanding Fines
               </span>
               <h3 className="text-2xl leading-normal font-black text-slate-800">
-                $0.00
+                ${stats.outstandingFines.toFixed(2)}
               </h3>
-              <Badge className="flex w-fit items-center gap-0.5 border-none bg-success-bg0/10 text-[8px] font-bold text-success-bg0 hover:bg-success-bg0/10">
-                <ShieldCheck size={10} />
-                <span>Account Safe</span>
-              </Badge>
+              {stats.outstandingFines === 0 ? (
+                <Badge className="bg-success-bg0/10 text-success-bg0 hover:bg-success-bg0/10 flex w-fit items-center gap-0.5 border-none text-[8px] font-bold">
+                  <ShieldCheck size={10} />
+                  <span>Account Safe</span>
+                </Badge>
+              ) : (
+                <Badge className="bg-error-bg0/10 text-error-bg0 hover:bg-error-bg0/10 flex w-fit items-center gap-0.5 border-none text-[8px] font-bold">
+                  <Award size={10} />
+                  <span>Fines Unpaid</span>
+                </Badge>
+              )}
             </div>
-            <div className="rounded-xl bg-success-bg p-3 text-success-text transition-transform group-hover:scale-110">
+            <div className="bg-success-bg text-success-text rounded-xl p-3 transition-transform group-hover:scale-110">
               <Award className="size-5" />
             </div>
           </CardContent>
@@ -476,7 +471,7 @@ export function StudentDashboardPage() {
                 Weekly analysis of study time (Hours)
               </p>
             </div>
-            <TrendingUp className="size-4 text-success-bg0" />
+            <TrendingUp className="text-success-bg0 size-4" />
           </CardHeader>
           <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={180}>
@@ -571,7 +566,7 @@ export function StudentDashboardPage() {
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 rounded bg-white/95 px-1 py-0.5 shadow-xs backdrop-blur-md">
-                    <Star className="size-2.5 fill-warning-text text-warning-text" />
+                    <Star className="fill-warning-text text-warning-text size-2.5" />
                     <span className="text-[8px] font-black text-slate-700">
                       {book.rating}
                     </span>
@@ -613,10 +608,10 @@ export function StudentDashboardPage() {
                       <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-blue-500" />
                     )}
                     {evt.type === "social" && (
-                      <span className="inline-block h-2 w-2 rounded-full bg-warning-bg0" />
+                      <span className="bg-warning-bg0 inline-block h-2 w-2 rounded-full" />
                     )}
                     {evt.type === "health" && (
-                      <span className="inline-block h-2 w-2 rounded-full bg-success-bg0" />
+                      <span className="bg-success-bg0 inline-block h-2 w-2 rounded-full" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">

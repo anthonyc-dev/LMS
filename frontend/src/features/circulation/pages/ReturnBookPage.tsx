@@ -98,6 +98,7 @@ export function ReturnBookPage() {
       toast.success("Book returned successfully!");
       setScannedBarcode(""); // Reset view
       setFines([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to process return");
     }
@@ -130,6 +131,7 @@ export function ReturnBookPage() {
   useEffect(() => {
     if (borrowing) {
       if (borrowing.bookCopy?.condition) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setReturnCondition(borrowing.bookCopy.condition);
       } else {
         setReturnCondition("GOOD");
@@ -355,7 +357,7 @@ export function ReturnBookPage() {
                   </span>
                   <Select
                     value={returnCondition}
-                    onValueChange={(val: string) => setReturnCondition(val)}
+                    onValueChange={(val) => { if (val) setReturnCondition(val); }}
                   >
                     <SelectTrigger className="h-8 w-32 bg-white text-xs font-bold text-slate-700">
                       <SelectValue />
@@ -435,6 +437,7 @@ export function ReturnBookPage() {
                           <Label className="text-xs text-slate-500">Type</Label>
                           <Select
                             value={fine.type}
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             onValueChange={(val: any) =>
                               handleUpdateFine(fine.id, "type", val)
                             }
@@ -455,6 +458,7 @@ export function ReturnBookPage() {
                           </Label>
                           <Select
                             value={fine.status}
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             onValueChange={(val: any) =>
                               handleUpdateFine(fine.id, "status", val)
                             }

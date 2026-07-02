@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getAdminAnalytics } from "@/features/books/services/dashboardApi";
 import { useAuthStore } from "@/app/store/authStore";
 import {
   Card,
@@ -43,16 +45,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 
-// Mock Data
-const borrowingTrendsData = [
-  { month: "Jan", checkouts: 120, returns: 100 },
-  { month: "Feb", checkouts: 150, returns: 130 },
-  { month: "Mar", checkouts: 180, returns: 160 },
-  { month: "Apr", checkouts: 220, returns: 175 },
-  { month: "May", checkouts: 195, returns: 185 },
-  { month: "Jun", checkouts: 250, returns: 210 },
-];
-
+// Traffic data remains mocked since we don't have visitor tracking yet
 const trafficData = [
   { day: "Mon", visitors: 145 },
   { day: "Tue", visitors: 262 },
@@ -63,61 +56,15 @@ const trafficData = [
   { day: "Sun", visitors: 95 },
 ];
 
-const categoryDistribution = [
-  { name: "Technology", value: 35, color: "#2563EB" },
-  { name: "Science", value: 25, color: "#3B82F6" },
-  { name: "Fiction", value: 20, color: "#60A5FA" },
-  { name: "History", value: 15, color: "#94A3B8" },
-  { name: "Arts", value: 5, color: "#CBD5E1" },
-];
-
-const recentLogs = [
-  {
-    id: 1,
-    type: "loan",
-    user: "Alexander Smith",
-    book: "Introduction to Quantum Physics",
-    time: "3 mins ago",
-    status: "success",
-  },
-  {
-    id: 2,
-    type: "return",
-    user: "Emily Watson",
-    book: "Advanced Data Structures & Algorithms",
-    time: "14 mins ago",
-    status: "info",
-  },
-  {
-    id: 3,
-    type: "overdue",
-    user: "Marcus Johnson",
-    book: "A History of Modern Art",
-    time: "1 hour ago",
-    status: "warning",
-  },
-  {
-    id: 4,
-    type: "user",
-    user: "Sarah Jenkins",
-    book: "New Student Account registered",
-    time: "2 hours ago",
-    status: "success",
-  },
-  {
-    id: 5,
-    type: "acquisition",
-    user: "Dr. David Vance",
-    book: "Suggested purchase: Neural Networks V2",
-    time: "3 hours ago",
-    status: "purple",
-  },
-];
-
 export function AdminDashboardPage() {
   usePageTitle("Admin Dashboard");
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["admin-analytics"],
+    queryFn: getAdminAnalytics,
+  });
+
   // HUD simulation states for interactive visual metrics
   const [cpuUsage, setCpuUsage] = useState(24);
   const [latency, setLatency] = useState(48);
@@ -144,6 +91,10 @@ export function AdminDashboardPage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  if (isLoading || !stats) {
+    return <div className="flex h-screen items-center justify-center text-slate-500">Loading dashboard data...</div>;
+  }
 
   return (
     <div className="animate-fade-in mx-auto max-w-[1600px] space-y-6 pb-12">
@@ -225,14 +176,14 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Total Catalog
               </span>
-              <h3 className="text-2xl font-black text-slate-800">18,450</h3>
+              <h3 className="text-2xl font-black text-slate-800">{stats.totalCatalog.toLocaleString()}</h3>
             </div>
             <div className="space-y-1.5 pt-1">
               <div className="flex justify-between text-[10px] font-bold text-slate-500">
                 <span>Available</span>
-                <span>86%</span>
+                <span>{Math.round(((stats.totalCatalog - stats.activeBorrows) / (stats.totalCatalog || 1)) * 100)}%</span>
               </div>
-              <Progress value={86} className="h-1.5 bg-slate-100" />
+              <Progress value={((stats.totalCatalog - stats.activeBorrows) / (stats.totalCatalog || 1)) * 100} className="h-1.5 bg-slate-100" />
             </div>
           </CardContent>
         </Card>
@@ -252,11 +203,11 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Active Members
               </span>
-              <h3 className="text-2xl font-black text-slate-800">3,240</h3>
+              <h3 className="text-2xl font-black text-slate-800">{stats.activeMembers.toLocaleString()}</h3>
             </div>
             <p className="text-[11px] font-medium text-slate-500">
               Daily active users:{" "}
-              <span className="font-bold text-slate-800">768 online</span>
+              <span className="font-bold text-slate-800">Online now</span>
             </p>
           </CardContent>
         </Card>
@@ -276,14 +227,14 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Active Borrows
               </span>
-              <h3 className="text-2xl font-black text-slate-800">856</h3>
+              <h3 className="text-2xl font-black text-slate-800">{stats.activeBorrows.toLocaleString()}</h3>
             </div>
             <div className="space-y-1.5 pt-1">
               <div className="flex justify-between text-[10px] font-bold text-slate-500">
                 <span>Returns Rate</span>
-                <span>78%</span>
+                <span>{Math.round(((stats.activeBorrows - stats.overdueAlerts) / (stats.activeBorrows || 1)) * 100)}%</span>
               </div>
-              <Progress value={78} className="h-1.5 bg-slate-100" />
+              <Progress value={((stats.activeBorrows - stats.overdueAlerts) / (stats.activeBorrows || 1)) * 100} className="h-1.5 bg-slate-100" />
             </div>
           </CardContent>
         </Card>
@@ -303,11 +254,13 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Overdue Alert
               </span>
-              <h3 className="text-error-text text-2xl font-black">42</h3>
+              <h3 className="text-error-text text-2xl font-black">{stats.overdueAlerts}</h3>
             </div>
             <p className="text-[11px] font-medium text-slate-500">
               Overdue rate:{" "}
-              <span className="text-error-bg0 font-bold">4.9% of loans</span>
+              <span className="text-error-bg0 font-bold">
+                {((stats.overdueAlerts / (stats.activeBorrows || 1)) * 100).toFixed(1)}% of loans
+              </span>
             </p>
           </CardContent>
         </Card>
@@ -327,7 +280,7 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Fine Collections
               </span>
-              <h3 className="text-2xl font-black text-slate-800">$1,245.50</h3>
+              <h3 className="text-2xl font-black text-slate-800">${stats.fineCollections.toFixed(2)}</h3>
             </div>
             <div className="space-y-1.5 pt-1">
               <div className="flex justify-between text-[10px] font-bold text-slate-500">
@@ -365,7 +318,7 @@ export function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="pt-6">
             <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={borrowingTrendsData} barGap={6}>
+              <BarChart data={stats.borrowingTrendsData} barGap={6}>
                 <defs>
                   <linearGradient id="checkoutGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#2563EB" stopOpacity={0.9} />
@@ -515,7 +468,7 @@ export function AdminDashboardPage() {
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie
-                  data={categoryDistribution}
+                  data={stats.categoryDistribution}
                   cx="50%"
                   cy="50%"
                   innerRadius={65}
@@ -523,7 +476,7 @@ export function AdminDashboardPage() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {categoryDistribution.map((entry, index) => (
+                  {stats.categoryDistribution.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -541,7 +494,7 @@ export function AdminDashboardPage() {
 
             {/* Custom Interactive Legend */}
             <div className="mt-4 grid w-full grid-cols-3 gap-2 text-[10px] font-bold text-slate-500">
-              {categoryDistribution.map((entry, idx) => (
+              {stats.categoryDistribution.map((entry, idx) => (
                 <div key={idx} className="flex items-center gap-1.5 truncate">
                   <span
                     className="h-2 w-2 shrink-0 rounded-full"
@@ -577,7 +530,7 @@ export function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="scrollbar-hide h-[340px] overflow-auto p-0">
             <div className="divide-y divide-slate-50">
-              {recentLogs.map((log) => (
+              {stats.recentLogs.map((log) => (
                 <div
                   key={log.id}
                   className="flex items-start justify-between gap-4 p-4 transition-colors hover:bg-slate-50/50"

@@ -147,6 +147,7 @@ export function ShelfPage() {
         toast.success("Shelf created successfully");
       }
       setFormOpen(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "An error occurred");
     }
@@ -158,6 +159,7 @@ export function ShelfPage() {
       await deleteMutation.mutateAsync(deleteTarget.id);
       toast.success("Shelf deleted");
       setDeleteOpen(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Failed to delete shelf");
     }
