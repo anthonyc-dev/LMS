@@ -1,6 +1,6 @@
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from '../../common/guard/auth.guard';
+import { AuthGuard } from '../../../common/guard/auth.guard';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
