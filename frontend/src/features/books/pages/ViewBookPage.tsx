@@ -48,9 +48,11 @@ export function ViewBookPage() {
           description: "You can view your borrowed books in My Books.",
         });
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
         toast.error(
-          err.response?.data?.message || "Failed to borrow book. Please try again.",
+          err.response?.data?.message ||
+            "Failed to borrow book. Please try again.",
         );
       },
     });
@@ -174,9 +176,7 @@ export function ViewBookPage() {
                 </AlertDialogTitle>
                 <AlertDialogDescription>
                   You are about to borrow{" "}
-                  <span className="font-bold text-slate-900">
-                    {book.title}
-                  </span>
+                  <span className="font-bold text-slate-900">{book.title}</span>
                   . The due date will be{" "}
                   <span className="font-bold text-slate-900">
                     {dueDateFormatted}

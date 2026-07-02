@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RefreshToken } from 'src/modules/auth/entities/refresh-token.entity';
-import { User } from 'src/modules/users/entities/user.entity';
+import { RefreshToken } from 'src/modules/identity/auth/entities/refresh-token.entity';
+import { User } from 'src/modules/identity/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
-import { Session } from 'src/modules/auth/entities/session.entity';
+import { Session } from 'src/modules/identity/auth/entities/session.entity';
 
 @Injectable()
 export class RefreshTokenService {

@@ -233,6 +233,7 @@ export function AddBookPage() {
           setCreatedBookId(data.id);
           setShowPromptModal(true);
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (err: any) => {
           const errMsg =
             err?.response?.data?.message ||

@@ -194,6 +194,7 @@ const SchedulePage = () => {
       await returnMutation.mutateAsync({ borrowingId: id });
       toast.success("Book returned successfully");
       setSelectedEvent(null);
+    // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Failed to return book");
     }

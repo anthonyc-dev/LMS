@@ -76,6 +76,7 @@ export function BookCopiesPage() {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
+      // eslint-disable-next-line react-hooks/immutability
       setPage(1);
     }, 300);
     return () => clearTimeout(handler);
@@ -140,6 +141,7 @@ export function BookCopiesPage() {
     setBarcodeOpen(true);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSave = async (data: any) => {
     try {
       if (editTarget) {
@@ -221,6 +223,7 @@ export function BookCopiesPage() {
           }
         }
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "An error occurred");
     }
@@ -232,6 +235,7 @@ export function BookCopiesPage() {
       await deleteMutation.mutateAsync(deleteTarget.id);
       toast.success("Book copy deleted");
       setDeleteOpen(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message || "Failed to delete book copy",

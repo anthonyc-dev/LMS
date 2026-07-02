@@ -55,6 +55,7 @@ export function EditBookModal({
 
   useEffect(() => {
     if (book) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         title: book.title || "",
         author: book.author || "",

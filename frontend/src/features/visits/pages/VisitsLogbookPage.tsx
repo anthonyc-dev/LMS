@@ -101,6 +101,7 @@ export function VisitsLogbookPage() {
         // Refocus after scan
         scanInputRef.current?.focus();
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onError: (err: any) => {
         toast.error("Scan Failed", {
           description: err.response?.data?.message || "User not found.",
@@ -114,7 +115,7 @@ export function VisitsLogbookPage() {
     if (!visits) return [];
     const q = search.toLowerCase();
 
-    let list = visits.filter((v: Visit) => {
+    const list = visits.filter((v: Visit) => {
       const matchSearch =
         v.user.fullName.toLowerCase().includes(q) ||
         v.user.schoolId.toLowerCase().includes(q);
@@ -135,6 +136,7 @@ export function VisitsLogbookPage() {
               const start = startOfDay(parseISO(customDateRange.from));
               const end = endOfDay(parseISO(customDateRange.to));
               matchDate = isWithinInterval(d, { start, end });
+            // eslint-disable-next-line unused-imports/no-unused-vars
             } catch (e) {
               matchDate = true;
             }
@@ -304,6 +306,7 @@ export function VisitsLogbookPage() {
                     <button
                       key={tab.value}
                       onClick={() => {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         setStatusTab(tab.value as any);
                         setPage(1);
                       }}
@@ -324,6 +327,7 @@ export function VisitsLogbookPage() {
                 <NativeSelect
                   value={dateFilter}
                   onChange={(e) => {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     setDateFilter(e.target.value as any);
                     setPage(1);
                   }}

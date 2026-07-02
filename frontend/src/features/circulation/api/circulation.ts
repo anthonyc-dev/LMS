@@ -63,6 +63,7 @@ export const useBookCopyByBarcode = (barcode: string) => {
   });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const useBorrowings = (filters?: any) => {
   return useQuery({
     queryKey: ["borrowings", filters],
@@ -87,6 +88,7 @@ export const useActiveBorrowingByBarcode = (barcode: string) => {
       const borrowingsRes = await api.get("/borrowings");
       const borrowings = borrowingsRes.data;
       const active = borrowings.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (b: any) =>
           b.bookCopy?.id === copy.id &&
           (b.status === "borrowed" ||

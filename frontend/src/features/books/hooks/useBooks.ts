@@ -97,6 +97,7 @@ export const useUpdateBook = () => {
         BOOKS_QUERY_KEYS.detail(id),
       );
 
+      // eslint-disable-next-line unused-imports/no-unused-vars
       const { coverImage, ...updateData } = data;
 
       if (previousBook) {

@@ -167,6 +167,7 @@ export function ViewUserModal({ open, onClose, user }: ViewUserModalProps) {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       {borrowings.map((b: any) => (
                         <tr
                           key={b.id}

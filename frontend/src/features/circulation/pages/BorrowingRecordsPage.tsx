@@ -103,7 +103,7 @@ export function BorrowingRecordsPage() {
     if (!borrowings) return [];
     const q = search.toLowerCase();
 
-    let list = borrowings.filter((r: Borrowing) => {
+    const list = borrowings.filter((r: Borrowing) => {
       const matchSearch =
         (r.bookCopy?.book.title || "").toLowerCase().includes(q) ||
         (r.user?.fullName || "").toLowerCase().includes(q) ||
@@ -225,6 +225,7 @@ export function BorrowingRecordsPage() {
                   <button
                     key={tab.value}
                     onClick={() => {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       setStatusTab(tab.value as any);
                       setPage(1);
                     }}

@@ -155,6 +155,7 @@ export function BorrowBookPage() {
       setScannedBooks((prev) => [...prev, copy]);
 
       toast.success("Book added to queue");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to find book copy.");
     } finally {
@@ -206,6 +207,7 @@ export function BorrowBookPage() {
           setBarcodeSearch("");
           setBorrowerSearch("");
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (err: any) => {
           toast.error(
             err.response?.data?.message ||

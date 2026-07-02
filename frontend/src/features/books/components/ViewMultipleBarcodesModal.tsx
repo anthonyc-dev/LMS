@@ -20,6 +20,7 @@ function SingleBarcodeDisplay({ copy }: { copy: BookCopy }) {
 
   useEffect(() => {
     if (!barcodeBlob) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBarcodeSrc("");
       return;
     }
