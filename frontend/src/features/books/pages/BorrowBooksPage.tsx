@@ -1,117 +1,33 @@
-import { Fragment } from "react";
-import {
-  Plus,
-  Clock,
-  BookOpen,
-  Heart,
-  TrendingUp,
-  ArrowRight,
-} from "lucide-react";
+import { useMemo } from "react";
+import { Plus, Clock, BookOpen, ArrowRight } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent } from "@/shared/components/ui/card";
 
 // Asset imports
 import bannerImg from "@/assets/images/dashboard/banner.png";
-import book1Img from "@/assets/images/dashboard/book1.png";
-import book2Img from "@/assets/images/dashboard/book2.png";
-import author1Img from "@/assets/images/dashboard/author1.png";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
-
-const ON_LOAN_BOOKS = [
-  {
-    id: 1,
-    title: "A Promised Land",
-    author: "Barack Obama",
-    due: "02/02/22",
-    image: book1Img,
-    color: "from-gray-100 to-gray-200",
-  },
-  {
-    id: 2,
-    title: "Write Who You Are",
-    author: "April Hartman",
-    due: "12/02/22",
-    image: book2Img,
-    color: "from-red-400 to-red-500",
-  },
-  {
-    id: 3,
-    title: "Wuthering Heights",
-    author: "Emily Brontë",
-    due: "22/02/22",
-    image: book2Img,
-    color: "from-slate-600 to-slate-700",
-  },
-  {
-    id: 4,
-    title: "A God In Ruins",
-    author: "Kate Atkinson",
-    due: "22/02/22",
-    image: book1Img,
-    color: "from-red-300 to-red-400",
-  },
-  {
-    id: 5,
-    title: "What Echo Heard",
-    author: "Gordon Sombrowski",
-    due: "22/02/22",
-    image: book2Img,
-    color: "from-blue-100 to-blue-200",
-  },
-  {
-    id: 6,
-    title: "The Bone Clocks",
-    author: "Gillian Flynn",
-    due: "22/02/22",
-    image: book1Img,
-    color: "from-blue-800 to-blue-900",
-  },
-];
-
-const RESERVED_BOOKS = [
-  {
-    title: "The Secret Lives of Colours",
-    author: "David Bergen",
-    due: "22/02/22",
-    image: book1Img,
-  },
-  {
-    title: "Here the Dark",
-    author: "David Bergen",
-    due: "22/02/22",
-    image: book2Img,
-  },
-  {
-    title: "Klara and the Sun",
-    author: "Gillian Flynn",
-    due: "22/02/22",
-    image: book1Img,
-  },
-];
-
-const FAVORITE_AUTHORS = [
-  { name: "Emily Brontë", period: "1818 - 1848", image: author1Img },
-  {
-    name: "Alice Walker",
-    period: "1944 - present",
-    image: author1Img,
-    badge: "NEW RELEASE",
-  },
-  { name: "Chinua Achebe", period: "1930 - 2013", image: author1Img },
-];
-
-const POPULAR_READS = [
-  { title: "A Passage North", author: "Anuk Arudpragasam", image: book2Img },
-  {
-    title: "The Sweetness of Water",
-    author: "Nathan Harris",
-    image: book1Img,
-  },
-];
+import { useAuthStore } from "@/app/store/authStore";
+import { useBorrowingsByUser } from "@/features/circulation/api/circulation";
+import { format } from "date-fns";
+import { Link, useNavigate } from "react-router-dom";
 
 export function BorrowBooksPage() {
   usePageTitle("Borrow Books");
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const { data: borrowings } = useBorrowingsByUser(user?.id);
+
+  const activeBorrowings = useMemo(() => {
+    if (!borrowings) return [];
+
+    return borrowings.filter(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (b: any) =>
+        b.status === "borrowed" ||
+        b.status === "pending" ||
+        b.status === "overdue",
+    );
+  }, [borrowings]);
   return (
     <div className="mx-auto max-w-[1600px] space-y-8 md:space-y-10">
       {/* ── Banner Section ────────────────────────────────────────── */}
@@ -129,9 +45,9 @@ export function BorrowBooksPage() {
               to inspiring volumes for children, we&apos;re celebrating classic
               works and contemporary triumphs.
             </p>
-            <Button className="rounded-xl bg-[#FF7A59] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-warning-bg/50 transition-all hover:bg-[#FF6B49] hover:shadow-xl active:scale-[0.98]">
+            {/* <Button className="shadow-warning-bg/50 rounded-xl bg-[#FF7A59] px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#FF6B49] hover:shadow-xl active:scale-[0.98]">
               Find out more
-            </Button>
+            </Button> */}
           </div>
           <div className="relative w-48 shrink-0 sm:w-56 md:w-64">
             <img
@@ -155,47 +71,71 @@ export function BorrowBooksPage() {
               On Loan
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              {ON_LOAN_BOOKS.length} books currently borrowed
+              {activeBorrowings.length} books currently borrowed
             </p>
           </div>
           <Button
             variant="ghost"
             className="gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700"
-          >
-            View All <ArrowRight size={14} />
-          </Button>
+            render={
+              <Link to="/student/books/history">
+                View All <ArrowRight size={14} />
+              </Link>
+            }
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-          {ON_LOAN_BOOKS.map((book) => (
-            <div key={book.id} className="group cursor-pointer space-y-3">
-              <div
-                className={`relative aspect-3/4 overflow-hidden rounded-xl bg-linear-to-br shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl ${book.color}`}
-              >
-                <img
-                  src={book.image}
-                  alt={book.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="truncate text-sm font-bold text-slate-900">
-                  {book.title}
-                </h3>
-                <p className="truncate text-xs text-slate-500">{book.author}</p>
-                <div className="flex items-center gap-1.5">
-                  <Clock size={10} className="text-warning-bg0" />
-                  <span className="text-[10px] font-semibold text-warning-text">
-                    Due {book.due}
-                  </span>
+          {activeBorrowings.map(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (borrowing: any) => {
+              const book = borrowing.bookCopy?.book;
+              if (!book) return null;
+              return (
+                <div
+                  key={borrowing.id}
+                  className="group cursor-pointer space-y-3"
+                >
+                  <div
+                    className={`relative aspect-3/4 overflow-hidden rounded-xl bg-linear-to-br from-slate-100 to-slate-200 shadow-md transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl`}
+                  >
+                    {book.coverImage ? (
+                      <img
+                        src={book.coverImage}
+                        alt={book.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-slate-400">
+                        <BookOpen size={40} />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="truncate text-sm font-bold text-slate-900">
+                      {book.title}
+                    </h3>
+                    <p className="truncate text-xs text-slate-500">
+                      {book.author}
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <Clock size={10} className="text-warning-bg0" />
+                      <span className="text-warning-text text-[10px] font-semibold">
+                        Due {format(new Date(borrowing.dueDate), "dd/MM/yy")}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              );
+            },
+          )}
 
           {/* Add more card */}
-          <div className="group flex aspect-3/4 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-400 hover:bg-blue-50/50 hover:shadow-lg">
+          <div
+            onClick={() => navigate("/student/books/browse")}
+            className="group flex aspect-3/4 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-400 hover:bg-blue-50/50 hover:shadow-lg"
+          >
             <div className="flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-all group-hover:bg-blue-100 group-hover:text-blue-600">
               <Plus size={24} />
             </div>
@@ -209,7 +149,7 @@ export function BorrowBooksPage() {
       {/* ── Bottom Grid ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {/* Reserved Books */}
-        <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
+        {/* <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
           <CardContent className="p-5 sm:p-6">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900">
@@ -255,10 +195,10 @@ export function BorrowBooksPage() {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Favourite Authors */}
-        <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
+        {/* <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
           <CardContent className="p-5 sm:p-6">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900">
@@ -296,10 +236,10 @@ export function BorrowBooksPage() {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Popular Reads */}
-        <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
+        {/* <Card className="overflow-hidden rounded-2xl border border-slate-100 shadow-sm transition-shadow hover:shadow-md">
           <CardContent className="p-5 sm:p-6">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900">
@@ -341,7 +281,7 @@ export function BorrowBooksPage() {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

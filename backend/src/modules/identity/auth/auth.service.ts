@@ -230,7 +230,21 @@ export class AuthService {
       );
 
       if (existingToken) {
-        throw new UnauthorizedException('Access denied');
+        // Token Reuse Detected: The token is valid but was already revoked
+        console.warn(
+          `Token reuse detected for user ${userId}! Revoking entire session.`,
+        );
+        if (existingToken.session) {
+          await this.sessionRepository.update(
+            { id: existingToken.session.id },
+            { isRevoked: true },
+          );
+          await this.refreshTokenRepository.update(
+            { session: { id: existingToken.session.id } },
+            { isRevoked: true },
+          );
+        }
+        throw new UnauthorizedException('Access denied. Token reuse detected.');
       }
 
       throw new UnauthorizedException('Access denied');

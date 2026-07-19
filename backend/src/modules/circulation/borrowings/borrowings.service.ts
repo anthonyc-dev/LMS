@@ -103,13 +103,13 @@ export class BorrowingsService {
         bookCopyId: availableCopy.id,
         borrowDate: new Date(),
         dueDate,
-        status: BorrowingStatus.BORROWED,
+        status: BorrowingStatus.PENDING,
       });
 
       const saved = await borrowingRepository.save(borrowing);
 
-      // 6. Update copy status
-      availableCopy.status = BookCopyStatus.BORROWED;
+      // 6. Update copy status to RESERVED to lock it while pending
+      availableCopy.status = BookCopyStatus.RESERVED;
       await bookCopyRepository.save(availableCopy);
 
       // 7. Return complete entity
@@ -120,27 +120,109 @@ export class BorrowingsService {
 
       // 8. Send real-time notifications
       const bookTitle = availableCopy.book?.title || 'a book';
-      const dueDateStr = dueDate.toLocaleDateString('en-US', {
+
+      this.notificationsGateway.sendToUser(userId, {
+        type: 'BORROW_PENDING',
+        title: 'Borrow Request Pending',
+        message: `Your request to borrow "${bookTitle}" is pending admin confirmation.`,
+        data: { borrowingId: saved.id, bookId },
+      });
+
+      this.notificationsGateway.sendToRole('admin', {
+        type: 'NEW_BORROWING_REQUEST',
+        title: 'New Borrowing Request',
+        message: `${borrower.fullName} requested to borrow "${bookTitle}". Pending confirmation.`,
+        data: { borrowingId: saved.id, userId, bookId },
+      });
+
+      return result;
+    });
+  }
+
+  async confirmBorrowing(id: string) {
+    return this.dataSource.transaction(async (manager) => {
+      const borrowingRepository = manager.getRepository(Borrowing);
+      const bookCopyRepository = manager.getRepository(BookCopy);
+
+      const borrowing = await borrowingRepository.findOne({
+        where: { id },
+        relations: { user: true, bookCopy: { book: true } },
+      });
+
+      if (!borrowing) throw new NotFoundException('Borrowing record not found');
+      if (borrowing.status !== BorrowingStatus.PENDING) {
+        throw new BadRequestException('Borrowing is not in pending status');
+      }
+
+      // Update borrowing status
+      borrowing.status = BorrowingStatus.BORROWED;
+
+      // Update book copy status
+      const copy = borrowing.bookCopy;
+      if (copy) {
+        copy.status = BookCopyStatus.BORROWED;
+        await bookCopyRepository.save(copy);
+      }
+
+      await borrowingRepository.save(borrowing);
+
+      // Notify user
+      const bookTitle = copy?.book?.title || 'a book';
+      const dueDateStr = borrowing.dueDate.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
       });
 
-      this.notificationsGateway.sendToUser(userId, {
+      this.notificationsGateway.sendToUser(borrowing.userId, {
         type: 'BORROW_CONFIRMED',
-        title: 'Book Borrowed Successfully',
-        message: `You have borrowed "${bookTitle}". Due date: ${dueDateStr}.`,
-        data: { borrowingId: saved.id, bookId },
+        title: 'Borrow Request Confirmed',
+        message: `Your request to borrow "${bookTitle}" has been confirmed by an admin. Due date: ${dueDateStr}.`,
+        data: { borrowingId: id, bookId: copy?.bookId },
       });
 
-      this.notificationsGateway.sendToRole('admin', {
-        type: 'NEW_BORROWING',
-        title: 'New Borrowing',
-        message: `${borrower.fullName} borrowed "${bookTitle}".`,
-        data: { borrowingId: saved.id, userId, bookId },
+      return borrowing;
+    });
+  }
+
+  async rejectBorrowing(id: string) {
+    return this.dataSource.transaction(async (manager) => {
+      const borrowingRepository = manager.getRepository(Borrowing);
+      const bookCopyRepository = manager.getRepository(BookCopy);
+
+      const borrowing = await borrowingRepository.findOne({
+        where: { id },
+        relations: { user: true, bookCopy: { book: true } },
       });
 
-      return result;
+      if (!borrowing) throw new NotFoundException('Borrowing record not found');
+      if (borrowing.status !== BorrowingStatus.PENDING) {
+        throw new BadRequestException('Borrowing is not in pending status');
+      }
+
+      // Update borrowing status
+      borrowing.status = BorrowingStatus.REJECTED;
+
+      // Update book copy status back to available
+      const copy = borrowing.bookCopy;
+      if (copy) {
+        copy.status = BookCopyStatus.AVAILABLE;
+        await bookCopyRepository.save(copy);
+      }
+
+      await borrowingRepository.save(borrowing);
+
+      // Notify user
+      const bookTitle = copy?.book?.title || 'a book';
+
+      this.notificationsGateway.sendToUser(borrowing.userId, {
+        type: 'BORROW_REJECTED',
+        title: 'Borrow Request Rejected',
+        message: `Your request to borrow "${bookTitle}" was not approved by the admin.`,
+        data: { borrowingId: id, bookId: copy?.bookId },
+      });
+
+      return borrowing;
     });
   }
 

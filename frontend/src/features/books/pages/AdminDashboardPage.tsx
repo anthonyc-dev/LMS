@@ -20,11 +20,7 @@ import {
   Plus,
   ArrowUpRight,
   Clock,
-  Cpu,
-  Database,
-  Wifi,
   CheckCircle2,
-  Calendar,
   Sparkles,
 } from "lucide-react";
 import {
@@ -58,7 +54,7 @@ const trafficData = [
 
 export function AdminDashboardPage() {
   usePageTitle("Admin Dashboard");
-  const { user } = useAuthStore();
+  const { user: _user } = useAuthStore();
   const navigate = useNavigate();
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-analytics"],
@@ -66,15 +62,15 @@ export function AdminDashboardPage() {
   });
 
   // HUD simulation states for interactive visual metrics
-  const [cpuUsage, setCpuUsage] = useState(24);
-  const [latency, setLatency] = useState(48);
+  const [_cpuUsage, setCpuUsage] = useState(24);
+  const [_latency, setLatency] = useState(48);
 
-  const currentDate = new Date().toLocaleDateString("en-US", {
+  /* const _currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
+  }); */
 
   useEffect(() => {
     // Simulate fluctuating server telemetry metrics
@@ -93,14 +89,18 @@ export function AdminDashboardPage() {
   }, []);
 
   if (isLoading || !stats) {
-    return <div className="flex h-screen items-center justify-center text-slate-500">Loading dashboard data...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center text-slate-500">
+        Loading dashboard data...
+      </div>
+    );
   }
 
   return (
     <div className="animate-fade-in mx-auto max-w-[1600px] space-y-6 pb-12">
       {/* Header and Welcome Panel */}
-      <div className="relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-xl md:flex-row md:items-center">
-        {/* Animated Background Elements */}
+      {/* <div className="relative flex flex-col items-start justify-between gap-4 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-xl md:flex-row md:items-center">
+       
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-24 -left-24 h-96 w-96 animate-pulse rounded-full bg-blue-500/5 blur-3xl" />
           <div className="absolute -right-24 -bottom-24 h-96 w-96 animate-pulse rounded-full bg-blue-500/5 blur-3xl delay-1000" />
@@ -120,7 +120,7 @@ export function AdminDashboardPage() {
           </p>
         </div>
 
-        {/* Real-time Telemetry Dashboard HUD */}
+      
         <div className="z-10 flex w-full flex-wrap items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/50 p-3.5 backdrop-blur-sm md:w-auto">
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
             <Cpu className="size-4 text-blue-400" />
@@ -157,7 +157,7 @@ export function AdminDashboardPage() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Primary KPI Metrics Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -176,14 +176,30 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Total Catalog
               </span>
-              <h3 className="text-2xl font-black text-slate-800">{stats.totalCatalog.toLocaleString()}</h3>
+              <h3 className="text-2xl font-black text-slate-800">
+                {stats.totalCatalog.toLocaleString()}
+              </h3>
             </div>
             <div className="space-y-1.5 pt-1">
               <div className="flex justify-between text-[10px] font-bold text-slate-500">
                 <span>Available</span>
-                <span>{Math.round(((stats.totalCatalog - stats.activeBorrows) / (stats.totalCatalog || 1)) * 100)}%</span>
+                <span>
+                  {Math.round(
+                    ((stats.totalCatalog - stats.activeBorrows) /
+                      (stats.totalCatalog || 1)) *
+                      100,
+                  )}
+                  %
+                </span>
               </div>
-              <Progress value={((stats.totalCatalog - stats.activeBorrows) / (stats.totalCatalog || 1)) * 100} className="h-1.5 bg-slate-100" />
+              <Progress
+                value={
+                  ((stats.totalCatalog - stats.activeBorrows) /
+                    (stats.totalCatalog || 1)) *
+                  100
+                }
+                className="h-1.5 bg-slate-100"
+              />
             </div>
           </CardContent>
         </Card>
@@ -203,7 +219,9 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Active Members
               </span>
-              <h3 className="text-2xl font-black text-slate-800">{stats.activeMembers.toLocaleString()}</h3>
+              <h3 className="text-2xl font-black text-slate-800">
+                {stats.activeMembers.toLocaleString()}
+              </h3>
             </div>
             <p className="text-[11px] font-medium text-slate-500">
               Daily active users:{" "}
@@ -227,14 +245,30 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Active Borrows
               </span>
-              <h3 className="text-2xl font-black text-slate-800">{stats.activeBorrows.toLocaleString()}</h3>
+              <h3 className="text-2xl font-black text-slate-800">
+                {stats.activeBorrows.toLocaleString()}
+              </h3>
             </div>
             <div className="space-y-1.5 pt-1">
               <div className="flex justify-between text-[10px] font-bold text-slate-500">
                 <span>Returns Rate</span>
-                <span>{Math.round(((stats.activeBorrows - stats.overdueAlerts) / (stats.activeBorrows || 1)) * 100)}%</span>
+                <span>
+                  {Math.round(
+                    ((stats.activeBorrows - stats.overdueAlerts) /
+                      (stats.activeBorrows || 1)) *
+                      100,
+                  )}
+                  %
+                </span>
               </div>
-              <Progress value={((stats.activeBorrows - stats.overdueAlerts) / (stats.activeBorrows || 1)) * 100} className="h-1.5 bg-slate-100" />
+              <Progress
+                value={
+                  ((stats.activeBorrows - stats.overdueAlerts) /
+                    (stats.activeBorrows || 1)) *
+                  100
+                }
+                className="h-1.5 bg-slate-100"
+              />
             </div>
           </CardContent>
         </Card>
@@ -254,12 +288,18 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Overdue Alert
               </span>
-              <h3 className="text-error-text text-2xl font-black">{stats.overdueAlerts}</h3>
+              <h3 className="text-error-text text-2xl font-black">
+                {stats.overdueAlerts}
+              </h3>
             </div>
             <p className="text-[11px] font-medium text-slate-500">
               Overdue rate:{" "}
               <span className="text-error-bg0 font-bold">
-                {((stats.overdueAlerts / (stats.activeBorrows || 1)) * 100).toFixed(1)}% of loans
+                {(
+                  (stats.overdueAlerts / (stats.activeBorrows || 1)) *
+                  100
+                ).toFixed(1)}
+                % of loans
               </span>
             </p>
           </CardContent>
@@ -280,7 +320,9 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Fine Collections
               </span>
-              <h3 className="text-2xl font-black text-slate-800">${stats.fineCollections.toFixed(2)}</h3>
+              <h3 className="text-2xl font-black text-slate-800">
+                ${stats.fineCollections.toFixed(2)}
+              </h3>
             </div>
             <div className="space-y-1.5 pt-1">
               <div className="flex justify-between text-[10px] font-bold text-slate-500">

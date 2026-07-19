@@ -40,12 +40,12 @@ const menuItems = [
       { label: "Borrowing History", path: "/student/books/history" },
     ],
   },
-  {
-    icon: Book,
-    label: "My Books",
-    path: "/student/my-books",
-    roles: ["student", "faculty"], // Example: might not need this for admin if admin has Admin Books
-  },
+  // {
+  //   icon: Book,
+  //   label: "My Books",
+  //   path: "/student/my-books",
+  //   roles: ["student", "faculty"], // Example: might not need this for admin if admin has Admin Books
+  // },
   {
     icon: CalendarIcon,
     label: "Schedule",

@@ -44,6 +44,8 @@ import { usePageTitle } from "@/shared/hooks/usePageTitle";
 
 import {
   useBorrowings,
+  useConfirmBorrowing,
+  useRejectBorrowing,
   type Borrowing,
   type BorrowingStatus,
 } from "@/features/circulation/api/circulation";
@@ -56,12 +58,25 @@ type SortDir = "asc" | "desc";
 export function statusConfig(status: BorrowingStatus) {
   switch (status) {
     case "borrowed":
-    case "pending":
       return {
         label: "Active",
         cls: "bg-blue-100 text-blue-700 border-blue-200",
         dot: "bg-blue-500",
         icon: BookOpen,
+      };
+    case "pending":
+      return {
+        label: "Pending",
+        cls: "bg-yellow-100 text-yellow-700 border-yellow-200",
+        dot: "bg-yellow-500",
+        icon: BookOpen,
+      };
+    case "rejected":
+      return {
+        label: "Rejected",
+        cls: "bg-slate-100 text-slate-700 border-slate-200",
+        dot: "bg-slate-500",
+        icon: X,
       };
     case "returned":
       return {
@@ -98,6 +113,8 @@ export function BorrowingRecordsPage() {
   const [selectedRecord, setSelectedRecord] = useState<Borrowing | null>(null);
 
   const { data: borrowings, isLoading, error } = useBorrowings();
+  const confirmMutation = useConfirmBorrowing();
+  const rejectMutation = useRejectBorrowing();
 
   const filtered = useMemo(() => {
     if (!borrowings) return [];
@@ -385,6 +402,18 @@ export function BorrowingRecordsPage() {
                             align="end"
                             className="w-[160px]"
                           >
+                            {record.status === 'pending' && (
+                              <>
+                                <DropdownMenuItem onClick={() => confirmMutation.mutate(record.id)}>
+                                  <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                                  <span>Confirm Borrowing</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => rejectMutation.mutate(record.id)}>
+                                  <X className="mr-2 h-4 w-4 text-red-500" />
+                                  <span>Reject Borrowing</span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
                             <DropdownMenuItem
                               onClick={() => setSelectedRecord(record)}
                             >

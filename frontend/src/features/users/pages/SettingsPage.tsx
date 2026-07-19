@@ -26,24 +26,7 @@ import {
   useUpdateUserProfile,
 } from "../api/users";
 import { toast } from "sonner";
-
-const ChromeIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    {...props}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="12" r="4" />
-    <line x1="21.17" x2="12" y1="8" y2="8" />
-    <line x1="3.95" x2="8.54" y1="6.06" y2="14" />
-    <line x1="10.88" x2="15.46" y1="21.94" y2="14" />
-  </svg>
-);
+import { Laptop } from "lucide-react";
 
 export function SettingsPage() {
   usePageTitle("Settings");
@@ -72,7 +55,7 @@ export function SettingsPage() {
           setNewEmail("");
         },
         onError: () => toast.error("Failed to update email"),
-      }
+      },
     );
   };
 
@@ -89,9 +72,11 @@ export function SettingsPage() {
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (err: any) => {
-          toast.error(err.response?.data?.message || "Failed to change password");
+          toast.error(
+            err.response?.data?.message || "Failed to change password",
+          );
         },
-      }
+      },
     );
   };
 
@@ -202,7 +187,9 @@ export function SettingsPage() {
           {isSessionsLoading ? (
             <div className="text-sm text-slate-500">Loading sessions...</div>
           ) : sessions.length === 0 ? (
-            <div className="text-sm text-slate-500">No active sessions found.</div>
+            <div className="text-sm text-slate-500">
+              No active sessions found.
+            </div>
           ) : (
             <div className="space-y-6">
               {/* Sessions List */}
@@ -215,12 +202,14 @@ export function SettingsPage() {
                       <div
                         key={session.id}
                         className={`flex items-center justify-between rounded-xl border p-4 transition-all hover:shadow-md ${
-                          isCurrent ? "border-slate-200 bg-slate-50" : "border-slate-100 bg-white"
+                          isCurrent
+                            ? "border-slate-200 bg-slate-50"
+                            : "border-slate-100 bg-white"
                         }`}
                       >
                         <div className="flex items-center gap-4">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200/50">
-                            <ChromeIcon className="size-[22px] text-slate-400" />
+                            <Laptop className="size-[22px] text-slate-400" />
                           </div>
                           <div className="flex flex-col gap-0.5">
                             <span className="text-sm font-semibold tracking-tight text-slate-900">
@@ -275,24 +264,31 @@ export function SettingsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEmailDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEmailDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button onClick={handleEmailSubmit} disabled={updateProfileMutation.isPending || !newEmail}>
-              Save Changes
+            <Button
+              onClick={handleEmailSubmit}
+              disabled={updateProfileMutation.isPending || !newEmail}
+            >
+              {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Change Password Dialog */}
-      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+      <Dialog
+        open={isPasswordDialogOpen}
+        onOpenChange={setIsPasswordDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
-              Update your account password.
-            </DialogDescription>
+            <DialogDescription>Update your account password.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -313,11 +309,21 @@ export function SettingsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsPasswordDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button onClick={handlePasswordSubmit} disabled={changePasswordMutation.isPending || !oldPassword || !newPassword}>
-              Update Password
+            <Button
+              onClick={handlePasswordSubmit}
+              disabled={
+                changePasswordMutation.isPending || !oldPassword || !newPassword
+              }
+            >
+              {changePasswordMutation.isPending
+                ? "Updating..."
+                : "Update Password"}
             </Button>
           </DialogFooter>
         </DialogContent>

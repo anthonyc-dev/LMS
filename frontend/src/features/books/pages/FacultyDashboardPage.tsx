@@ -15,13 +15,11 @@ import { Input } from "@/shared/components/ui/input";
 import { toast } from "sonner";
 import {
   BookOpen,
-  GraduationCap,
   PlusCircle,
   Eye,
   CheckCircle2,
   Clock,
   BookMarked,
-  Calendar,
   RotateCw,
   AlertCircle,
 } from "lucide-react";
@@ -63,7 +61,7 @@ const mockAcquisitions = [
 
 export function FacultyDashboardPage() {
   usePageTitle("Faculty Dashboard");
-  const { user } = useAuthStore();
+  const { user: _user } = useAuthStore();
   // Acquisition Request Form state
   const [reqTitle, setReqTitle] = useState("");
   const [reqAuthor, setReqAuthor] = useState("");
@@ -81,12 +79,12 @@ export function FacultyDashboardPage() {
   // Request lists
   const [acquisitions, setAcquisitions] = useState(mockAcquisitions);
 
-  const currentDate = new Date().toLocaleDateString("en-US", {
+  /* const _currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
+  }); */
 
   // Form submit handler
   const handleAcquisitionSubmit = (e: React.FormEvent) => {
@@ -135,7 +133,7 @@ export function FacultyDashboardPage() {
   return (
     <div className="animate-fade-in mx-auto max-w-[1600px] space-y-6 pb-12">
       {/* Welcome & Faculty Card Header */}
-      <div className="relative flex flex-col items-stretch justify-between gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:flex-row lg:items-center">
+      {/* <div className="relative flex flex-col items-stretch justify-between gap-4 overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:flex-row lg:items-center">
         <div className="absolute top-0 right-0 h-64 w-64 translate-x-12 -translate-y-12 rounded-full bg-slate-500/5 blur-3xl" />
         <div className="z-10 space-y-1.5">
           <div className="flex items-center gap-2">
@@ -174,7 +172,7 @@ export function FacultyDashboardPage() {
             </span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* KPI Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
