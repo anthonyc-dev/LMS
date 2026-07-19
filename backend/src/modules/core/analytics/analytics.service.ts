@@ -153,7 +153,10 @@ export class AnalyticsService {
     this.logger.log(`Fetching user dashboard stats for ${userId}`);
 
     const activeBorrows = await this.borrowingRepo.find({
-      where: { userId, status: BorrowingStatus.BORROWED },
+      where: [
+        { userId, status: BorrowingStatus.BORROWED },
+        { userId, status: BorrowingStatus.OVERDUE },
+      ],
       relations: { bookCopy: { book: { category: true } } },
     });
 

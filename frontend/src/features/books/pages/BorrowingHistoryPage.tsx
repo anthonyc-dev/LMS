@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -39,123 +39,28 @@ import {
 } from "@/shared/components/ui/select";
 import { Can } from "@/features/auth/components/Can";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { useAuthStore } from "@/app/store/authStore";
+import { useBorrowingsByUser } from "@/features/circulation/api/circulation";
+import { format } from "date-fns";
 
 // ---------------------------------------------------------------------------
 // Data
 // ---------------------------------------------------------------------------
 
-const HISTORY_DATA = [
-  {
-    id: "TX-9021",
-    user: "Alex Johnson",
-    email: "alex@example.com",
-    initials: "AJ",
-    book: "The Great Gatsby",
-    category: "Fiction",
-    borrowDate: "May 01, 2026",
-    dueDate: "May 15, 2026",
-    status: "Returned",
-  },
-  {
-    id: "TX-9022",
-    user: "Sarah Smith",
-    email: "sarah@example.com",
-    initials: "SS",
-    book: "Atomic Habits",
-    category: "Self-Help",
-    borrowDate: "May 05, 2026",
-    dueDate: "May 19, 2026",
-    status: "On Loan",
-  },
-  {
-    id: "TX-9023",
-    user: "Michael Brown",
-    email: "mike@example.com",
-    initials: "MB",
-    book: "Deep Work",
-    category: "Self-Help",
-    borrowDate: "Apr 28, 2026",
-    dueDate: "May 12, 2026",
-    status: "Overdue",
-  },
-  {
-    id: "TX-9024",
-    user: "Emily Davis",
-    email: "emily@example.com",
-    initials: "ED",
-    book: "The Alchemist",
-    category: "Fiction",
-    borrowDate: "May 10, 2026",
-    dueDate: "May 24, 2026",
-    status: "On Loan",
-  },
-  {
-    id: "TX-9025",
-    user: "Chris Wilson",
-    email: "chris@example.com",
-    initials: "CW",
-    book: "Steve Jobs",
-    category: "Biography",
-    borrowDate: "May 02, 2026",
-    dueDate: "May 16, 2026",
-    status: "Returned",
-  },
-  {
-    id: "TX-9026",
-    user: "Jessica Taylor",
-    email: "jess@example.com",
-    initials: "JT",
-    book: "A Promised Land",
-    category: "Biography",
-    borrowDate: "May 08, 2026",
-    dueDate: "May 22, 2026",
-    status: "Returned",
-  },
-  {
-    id: "TX-9027",
-    user: "Nathan Park",
-    email: "nathan@example.com",
-    initials: "NP",
-    book: "Brief History of Time",
-    category: "Science",
-    borrowDate: "May 03, 2026",
-    dueDate: "May 17, 2026",
-    status: "Overdue",
-  },
-  {
-    id: "TX-9028",
-    user: "Laura Chen",
-    email: "laura@example.com",
-    initials: "LC",
-    book: "Sapiens",
-    category: "History",
-    borrowDate: "May 12, 2026",
-    dueDate: "May 26, 2026",
-    status: "On Loan",
-  },
-  {
-    id: "TX-9029",
-    user: "Marcus Lee",
-    email: "marcus@example.com",
-    initials: "ML",
-    book: "Zero to One",
-    category: "Self-Help",
-    borrowDate: "May 06, 2026",
-    dueDate: "May 20, 2026",
-    status: "Returned",
-  },
-  {
-    id: "TX-9030",
-    user: "Olivia Martinez",
-    email: "olivia@example.com",
-    initials: "OM",
-    book: "Clean Code",
-    category: "Technology",
-    borrowDate: "Apr 30, 2026",
-    dueDate: "May 14, 2026",
-    status: "Overdue",
-  },
-];
+interface HistoryRow {
+  originalId: string;
+  id: string;
+  user: string;
+  email: string;
+  initials: string;
+  avatarUrl: string | null;
+  book: string;
+  category: string;
+  borrowDate: string;
+  dueDate: string;
+  status: string;
+}
+
 
 const ROWS_PER_PAGE = 6;
 
@@ -194,9 +99,35 @@ export function BorrowingHistoryPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [page, setPage] = useState(1);
+  const { user } = useAuthStore();
+  const { data: borrowingsData } = useBorrowingsByUser(user?.id);
+
+  const HISTORY_DATA = useMemo(() => {
+    if (!borrowingsData) return [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return borrowingsData.map((b: any) => {
+      let statusStr = "Returned";
+      if (b.status === "borrowed" || b.status === "pending") statusStr = "On Loan";
+      else if (b.status === "overdue") statusStr = "Overdue";
+
+      return {
+        originalId: b.id,
+        id: "TX-" + b.id.substring(0, 4).toUpperCase(),
+        user: b.user?.fullName || "Unknown",
+        email: b.user?.email || "",
+        initials: (b.user?.fullName || "U").substring(0, 2).toUpperCase(),
+        avatarUrl: b.user?.avatarUrl || null,
+        book: b.bookCopy?.book?.title || "Unknown Book",
+        category: b.bookCopy?.book?.category?.name || "Uncategorized",
+        borrowDate: format(new Date(b.borrowDate), "MMM dd, yyyy"),
+        dueDate: format(new Date(b.dueDate), "MMM dd, yyyy"),
+        status: statusStr,
+      };
+    });
+  }, [borrowingsData]);
 
   const filtered = useMemo(() => {
-    return HISTORY_DATA.filter((r) => {
+    return HISTORY_DATA.filter((r: HistoryRow) => {
       const matchSearch =
         r.user.toLowerCase().includes(search.toLowerCase()) ||
         r.book.toLowerCase().includes(search.toLowerCase()) ||
@@ -204,7 +135,7 @@ export function BorrowingHistoryPage() {
       const matchStatus = status === "All" || r.status === status;
       return matchSearch && matchStatus;
     });
-  }, [search, status]);
+  }, [search, status, HISTORY_DATA]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
   const paginated = filtered.slice(
@@ -213,12 +144,12 @@ export function BorrowingHistoryPage() {
   );
 
   const totalBorrowed = HISTORY_DATA.length;
-  const activeLoans = HISTORY_DATA.filter((r) => r.status === "On Loan").length;
+  const activeLoans = HISTORY_DATA.filter((r: HistoryRow) => r.status === "On Loan").length;
   const overdueCount = HISTORY_DATA.filter(
-    (r) => r.status === "Overdue",
+    (r: HistoryRow) => r.status === "Overdue",
   ).length;
   const returnedCount = HISTORY_DATA.filter(
-    (r) => r.status === "Returned",
+    (r: HistoryRow) => r.status === "Returned",
   ).length;
 
   const onSearch = (v: string) => {
@@ -424,7 +355,7 @@ export function BorrowingHistoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginated.map((row, idx) => {
+              {paginated.map((row: HistoryRow, idx: number) => {
                 const badge = STATUS_CFG[row.status as keyof typeof STATUS_CFG];
                 const avatarCls = AVATAR_COLORS[idx % AVATAR_COLORS.length];
                 const isExpanded = isMobile && expandedRow === row.id;
@@ -444,6 +375,7 @@ export function BorrowingHistoryPage() {
                         <TableCell className="py-4 pl-5">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-9 w-9 shrink-0 rounded-xl shadow-sm transition-transform group-hover:scale-105">
+                              <AvatarImage src={row.avatarUrl || undefined} alt={row.user} className="rounded-xl" />
                               <AvatarFallback
                                 className={`${avatarCls} rounded-xl text-xs font-black`}
                               >
@@ -469,6 +401,7 @@ export function BorrowingHistoryPage() {
                             {isMobile && (
                               <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6 shrink-0 rounded-md">
+                                  <AvatarImage src={row.avatarUrl || undefined} alt={row.user} className="rounded-md" />
                                   <AvatarFallback
                                     className={`${avatarCls} rounded-md text-[9px] font-black`}
                                   >

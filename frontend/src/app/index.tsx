@@ -153,7 +153,6 @@ const VisitsLogbookPage = lazy(() =>
   })),
 );
 
-
 function App() {
   const [isInitializing, setIsInitializing] = useState(true);
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -294,10 +293,7 @@ function App() {
                 path="circulation/records"
                 element={<CirculationRecordsPage />}
               />
-              <Route
-                path="visits-logbook"
-                element={<VisitsLogbookPage />}
-              />
+              <Route path="visits-logbook" element={<VisitsLogbookPage />} />
             </Route>
           </Route>
 

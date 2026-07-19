@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './modules/identity/auth/auth.module';
 import { UsersModule } from './modules/identity/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -49,6 +50,7 @@ dns.setDefaultResultOrder('ipv4first');
         limit: 120,
       },
     ]),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot(databaseConfig),
     TerminusModule,
     TypeOrmModule,

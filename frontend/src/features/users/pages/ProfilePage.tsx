@@ -275,9 +275,10 @@ export function ProfilePage() {
                 </Button>
                 <Button
                   onClick={handleSavePersonal}
-                  className="h-8 cursor-pointer rounded-lg bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+                  disabled={updateProfileMutation.isPending}
+                  className="h-8 cursor-pointer rounded-lg bg-blue-600 px-4 text-xs font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
                 >
-                  Save
+                  {updateProfileMutation.isPending ? "Saving..." : "Save"}
                 </Button>
               </div>
             ) : (

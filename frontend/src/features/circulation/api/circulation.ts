@@ -7,7 +7,8 @@ export type BorrowingStatus =
   | "borrowed"
   | "returned"
   | "overdue"
-  | "lost";
+  | "lost"
+  | "rejected";
 
 export interface BookCopy {
   id: string;
@@ -71,6 +72,18 @@ export const useBorrowings = (filters?: any) => {
       const res = await api.get("/borrowings", { params: filters });
       return res.data;
     },
+  });
+};
+
+export const useBorrowingsByUser = (userId?: string) => {
+  return useQuery({
+    queryKey: ["borrowings-user", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const res = await api.get(`/borrowings/user/${userId}`);
+      return res.data;
+    },
+    enabled: !!userId,
   });
 };
 
@@ -179,6 +192,35 @@ export const useReturnBook = () => {
     },
   });
 };
+
+export const useConfirmBorrowing = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (borrowingId: string) => {
+      const res = await api.patch(`/borrowings/${borrowingId}/confirm`);
+      return res.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["borrowings"] });
+      qc.invalidateQueries({ queryKey: ["book-copies"] });
+    },
+  });
+};
+
+export const useRejectBorrowing = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (borrowingId: string) => {
+      const res = await api.patch(`/borrowings/${borrowingId}/reject`);
+      return res.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["borrowings"] });
+      qc.invalidateQueries({ queryKey: ["book-copies"] });
+    },
+  });
+};
+
 //Fines--------------------------------
 export const useCreateFine = () => {
   const qc = useQueryClient();
