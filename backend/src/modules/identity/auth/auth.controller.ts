@@ -46,7 +46,7 @@ export class AuthController {
     res.cookie('csrf_token', token, {
       httpOnly: false, // Accessible by frontend JS (Axios)
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       path: '/',
     });
     return { csrfToken: token };
@@ -217,7 +217,7 @@ export class AuthController {
     response.cookie('reset_session', result.resetToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 15 * 60 * 1000, // 15 mins
     });
 
