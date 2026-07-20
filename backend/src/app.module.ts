@@ -14,7 +14,7 @@ import Joi from 'joi';
 import { DatabaseModule } from './database/database.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guard/passport-auth.guard';
-import { CsrfGuard } from './common/guard/csrf.guard';
+// import { CsrfGuard } from './common/guard/csrf.guard';
 import { CsrfService } from './common/services/csrf.service';
 import { BooksModule } from './modules/catalog/books/books.module';
 import { BorrowingsModule } from './modules/circulation/borrowings/borrowings.module';
@@ -77,10 +77,6 @@ dns.setDefaultResultOrder('ipv4first');
       useClass: JwtAuthGuard,
     },
     CsrfService,
-    {
-      provide: APP_GUARD,
-      useClass: CsrfGuard,
-    },
     AppHealthIndicator,
   ],
 })
