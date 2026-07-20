@@ -23,10 +23,15 @@ async function bootstrap() {
     }),
   );
 
-  const corsOrigin =
-    process.env.CORS_ORIGIN?.split(',') ?? 'http://localhost:5173';
+  // const corsOrigin =
+  //   process.env.CORS_ORIGIN?.split(',') ?? 'http://localhost:5173';
+  // app.enableCors({
+  //   origin: corsOrigin,
+  //   credentials: true,
+  // });
+
   app.enableCors({
-    origin: corsOrigin,
+    origin: 'https://cs-lms-2026.vercel.app',
     credentials: true,
   });
 
