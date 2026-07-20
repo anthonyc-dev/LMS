@@ -5,19 +5,19 @@ export const setAuthCookies = (
   accessToken: string,
   refreshToken: string,
 ) => {
-  const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+  const isProd = process.env.NODE_ENV === 'production';
 
   response.cookie('accessToken', accessToken, {
     httpOnly: true,
-    secure: isProd ? true : false,
-    sameSite: isProd ? 'none' : 'lax',
+    secure: isProd,
+    sameSite: isProd ? ('none' as const) : ('lax' as const),
     maxAge: 15 * 60 * 1000,
   });
 
   response.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: isProd ? true : false,
-    sameSite: isProd ? 'none' : 'lax',
+    secure: isProd,
+    sameSite: isProd ? ('none' as const) : ('lax' as const),
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };

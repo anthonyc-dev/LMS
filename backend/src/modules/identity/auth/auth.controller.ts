@@ -43,11 +43,11 @@ export class AuthController {
   @Get('csrf')
   getCsrfToken(@Res({ passthrough: true }) res: Response) {
     const token = this.csrfService.generateToken();
-    const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+    const isProd = process.env.NODE_ENV === 'production';
     res.cookie('csrf_token', token, {
       httpOnly: false,
-      secure: isProd ? true : false,
-      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd,
+      sameSite: isProd ? ('none' as const) : ('lax' as const),
       path: '/',
     });
     return { csrfToken: token };
@@ -215,11 +215,11 @@ export class AuthController {
   ) {
     const result = await this.authService.verifyOtp(verifyOtpDto.otp);
 
-    const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+    const isProd = process.env.NODE_ENV === 'production';
     response.cookie('reset_session', result.resetToken, {
       httpOnly: true,
-      secure: isProd ? true : false,
-      sameSite: isProd ? 'none' : 'lax',
+      secure: isProd,
+      sameSite: isProd ? ('none' as const) : ('lax' as const),
       maxAge: 15 * 60 * 1000, // 15 mins
     });
 
