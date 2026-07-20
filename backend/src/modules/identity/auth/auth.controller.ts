@@ -45,7 +45,8 @@ export class AuthController {
     const token = this.csrfService.generateToken();
     const isProduction =
       process.env.NODE_ENV === 'production' ||
-      (process.env.CORS_ORIGIN && !process.env.CORS_ORIGIN.includes('localhost'));
+      (process.env.CORS_ORIGIN &&
+        !process.env.CORS_ORIGIN.includes('localhost'));
     res.cookie('csrf_token', token, {
       httpOnly: false, // Accessible by frontend JS (Axios)
       secure: !!isProduction,
@@ -219,7 +220,8 @@ export class AuthController {
 
     const isProduction =
       process.env.NODE_ENV === 'production' ||
-      (process.env.CORS_ORIGIN && !process.env.CORS_ORIGIN.includes('localhost'));
+      (process.env.CORS_ORIGIN &&
+        !process.env.CORS_ORIGIN.includes('localhost'));
     response.cookie('reset_session', result.resetToken, {
       httpOnly: true,
       secure: !!isProduction,
