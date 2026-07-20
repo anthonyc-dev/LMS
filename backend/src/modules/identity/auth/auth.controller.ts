@@ -43,14 +43,14 @@ export class AuthController {
   @Get('csrf')
   getCsrfToken(@Res({ passthrough: true }) res: Response) {
     const token = this.csrfService.generateToken();
-    const isProduction =
-      process.env.NODE_ENV === 'production' ||
-      (process.env.CORS_ORIGIN &&
-        !process.env.CORS_ORIGIN.includes('localhost'));
+    // const isProduction =
+    //   process.env.NODE_ENV === 'production' ||
+    //   (process.env.CORS_ORIGIN &&
+    //     !process.env.CORS_ORIGIN.includes('localhost'));
     res.cookie('csrf_token', token, {
-      httpOnly: false, // Accessible by frontend JS (Axios)
-      secure: !!isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
       path: '/',
     });
     return { csrfToken: token };
