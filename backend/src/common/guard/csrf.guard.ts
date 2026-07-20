@@ -24,6 +24,11 @@ export class CsrfGuard implements CanActivate {
       return true;
     }
 
+    // Skip CSRF for login and register since no session exists yet
+    if (['/auth/login', '/auth/register'].includes(req.path)) {
+      return true;
+    }
+
     const cookieToken = req.cookies?.['csrf_token'] as string | undefined;
     const headerToken = req.headers['x-csrf-token'] as string | undefined;
 

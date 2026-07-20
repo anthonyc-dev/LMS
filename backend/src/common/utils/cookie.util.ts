@@ -5,7 +5,9 @@ export const setAuthCookies = (
   accessToken: string,
   refreshToken: string,
 ) => {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction =
+    process.env.NODE_ENV === 'production' ||
+    (process.env.CORS_ORIGIN ? !process.env.CORS_ORIGIN.includes('localhost') : false);
 
   response.cookie('accessToken', accessToken, {
     httpOnly: true,
