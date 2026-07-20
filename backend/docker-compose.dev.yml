@@ -19,3 +19,16 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - PNPM_CONFIRM_MODULES_PURGE=false
+      - CI=true
+    command: pnpm run start:dev
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /app
+          initial_sync: true
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json

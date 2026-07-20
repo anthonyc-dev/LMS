@@ -1,4 +1,4 @@
-// import { User } from 'src/modules/users/entities/user.entity';
+// import { User } from 'src/modules/identity/users/entities/user.entity';
 
 // declare global {
 //     namespace Express {

@@ -1,0 +1,561 @@
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  ForbiddenException,
+  ServiceUnavailableException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UsersService } from '../users/users.service';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { TokenService } from 'src/common/services/token.service';
+import { RefreshTokenService } from 'src/common/services/refresh-token.service';
+import { sanitizeUser } from 'src/common/utils/user.util';
+import { RefreshToken } from './entities/refresh-token.entity';
+import { Session } from './entities/session.entity';
+import { User } from '../users/entities/user.entity';
+import { normalizeIp } from 'src/common/utils/normalizedIp.util';
+import * as nodemailer from 'nodemailer';
+import { randomInt } from 'crypto';
+import { JwtService } from '@nestjs/jwt';
+import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
+import { DepartmentEnum, YearLevelEnum } from 'src/common/enums/enum.enums';
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
+
+@Injectable()
+export class AuthService {
+  private transporter: nodemailer.Transporter;
+
+  constructor(
+    private usersService: UsersService,
+    @InjectRepository(RefreshToken)
+    private refreshTokenRepository: Repository<RefreshToken>,
+    @InjectRepository(Session)
+    private sessionRepository: Repository<Session>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private readonly tokenService: TokenService,
+    private readonly refreshTokenService: RefreshTokenService,
+    private readonly jwtService: JwtService,
+    private readonly httpService: HttpService,
+  ) {
+    this.transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+  }
+
+  async register(
+    schoolId: string,
+    fullName: string,
+    email: string,
+    phoneNumber: string,
+    password: string,
+    yearLevel: YearLevelEnum | undefined,
+    department: DepartmentEnum,
+    acceptedTerms: boolean,
+    ipAddress: string,
+    deviceInfo: string,
+  ) {
+    if (!acceptedTerms) {
+      throw new BadRequestException('You must accept terms and conditions');
+    }
+
+    await this.validateStudent(schoolId);
+
+    const existingUser = await this.usersService.findByEmail(email);
+    if (existingUser) {
+      throw new BadRequestException('Email already registered');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const cleanIp = normalizeIp(ipAddress);
+
+    const user = await this.usersService.create({
+      schoolId,
+      fullName,
+      email,
+      phoneNumber,
+      yearLevel,
+      department,
+      password: hashedPassword,
+      acceptedTerms,
+      ipAddress: cleanIp,
+    });
+
+    await this.enforceMaxDevices(user.id);
+
+    const session = await this.sessionRepository.save({
+      user,
+      deviceInfo,
+      ipAddress: cleanIp,
+      lastUsedAt: new Date(),
+    });
+
+    const tokens = await this.tokenService.generateTokens(user);
+    await this.refreshTokenService.saveRefreshToken(
+      user,
+      tokens.refreshTokenHash,
+      session,
+    );
+
+    return {
+      user: sanitizeUser(user),
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  async signIn(
+    email: string,
+    pass: string,
+    ipAddress: string,
+    deviceInfo: string,
+  ) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (user.lockoutUntil && user.lockoutUntil > new Date()) {
+      const remainingMs = user.lockoutUntil.getTime() - Date.now();
+      const remainingMin = Math.ceil(remainingMs / 60000);
+      throw new ForbiddenException(
+        `Account locked. Try again in ${remainingMin} minute(s).`,
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(pass, user.password);
+    if (!isPasswordValid) {
+      const attempts = user.failedLoginAttempts + 1;
+
+      if (attempts >= MAX_FAILED_ATTEMPTS) {
+        await this.userRepository.update(user.id, {
+          failedLoginAttempts: attempts,
+          lockoutUntil: new Date(Date.now() + LOCKOUT_DURATION_MS),
+        });
+      } else {
+        await this.userRepository.update(user.id, {
+          failedLoginAttempts: attempts,
+        });
+      }
+
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    await this.userRepository.update(user.id, {
+      failedLoginAttempts: 0,
+      lockoutUntil: null,
+    });
+
+    await this.enforceMaxDevices(user.id);
+
+    const session = await this.sessionRepository.save({
+      user,
+      deviceInfo,
+      ipAddress: normalizeIp(ipAddress),
+      lastUsedAt: new Date(),
+    });
+
+    const tokens = await this.tokenService.generateTokens(user);
+    await this.refreshTokenService.saveRefreshToken(
+      user,
+      tokens.refreshTokenHash,
+      session,
+    );
+
+    return {
+      user: sanitizeUser(user),
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  async refreshTokens(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    let payload: { sub: string };
+
+    /**
+     * STEP 1: VERIFY JWT
+     */
+    try {
+      payload = await this.tokenService.verifyRefreshToken(refreshToken);
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    const userId = payload.sub;
+
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const activeTokens = await this.refreshTokenRepository.find({
+      where: {
+        user: { id: userId },
+        isRevoked: false,
+      },
+      relations: ['session'],
+    });
+
+    const matchedActiveToken = await this.findMatchingToken(
+      activeTokens,
+      refreshToken,
+    );
+
+    if (!matchedActiveToken) {
+      const allTokens = await this.refreshTokenRepository.find({
+        where: { user: { id: userId } },
+        relations: ['session'],
+      });
+
+      const existingToken = await this.findMatchingToken(
+        allTokens,
+        refreshToken,
+      );
+
+      if (existingToken) {
+        // Token Reuse Detected: The token is valid but was already revoked
+        console.warn(
+          `Token reuse detected for user ${userId}! Revoking entire session.`,
+        );
+        if (existingToken.session) {
+          await this.sessionRepository.update(
+            { id: existingToken.session.id },
+            { isRevoked: true },
+          );
+          await this.refreshTokenRepository.update(
+            { session: { id: existingToken.session.id } },
+            { isRevoked: true },
+          );
+        }
+        throw new UnauthorizedException('Access denied. Token reuse detected.');
+      }
+
+      throw new UnauthorizedException('Access denied');
+    }
+
+    if (matchedActiveToken.expiresAt < new Date()) {
+      console.log('TOKEN EXPIRED → REVOKING');
+
+      await this.refreshTokenRepository.update(
+        { id: matchedActiveToken.id },
+        { isRevoked: true },
+      );
+
+      throw new UnauthorizedException('Refresh token expired');
+    }
+
+    await this.refreshTokenRepository.update(
+      { id: matchedActiveToken.id },
+      { isRevoked: true },
+    );
+
+    if (matchedActiveToken.session) {
+      matchedActiveToken.session.lastUsedAt = new Date();
+      await this.sessionRepository.save(matchedActiveToken.session);
+    }
+
+    const tokens = await this.tokenService.generateTokens(user);
+
+    await this.refreshTokenService.saveRefreshToken(
+      user,
+      tokens.refreshTokenHash,
+      matchedActiveToken.session,
+    );
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
+  }
+
+  async logout(userId: string, refreshToken: string): Promise<void> {
+    const activeTokens = await this.refreshTokenRepository.find({
+      where: { user: { id: userId }, isRevoked: false },
+      relations: ['session'],
+    });
+
+    const matchedToken = await this.findMatchingToken(
+      activeTokens,
+      refreshToken,
+    );
+    if (matchedToken && matchedToken.session) {
+      await this.sessionRepository.update(
+        { id: matchedToken.session.id },
+        { isRevoked: true },
+      );
+    }
+    if (matchedToken) {
+      await this.refreshTokenRepository.update(
+        { id: matchedToken.id },
+        { isRevoked: true },
+      );
+    }
+  }
+
+  async getSessions(userId: string) {
+    const sessions = await this.sessionRepository.find({
+      where: { user: { id: userId }, isRevoked: false },
+      order: { lastUsedAt: 'DESC' },
+    });
+
+    return sessions.map((s) => ({
+      id: s.id,
+      deviceInfo: s.deviceInfo || 'Unknown Device',
+      ipAddress: s.ipAddress || 'Unknown IP',
+      lastUsedAt: s.lastUsedAt || s.createdAt,
+      createdAt: s.createdAt,
+    }));
+  }
+
+  async revokeSession(userId: string, sessionId: string) {
+    const session = await this.sessionRepository.findOne({
+      where: { id: sessionId, user: { id: userId }, isRevoked: false },
+    });
+
+    if (!session) {
+      throw new BadRequestException('Session not found or already revoked');
+    }
+
+    await this.sessionRepository.update({ id: sessionId }, { isRevoked: true });
+  }
+
+  async revokeAllSessions(userId: string, currentRefreshToken?: string) {
+    let currentSessionId: string | null = null;
+
+    if (currentRefreshToken) {
+      const activeTokens = await this.refreshTokenRepository.find({
+        where: { user: { id: userId }, isRevoked: false },
+        relations: ['session'],
+      });
+      const matchedToken = await this.findMatchingToken(
+        activeTokens,
+        currentRefreshToken,
+      );
+      if (matchedToken && matchedToken.session) {
+        currentSessionId = matchedToken.session.id;
+      }
+    }
+
+    const query = this.sessionRepository
+      .createQueryBuilder()
+      .update(Session)
+      .set({ isRevoked: true })
+      .where('userId = :userId', { userId })
+      .andWhere('isRevoked = false');
+
+    if (currentSessionId) {
+      query.andWhere('id != :currentSessionId', { currentSessionId });
+    }
+
+    await query.execute();
+  }
+
+  private async enforceMaxDevices(userId: string) {
+    const MAX_SESSIONS = 5;
+    const activeSessions = await this.sessionRepository.find({
+      where: { user: { id: userId }, isRevoked: false },
+      order: { lastUsedAt: 'ASC' }, // oldest first
+    });
+
+    if (activeSessions.length >= MAX_SESSIONS) {
+      const sessionsToRevoke = activeSessions.length - MAX_SESSIONS + 1;
+      const idsToRevoke = activeSessions
+        .slice(0, sessionsToRevoke)
+        .map((s) => s.id);
+
+      await this.sessionRepository.update(idsToRevoke, { isRevoked: true });
+    }
+  }
+
+  private async findMatchingToken(
+    tokens: RefreshToken[],
+    rawToken: string,
+  ): Promise<RefreshToken | null> {
+    for (const token of tokens) {
+      const isValid = await bcrypt.compare(rawToken, token.token);
+      if (isValid) {
+        return token;
+      }
+    }
+    return null;
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Return a generic message to prevent email enumeration
+      return {
+        message: 'If an account with that email exists, an OTP has been sent.',
+      };
+    }
+
+    const otp = randomInt(100000, 999999).toString();
+    const expires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    await this.userRepository.update(user.id, {
+      resetPasswordOtp: otp,
+      resetPasswordExpires: expires,
+    });
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+    <div style="max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 10px;">
+        <h2 style="color: #333; text-align: center;">Password Reset Request</h2>
+        <p style="color: #666; font-size: 16px;">Your OTP for password reset is:</p>
+        <div style="background: #007bff; color: white; font-size: 32px; font-weight: bold; 
+            padding: 15px; text-align: center; border-radius: 5px; letter-spacing: 5px; margin: 20px 0;">
+            ${otp}
+        </div>
+        <p style="color: #666; font-size: 14px;">This OTP will expire in <strong>5 minutes</strong>.</p>
+        <p style="color: #999; font-size: 12px; margin-top: 30px;">
+            If you didn't request this, please ignore this email. 
+            For security reasons, never share your OTP with anyone.
+        </p>
+    </div>
+</body>
+</html>`;
+
+    await this.transporter.sendMail({
+      from: process.env.SMTP_EMAIL,
+      to: email,
+      subject: 'Password Reset OTP',
+      html: htmlContent,
+    });
+
+    return {
+      message: 'If an account with that email exists, an OTP has been sent.',
+    };
+  }
+
+  async verifyOtp(otp: string) {
+    const user = await this.userRepository.findOne({
+      where: { resetPasswordOtp: otp },
+    });
+    if (!user) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      throw new BadRequestException('OTP has expired');
+    }
+
+    const resetToken = this.jwtService.sign(
+      { sub: user.id },
+      { expiresIn: '15m' },
+    );
+
+    return { message: 'OTP verified successfully', resetToken };
+  }
+
+  async resetPassword(
+    token: string,
+    newPassword: string,
+    confirmPassword: string,
+  ) {
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
+    let payload: { sub: string };
+    try {
+      payload = this.jwtService.verify(token);
+    } catch {
+      throw new UnauthorizedException('Reset session expired or invalid');
+    }
+
+    const user = await this.usersService.findById(payload.sub);
+    if (!user) {
+      throw new BadRequestException('Invalid session');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.userRepository.update(user.id, {
+      password: hashedPassword,
+      resetPasswordOtp: null,
+      resetPasswordExpires: null,
+      failedLoginAttempts: 0,
+      lockoutUntil: null,
+    });
+
+    // Revoke all existing sessions so they have to log in again with new password
+    await this.refreshTokenRepository.update(
+      { user: { id: user.id }, isRevoked: false },
+      { isRevoked: true },
+    );
+
+    return { message: 'Password reset successful' };
+  }
+
+  async validateStudent(schoolId: string) {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/intigration/getStudentBySchoolId/${schoolId}`),
+      );
+
+      if (!response.data) {
+        throw new BadRequestException(
+          'Student ID not found in Enrollment system.',
+        );
+      }
+
+      return {
+        success: true,
+        data: response.data as Record<string, unknown>,
+      };
+    } catch (error) {
+      const err = error as {
+        message?: string;
+        code?: string;
+        response?: { status?: number };
+      };
+      console.error('EMS validation error:', err.message);
+
+      if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
+        throw new ServiceUnavailableException(
+          'Unable to connect to Enrollment Management System. Please try again later.',
+        );
+      }
+
+      if (err.response?.status === 404) {
+        throw new BadRequestException(
+          'Student ID not found in Enrollment system.',
+        );
+      }
+
+      throw new InternalServerErrorException({
+        message: 'Error validating student with Enrollment system.',
+        details: err.message,
+      });
+    }
+  }
+
+  async getMe(userId: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return sanitizeUser(user);
+  }
+}

@@ -1,0 +1,371 @@
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { Session } from '../auth/entities/session.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { CreateAdminUserDto } from './dto/create-admin-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import * as bcrypt from 'bcrypt';
+import { normalizeIp } from 'src/common/utils/normalizedIp.util';
+import * as nodemailer from 'nodemailer';
+import { randomBytes } from 'crypto';
+import cloudinary from 'src/config/cloudinary';
+import * as bwipjs from 'bwip-js';
+import { BorrowingStatus } from 'src/common/enums/enum.enums';
+
+@Injectable()
+export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+  private transporter: nodemailer.Transporter;
+
+  constructor(
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+    @InjectRepository(Session)
+    private sessionRepository: Repository<Session>,
+  ) {
+    this.transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+  }
+
+  async create(userData: CreateUserDto): Promise<User> {
+    this.logger.log(`Creating user: ${userData.email}`);
+
+    // Check if any user already exists with the same email, phone number, or school ID
+    const existingUser = await this.usersRepository.findOne({
+      where: [
+        { email: userData.email },
+        { phoneNumber: userData.phoneNumber },
+        { schoolId: userData.schoolId },
+      ],
+    });
+
+    if (existingUser) {
+      if (existingUser.email === userData.email) {
+        throw new ConflictException('Email already exists');
+      }
+
+      if (existingUser.phoneNumber === userData.phoneNumber) {
+        throw new ConflictException('Phone number already exists');
+      }
+
+      if (existingUser.schoolId === userData.schoolId) {
+        throw new ConflictException('School ID already exists');
+      }
+
+      throw new ConflictException('User already exists');
+    }
+
+    const user = this.usersRepository.create(userData);
+
+    if (!user.avatarUrl) {
+      user.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`;
+    }
+
+    user.barcode = await this.generateBarcode(user.schoolId);
+
+    return this.usersRepository.save(user);
+  }
+
+  async createAdminUser(
+    userData: CreateAdminUserDto,
+    ipAddress: string,
+  ): Promise<User> {
+    this.logger.log(`Creating user: ${userData.email}`);
+
+    // Check if any user already exists with the same email, phone number, or school ID
+    const existingUser = await this.usersRepository.findOne({
+      where: [
+        { email: userData.email },
+        { phoneNumber: userData.phoneNumber },
+        { schoolId: userData.schoolId },
+      ],
+    });
+
+    if (existingUser?.email === userData.email) {
+      throw new ConflictException('Email already exists');
+    }
+
+    if (existingUser?.phoneNumber === userData.phoneNumber) {
+      throw new ConflictException('Phone number already exists');
+    }
+
+    if (existingUser?.schoolId === userData.schoolId) {
+      throw new ConflictException('School ID already exists');
+    }
+    const cleanIp = normalizeIp(ipAddress);
+
+    const generatedPassword = randomBytes(6).toString('hex');
+    const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+
+    const user = this.usersRepository.create({
+      ...userData,
+      ipAddress: cleanIp,
+      password: hashedPassword,
+      acceptedTerms: true,
+      acceptedAt: new Date(),
+    });
+
+    if (!user.avatarUrl) {
+      user.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName)}&background=random`;
+    }
+
+    user.barcode = await this.generateBarcode(user.schoolId);
+
+    const savedUser = await this.usersRepository.save(user);
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+    <div style="max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 10px;">
+        <h2 style="color: #333; text-align: center;">Account Created Successfully</h2>
+        <p style="color: #666; font-size: 16px;">Your account has been created successfully. Your temporary password is:</p>
+        <div style="background: #007bff; color: white; font-size: 32px; font-weight: bold; 
+            padding: 15px; text-align: center; border-radius: 5px; letter-spacing: 5px; margin: 20px 0;">
+            ${generatedPassword}
+        </div>
+        <p style="color: #666; font-size: 14px;">Please login and change your password as soon as possible.</p>
+    </div>
+</body>
+</html>`;
+
+    await this.transporter.sendMail({
+      from: process.env.SMTP_EMAIL,
+      to: savedUser.email,
+      subject: 'Account Created Successfully - Password',
+      html: htmlContent,
+    });
+
+    return savedUser;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    this.logger.log(`Finding user by email: ${email}`);
+    return this.usersRepository.findOne({
+      where: { email },
+      relations: ['borrowings'],
+    });
+  }
+
+  async findById(id: string): Promise<User | null> {
+    this.logger.log(`Finding user by id: ${id}`);
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: ['borrowings'],
+    });
+  }
+
+  async findAll(page: number = 1, limit: number = 10) {
+    this.logger.log(`Fetching all users: page ${page}, limit ${limit}`);
+
+    const query = this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.borrowings', 'borrowing')
+      .leftJoinAndSelect('borrowing.bookCopy', 'bookCopy')
+      .leftJoinAndSelect('bookCopy.book', 'book')
+      .orderBy('user.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [users, total] = await query.getManyAndCount();
+
+    const data = users.map((user) => {
+      const activeBorrowingsCount = user.borrowings
+        ? user.borrowings.filter(
+            (borrow) =>
+              borrow.status === BorrowingStatus.BORROWED ||
+              borrow.status === BorrowingStatus.OVERDUE,
+          ).length
+        : 0;
+
+      return {
+        ...user,
+        activeBorrowingsCount,
+        borrowingsCount: user.borrowings?.length || 0,
+        borrowings:
+          user.borrowings?.map((borrowing) => ({
+            id: borrowing.id,
+            bookCopyId: borrowing.bookCopyId,
+            borrowDate: borrowing.borrowDate,
+            dueDate: borrowing.dueDate,
+            returnedDate: borrowing.returnedDate,
+            status: borrowing.status,
+            extendedCount: borrowing.extendedCount,
+
+            book: borrowing.bookCopy
+              ? {
+                  id: borrowing.bookCopy.book?.id,
+                  title: borrowing.bookCopy.book?.title,
+                  isbn: borrowing.bookCopy.book?.isbn,
+                }
+              : null,
+          })) || [],
+      };
+    });
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async update(id: string, userData: UpdateUserDto) {
+    this.logger.log(`Updating user: ${id}`);
+
+    const updateData: Partial<User> = { ...userData };
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    if (updateData.schoolId) {
+      updateData.barcode = await this.generateBarcode(updateData.schoolId);
+    }
+
+    await this.usersRepository.update(id, updateData);
+    return this.findById(id);
+  }
+
+  async updateProfile(
+    id: string,
+    updateProfileDto: UpdateProfileDto,
+    file?: Express.Multer.File,
+  ) {
+    this.logger.log(`Updating profile for user: ${id}`);
+
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const updateData = { ...updateProfileDto };
+
+    if (file) {
+      try {
+        const base64Data = Buffer.from(file.buffer).toString('base64');
+        const dataURI = `data:${file.mimetype};base64,${base64Data}`;
+        const result = await cloudinary.uploader.upload(dataURI, {
+          folder: 'student-profile',
+        });
+        updateData.avatarUrl = result.secure_url;
+      } catch (error) {
+        this.logger.error('Error uploading avatar to Cloudinary', error);
+        // Continue with the rest of the update, or throw an error. Usually we want to throw.
+        throw new ConflictException('Failed to upload avatar image');
+      }
+    }
+
+    if (!updateData.avatarUrl && !user.avatarUrl) {
+      const nameForAvatar = updateData.fullName || user.fullName;
+      updateData.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=random`;
+    } else if (updateData.avatarUrl === '') {
+      const nameForAvatar = updateData.fullName || user.fullName;
+      updateData.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nameForAvatar)}&background=random`;
+    }
+
+    await this.usersRepository.update(id, updateData);
+    return this.findById(id);
+  }
+
+  async changePassword(
+    id: string,
+    changePasswordDto: import('./dto/change-password.dto').ChangePasswordDto,
+  ) {
+    this.logger.log(`Changing password for user: ${id}`);
+    const user = await this.usersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      changePasswordDto.oldPassword,
+      user.password,
+    );
+
+    if (!isPasswordValid) {
+      throw new ConflictException('Incorrect old password');
+    }
+
+    const hashedPassword = await bcrypt.hash(changePasswordDto.newPassword, 10);
+    await this.usersRepository.update(id, { password: hashedPassword });
+
+    return { message: 'Password changed successfully' };
+  }
+
+  async delete(id: string) {
+    this.logger.log(`Deleting user: ${id}`);
+    await this.sessionRepository.delete({ user: { id } });
+    await this.usersRepository.softDelete(id);
+  }
+
+  // ---------- Lockout and failed attempts functions || SOON
+  async resetFailedAttempts(id: string): Promise<void> {
+    await this.usersRepository.update(id, {
+      failedLoginAttempts: 0,
+      lockoutUntil: null,
+    });
+  }
+
+  async incrementFailedAttempts(id: string): Promise<void> {
+    await this.usersRepository.increment({ id }, 'failedLoginAttempts', 1);
+  }
+
+  async setLockout(id: string, durationMs: number): Promise<void> {
+    const lockoutUntil = new Date(Date.now() + durationMs);
+    await this.usersRepository.update(id, { lockoutUntil });
+  }
+
+  async isLockedOut(id: string): Promise<boolean> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) return false;
+
+    if (user.lockoutUntil && user.lockoutUntil > new Date()) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private async generateBarcode(text: string): Promise<string> {
+    const normalized = this.normalizeBarcode(text);
+    const png = await bwipjs.toBuffer({
+      bcid: 'code128',
+      text: normalized,
+      scale: 3,
+      height: 10,
+      includetext: true,
+      textxalign: 'center',
+    });
+    return `data:image/png;base64,${png.toString('base64')}`;
+  }
+
+  private normalizeBarcode(value: string): string {
+    return value.trim().toUpperCase();
+  }
+}
