@@ -47,7 +47,7 @@ export class AuthController {
     res.cookie('csrf_token', token, {
       httpOnly: false,
       secure: isProd,
-      sameSite: isProd ? ('none' as const) : ('lax' as const),
+      sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
       path: '/',
     });
     return { csrfToken: token };
@@ -219,7 +219,7 @@ export class AuthController {
     response.cookie('reset_session', result.resetToken, {
       httpOnly: true,
       secure: isProd,
-      sameSite: isProd ? ('none' as const) : ('lax' as const),
+      sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
       maxAge: 15 * 60 * 1000, // 15 mins
     });
 
