@@ -5,21 +5,19 @@ export const setAuthCookies = (
   accessToken: string,
   refreshToken: string,
 ) => {
-  // const isProduction =
-  //   process.env.NODE_ENV === 'production' ||
-  //   (process.env.CORS_ORIGIN && !process.env.CORS_ORIGIN.includes('localhost'));
+  const isProd = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 
   response.cookie('accessToken', accessToken, {
-    httpOnly: false,
-    secure: true,
-    sameSite: 'none',
+    httpOnly: true,
+    secure: isProd ? true : false,
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 15 * 60 * 1000,
   });
 
   response.cookie('refreshToken', refreshToken, {
-    httpOnly: false,
-    secure: true,
-    sameSite: 'none',
+    httpOnly: true,
+    secure: isProd ? true : false,
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
