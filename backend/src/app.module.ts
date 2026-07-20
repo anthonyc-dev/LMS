@@ -77,10 +77,6 @@ dns.setDefaultResultOrder('ipv4first');
       useClass: JwtAuthGuard,
     },
     CsrfService,
-    {
-      provide: APP_GUARD,
-      useClass: CsrfGuard,
-    },
     AppHealthIndicator,
   ],
 })
