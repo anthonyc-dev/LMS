@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/:match*",
-      "destination": "https://lms-lyws.onrender.com/:match*"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
