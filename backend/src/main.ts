@@ -38,7 +38,23 @@ async function bootstrap() {
   console.log('CORS_ORIGIN allowed:', corsOrigin);
 
   app.enableCors({
-    origin: corsOrigin,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      const isValid = corsOrigin.some((o) => {
+        if (o.startsWith('https://')) return origin === o;
+
+        const hostname = new URL(origin).hostname;
+        const pattern = o
+          .replace('.', '\\.')
+          .replace('*', '(?:.*)')
+          .replace(/\/$/, '');
+        return new RegExp(`^${pattern}$`).test(hostname);
+      });
+
+      if (isValid) callback(null, true);
+      else callback(new Error('Not allowed by CORS'), false);
+    },
     credentials: true,
   });
 
