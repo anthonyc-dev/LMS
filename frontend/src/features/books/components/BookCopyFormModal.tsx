@@ -46,6 +46,7 @@ import {
 } from "@/features/books/types/bookCopy";
 import { useBooks } from "@/features/books/hooks/useBooks";
 import { useShelves } from "@/features/books/api/shelves";
+import type { BookCopyFormPayload } from "@/features/books/utils/bookCopyPayload";
 
 function Field({
   id,
@@ -86,8 +87,7 @@ export interface BookCopyFormProps {
   defaultBookId?: string;
   isPending?: boolean;
   onClose: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSave: (data: any) => void;
+  onSave: (data: BookCopyFormPayload) => void;
 }
 
 export function BookCopyFormModal({

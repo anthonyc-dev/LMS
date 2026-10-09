@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { isAxiosError } from "axios";
 import {
   Upload,
   BookOpen,
@@ -55,6 +56,7 @@ import { BookCopyFormModal } from "@/features/books/components/BookCopyFormModal
 import { ViewBarcodeModal } from "@/features/books/components/ViewBarcodeModal";
 import { ViewMultipleBarcodesModal } from "@/features/books/components/ViewMultipleBarcodesModal";
 import type { BookCopy } from "@/features/books/types/bookCopy";
+import { buildBookCopyRequests } from "@/features/books/utils/bookCopyPayload";
 import {
   Dialog,
   DialogContent,
@@ -812,33 +814,43 @@ export function AddBookPage() {
             setShowCopyModal(false);
             navigate("/admin/books");
           }}
-          onSave={(copyData) => {
-            if (copyData.count && copyData.count > 1) {
-              bulkCreateCopyMutation.mutate(copyData, {
-                onSuccess: (newCopies) => {
-                  toast.success(
-                    `${copyData.count} book copies added successfully!`,
-                  );
-                  setShowCopyModal(false);
-                  setMultipleBarcodesTarget(newCopies);
-                  setMultipleBarcodesOpen(true);
-                },
-                onError: () => {
-                  toast.error("Failed to add book copies.");
-                },
-              });
-            } else {
-              createCopyMutation.mutate(copyData, {
-                onSuccess: (data) => {
-                  toast.success("Book copy added successfully!");
-                  setShowCopyModal(false);
-                  setCreatedBookCopy(data);
-                  setShowBarcodeModal(true);
-                },
-                onError: () => {
-                  toast.error("Failed to add book copy.");
-                },
-              });
+          onSave={async (copyData) => {
+            try {
+              const requests = buildBookCopyRequests(copyData);
+              if (copyData.count !== undefined) {
+                const newCopies: BookCopy[] = [];
+                for (const request of requests) {
+                  if (!("count" in request)) continue;
+                  const copies =
+                    await bulkCreateCopyMutation.mutateAsync(request);
+                  newCopies.push(...copies);
+                }
+                toast.success(
+                  `${newCopies.length} book copies added successfully!`,
+                );
+                setShowCopyModal(false);
+                setMultipleBarcodesTarget(newCopies);
+                setMultipleBarcodesOpen(true);
+              } else {
+                const newCopy = await createCopyMutation.mutateAsync(
+                  requests[0],
+                );
+                toast.success("Book copy added successfully!");
+                setShowCopyModal(false);
+                setCreatedBookCopy(newCopy);
+                setShowBarcodeModal(true);
+              }
+            } catch (error: unknown) {
+              const message = isAxiosError<{ message?: string | string[] }>(
+                error,
+              )
+                ? error.response?.data?.message
+                : undefined;
+              toast.error(
+                Array.isArray(message)
+                  ? message.join("; ")
+                  : message || "Failed to add book copies.",
+              );
             }
           }}
         />
