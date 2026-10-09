@@ -92,7 +92,7 @@ export function CategoryModal({
               }}
             />
             {nameErr && (
-              <p className="text-xs font-medium text-error-bg0">
+              <p className="text-error-bg0 text-xs font-medium">
                 Name is required.
               </p>
             )}

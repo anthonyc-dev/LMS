@@ -27,35 +27,42 @@ async function bootstrap() {
   );
 
   const corsOriginEnv = process.env.CORS_ORIGIN;
+
   if (!corsOriginEnv) {
     throw new Error(
       'CORS_ORIGIN environment variable is not set. Refusing to start.',
     );
   }
-  const corsOrigin = corsOriginEnv.split(',').map((o) => o.trim());
+
+  const allowedOrigins = corsOriginEnv
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   console.log('NODE_ENV:', process.env.NODE_ENV);
-  console.log('CORS_ORIGIN allowed:', corsOrigin);
+  console.log('CORS allowed origins:', allowedOrigins);
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
+      // Allow non-browser requests such as Postman, curl, mobile apps, etc.
+      if (!origin) {
+        return callback(null, true);
+      }
 
-      const isValid = corsOrigin.some((o) => {
-        if (o.startsWith('https://')) return origin === o;
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-        const hostname = new URL(origin).hostname;
-        const pattern = o
-          .replace('.', '\\.')
-          .replace('*', '(?:.*)')
-          .replace(/\/$/, '');
-        return new RegExp(`^${pattern}$`).test(hostname);
-      });
+      console.warn(`CORS rejected origin: ${origin}`);
 
-      if (isValid) callback(null, true);
-      else callback(new Error('Not allowed by CORS'), false);
+      return callback(new Error('Not allowed by CORS'), false);
     },
+
     credentials: true,
+
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
   });
 
   // const corsOrigin =

@@ -12,7 +12,6 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
 
-
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import {
@@ -40,6 +39,7 @@ import book2Img from "@/assets/images/dashboard/book2.png";
 import bookDark1Img from "@/assets/images/dashboard/book_dark1.png";
 import bookDark2Img from "@/assets/images/dashboard/book_dark2.png"; */
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { useRoleBasePath } from "@/shared/hooks/useRoleBasePath";
 
 // Mock Data
 const readingStats = [
@@ -119,6 +119,7 @@ export function StudentDashboardPage() {
   usePageTitle("Student Dashboard");
   const { user: _user } = useAuthStore();
   const navigate = useNavigate();
+  const basePath = useRoleBasePath();
   // const [searchQuery, _setSearchQuery] = useState("");
 
   const { data: stats, isLoading } = useQuery({
@@ -148,7 +149,9 @@ export function StudentDashboardPage() {
     e.preventDefault();
     if (searchQuery.trim()) {
       toast.info(`Searching database for: "${searchQuery}"`);
-      navigate(`/student/books/browse?q=${encodeURIComponent(searchQuery)}`);
+      navigate(
+        `${basePath}/books/browse?q=${encodeURIComponent(searchQuery)}`,
+      );
     }
   }; */
 
@@ -245,7 +248,7 @@ export function StudentDashboardPage() {
               </h3>
               <p
                 className="flex cursor-pointer items-center gap-0.5 text-[10px] font-bold text-blue-600 hover:underline"
-                onClick={() => navigate("/student/books")}
+                onClick={() => navigate(`${basePath}/books/browse`)}
               >
                 <span>View library list</span>
                 <ArrowRight size={10} />
@@ -373,7 +376,7 @@ export function StudentDashboardPage() {
             </div>
             <Button
               variant="ghost"
-              onClick={() => navigate("/student/books")}
+              onClick={() => navigate(`${basePath}/books/history`)}
               className="flex cursor-pointer items-center gap-0.5 px-0 text-xs font-bold text-blue-600"
             >
               <span>View All history</span>
@@ -432,7 +435,13 @@ export function StudentDashboardPage() {
                           </span>
                         </div>
                         <Progress
-                          value={Math.max(0, Math.min(100, (book.daysRemaining / book.totalDays) * 100))}
+                          value={Math.max(
+                            0,
+                            Math.min(
+                              100,
+                              (book.daysRemaining / book.totalDays) * 100,
+                            ),
+                          )}
                           className={`h-1.5 bg-slate-100 ${
                             book.daysRemaining <= 3
                               ? "[&>div]:bg-error-bg0"
@@ -466,7 +475,7 @@ export function StudentDashboardPage() {
               </p>
               <Button
                 variant="outline"
-                onClick={() => navigate("/student/books/browse")}
+                onClick={() => navigate(`${basePath}/books/browse`)}
                 className="mt-4 border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
               >
                 Browse Books
@@ -557,7 +566,7 @@ export function StudentDashboardPage() {
             </div>
             <Button
               variant="ghost"
-              onClick={() => navigate("/student/books/browse")}
+              onClick={() => navigate(`${basePath}/books/browse`)}
               className="flex cursor-pointer items-center gap-0.5 px-0 text-xs font-bold text-blue-600"
             >
               <span>Browse Catalog</span>
@@ -569,7 +578,7 @@ export function StudentDashboardPage() {
             {recommendationBooks.map((book) => (
               <div
                 key={book.id}
-                onClick={() => navigate("/student/books/browse")}
+                onClick={() => navigate(`${basePath}/books/browse`)}
                 className="group cursor-pointer rounded-xl border border-slate-100 bg-white p-3 shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
               >
                 <div

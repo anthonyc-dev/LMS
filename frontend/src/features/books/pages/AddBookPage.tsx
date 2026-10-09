@@ -103,13 +103,13 @@ function Field({
       >
         {Icon && <Icon className="size-3.5 text-slate-400" />}
         {label}
-        {required && <span className="ml-0.5 text-error-bg0">*</span>}
+        {required && <span className="text-error-bg0 ml-0.5">*</span>}
       </Label>
       {children}
       {hint && !error && (
         <p className="text-[11px] font-medium text-slate-400">{hint}</p>
       )}
-      {error && <p className="text-[11px] font-bold text-error-bg0">{error}</p>}
+      {error && <p className="text-error-bg0 text-[11px] font-bold">{error}</p>}
     </div>
   );
 }
@@ -131,7 +131,7 @@ function StepDot({
     <div
       className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-black transition-all duration-300 ${
         done
-          ? "bg-success-bg0 text-white shadow-md shadow-success-bg"
+          ? "bg-success-bg0 shadow-success-bg text-white shadow-md"
           : active
             ? "bg-blue-600 text-white shadow-md shadow-blue-200"
             : "bg-slate-100 text-slate-400"
@@ -641,7 +641,7 @@ export function AddBookPage() {
       {/* ── STEP 3: Review ── */}
       {step === 3 && (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-          <div className="relative overflow-hidden bg-linear-to-br from-success-text to-blue-600 p-6 text-white">
+          <div className="from-success-text relative overflow-hidden bg-linear-to-br to-blue-600 p-6 text-white">
             <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/5" />
             <div className="relative z-10 space-y-1">
               <Badge className="mb-2 border-white/20 bg-white/10 text-[10px] font-bold tracking-wider text-white uppercase">
@@ -650,7 +650,7 @@ export function AddBookPage() {
               <h2 className="text-2xl font-black text-white">
                 Review & Confirm
               </h2>
-              <p className="font-medium text-success-bg">
+              <p className="text-success-bg font-medium">
                 Verify the details below before saving the metadata to the
                 catalog.
               </p>
@@ -748,7 +748,7 @@ export function AddBookPage() {
               <Button
                 onClick={handleSubmit}
                 disabled={createBookMutation.isPending}
-                className="h-10 gap-2 rounded-xl bg-success-text px-6 font-bold text-white shadow-lg shadow-success-bg transition-all hover:scale-105 hover:bg-success-text active:scale-95"
+                className="bg-success-text shadow-success-bg hover:bg-success-text h-10 gap-2 rounded-xl px-6 font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95"
               >
                 <Check className="size-4" />{" "}
                 {createBookMutation.isPending ? "Adding..." : "Add Metadata"}

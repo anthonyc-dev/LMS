@@ -6,7 +6,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
-import { useNotificationStore } from "@/app/store/notificationStore";
+import {
+  useDismissAllNotifications,
+  useDismissNotification,
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useNotifications,
+} from "@/features/notifications/api/notifications";
+import { toast } from "sonner";
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -37,13 +44,15 @@ function getNotificationIcon(type: string) {
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
-  const notifications = useNotificationStore((s) => s.notifications);
-  const markAsRead = useNotificationStore((s) => s.markAsRead);
-  const markAllAsRead = useNotificationStore((s) => s.markAllAsRead);
-  const clearAll = useNotificationStore((s) => s.clearAll);
-  const removeNotification = useNotificationStore((s) => s.removeNotification);
+  const { data, isLoading, isError, refetch } = useNotifications();
+  const markAsRead = useMarkNotificationRead();
+  const markAllAsRead = useMarkAllNotificationsRead();
+  const dismissNotification = useDismissNotification();
+  const dismissAll = useDismissAllNotifications();
+  const notifications = data?.items ?? [];
+  const unreadCount = data?.unreadCount ?? 0;
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const reportFailure = () => toast.error("Could not update notifications");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,6 +61,7 @@ export function NotificationBell() {
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Open notifications"
             className="relative rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900"
           >
             <Bell className="size-5" />
@@ -77,7 +87,10 @@ export function NotificationBell() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={markAllAsRead}
+                onClick={() =>
+                  markAllAsRead.mutate(undefined, { onError: reportFailure })
+                }
+                disabled={markAllAsRead.isPending}
                 className="h-7 gap-1 rounded-lg px-2 text-[11px] font-semibold text-blue-600 hover:bg-blue-50 hover:text-blue-700"
               >
                 <CheckCheck className="size-3.5" />
@@ -88,11 +101,14 @@ export function NotificationBell() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={clearAll}
+                onClick={() =>
+                  dismissAll.mutate(undefined, { onError: reportFailure })
+                }
+                disabled={dismissAll.isPending}
                 className="h-7 gap-1 rounded-lg px-2 text-[11px] font-semibold text-slate-400 hover:bg-slate-50 hover:text-slate-600"
               >
                 <Trash2 className="size-3.5" />
-                Clear
+                Dismiss all
               </Button>
             )}
           </div>
@@ -100,7 +116,24 @@ export function NotificationBell() {
 
         {/* Notification List */}
         <div className="max-h-[400px] overflow-y-auto">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="py-12 text-center text-sm font-semibold text-slate-400">
+              Loading notifications...
+            </div>
+          ) : isError ? (
+            <div className="flex flex-col items-center gap-2 py-12 text-center">
+              <p className="text-sm font-semibold text-slate-500">
+                Could not load notifications
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void refetch()}
+              >
+                Retry
+              </Button>
+            </div>
+          ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Bell className="mb-3 size-10 text-slate-200" />
               <p className="text-sm font-semibold text-slate-400">
@@ -137,20 +170,30 @@ export function NotificationBell() {
                     >
                       {notification.title}
                     </p>
-                    <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
                       {!notification.read && (
                         <button
-                          onClick={() => markAsRead(notification.id)}
+                          onClick={() =>
+                            markAsRead.mutate(notification.id, {
+                              onError: reportFailure,
+                            })
+                          }
                           className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-blue-600"
                           title="Mark as read"
+                          aria-label={`Mark ${notification.title} as read`}
                         >
                           <Check className="size-3.5" />
                         </button>
                       )}
                       <button
-                        onClick={() => removeNotification(notification.id)}
+                        onClick={() =>
+                          dismissNotification.mutate(notification.id, {
+                            onError: reportFailure,
+                          })
+                        }
                         className="rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-red-500"
                         title="Dismiss"
+                        aria-label={`Dismiss ${notification.title}`}
                       >
                         <X className="size-3.5" />
                       </button>

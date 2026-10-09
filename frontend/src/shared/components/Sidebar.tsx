@@ -43,6 +43,7 @@ import {
   AvatarImage,
 } from "@/shared/components/ui/avatar";
 import { toast } from "sonner";
+import { getRoleBasePath } from "@/shared/utils/roles";
 
 type MenuItem = {
   icon: LucideIcon;
@@ -156,6 +157,7 @@ export function SidebarContentInner({
   const { state, isMobile, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed" && !isMobile;
   const { logout, user } = useAuthStore();
+  const basePath = getRoleBasePath(user?.role);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleNavigate = (path: string) => {
@@ -198,7 +200,7 @@ export function SidebarContentInner({
               <SidebarMenuButton
                 size="lg"
                 tooltip="NCMC Library"
-                onClick={() => handleNavigate("/student/dashboard")}
+                onClick={() => handleNavigate(`${basePath}/dashboard`)}
                 className={`group hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex h-auto items-center justify-center py-2 transition-all duration-300 ${isCollapsed ? "w-full px-0" : "w-full px-2"}`}
               >
                 <div
@@ -336,7 +338,7 @@ export function SidebarContentInner({
                   className="border-border bg-popover text-popover-foreground mb-2 w-56 overflow-hidden rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuItem
-                    onClick={() => handleNavigate("/student/profile")}
+                    onClick={() => handleNavigate(`${basePath}/profile`)}
                     className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors"
                   >
                     <User className="h-4 w-4" />
@@ -344,7 +346,7 @@ export function SidebarContentInner({
                   </DropdownMenuItem>
                   <div className="bg-border my-1 h-px" />
                   <DropdownMenuItem
-                    onClick={() => handleNavigate("/student/settings")}
+                    onClick={() => handleNavigate(`${basePath}/settings`)}
                     className="hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors"
                   >
                     <SettingsIcon className="h-4 w-4" />

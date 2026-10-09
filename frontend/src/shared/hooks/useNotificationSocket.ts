@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { getSocket, disconnectSocket } from "@/shared/lib/socket";
 import {
-  useNotificationStore,
   type Notification,
-} from "@/app/store/notificationStore";
+  type NotificationsResponse,
+  NOTIFICATIONS_QUERY_KEY,
+} from "@/features/notifications/api/notifications";
 import { useAuthStore } from "@/app/store/authStore";
 import { toast } from "sonner";
 
@@ -13,10 +15,7 @@ import { toast } from "sonner";
  */
 export function useNotificationSocket() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const addNotification = useNotificationStore((s) => s.addNotification);
-  const addRef = useRef(addNotification);
-  // eslint-disable-next-line react-hooks/refs
-  addRef.current = addNotification;
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -27,9 +26,30 @@ export function useNotificationSocket() {
     const socket = getSocket();
     if (!socket) return;
 
-    const handleNotification = (payload: Omit<Notification, "read">) => {
-      // Add to store
-      addRef.current(payload);
+    const handleNotification = (payload: Notification) => {
+      queryClient.setQueryData<NotificationsResponse>(
+        NOTIFICATIONS_QUERY_KEY,
+        (current) => {
+          if (!current) {
+            return {
+              items: [payload],
+              total: 1,
+              unreadCount: payload.read ? 0 : 1,
+              page: 1,
+              limit: 50,
+            };
+          }
+          if (current.items.some((item) => item.id === payload.id)) {
+            return current;
+          }
+          return {
+            ...current,
+            items: [payload, ...current.items].slice(0, current.limit),
+            total: current.total + 1,
+            unreadCount: current.unreadCount + (payload.read ? 0 : 1),
+          };
+        },
+      );
 
       // Show toast based on notification type
       switch (payload.type) {
@@ -60,10 +80,17 @@ export function useNotificationSocket() {
       }
     };
 
+    const syncMissedNotifications = () => {
+      void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+    };
+
     socket.on("notification", handleNotification);
+    socket.on("connect", syncMissedNotifications);
+    syncMissedNotifications();
 
     return () => {
       socket.off("notification", handleNotification);
+      socket.off("connect", syncMissedNotifications);
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, queryClient]);
 }

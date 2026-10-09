@@ -74,14 +74,14 @@ export function CategoryPageSkeleton() {
         <Card className="h-fit shadow-xs">
           <div className="border-b border-slate-50 p-6 pb-4">
             <div className="flex items-center gap-2 text-base font-black text-slate-800">
-              <Layers className="size-4 text-slate-300" /> 
+              <Layers className="size-4 text-slate-300" />
               <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
             </div>
             <div className="mt-2 h-3 w-32 animate-pulse rounded bg-slate-100" />
           </div>
           <CardContent className="flex flex-col items-center pt-8">
             <div className="h-40 w-40 animate-pulse rounded-full border-8 border-slate-100 bg-white" />
-            
+
             <div className="mt-8 w-full space-y-4">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex items-center justify-between">

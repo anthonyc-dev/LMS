@@ -10,10 +10,12 @@ import { useAuthStore } from "@/app/store/authStore";
 import { useBorrowingsByUser } from "@/features/circulation/api/circulation";
 import { format } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
+import { useRoleBasePath } from "@/shared/hooks/useRoleBasePath";
 
 export function BorrowBooksPage() {
   usePageTitle("Borrow Books");
   const navigate = useNavigate();
+  const basePath = useRoleBasePath();
   const { user } = useAuthStore();
   const { data: borrowings } = useBorrowingsByUser(user?.id);
 
@@ -78,7 +80,7 @@ export function BorrowBooksPage() {
             variant="ghost"
             className="gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700"
             render={
-              <Link to="/student/books/history">
+              <Link to={`${basePath}/books/history`}>
                 View All <ArrowRight size={14} />
               </Link>
             }
@@ -133,7 +135,7 @@ export function BorrowBooksPage() {
 
           {/* Add more card */}
           <div
-            onClick={() => navigate("/student/books/browse")}
+            onClick={() => navigate(`${basePath}/books/browse`)}
             className="group flex aspect-3/4 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 transition-all duration-300 hover:-translate-y-1.5 hover:border-blue-400 hover:bg-blue-50/50 hover:shadow-lg"
           >
             <div className="flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 transition-all group-hover:bg-blue-100 group-hover:text-blue-600">

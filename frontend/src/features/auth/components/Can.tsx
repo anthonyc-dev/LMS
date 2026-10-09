@@ -1,18 +1,17 @@
 import { hasRole } from "@/shared/utils/roles";
 import { useAuthStore } from "@/app/store/authStore";
 
-
 type Props = {
-    roles: string[];
-    children: React.ReactNode;
+  roles: string[];
+  children: React.ReactNode;
 };
 
 export const Can = ({ roles, children }: Props) => {
-    const user = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
 
-    if (!user) return null;
+  if (!user) return null;
 
-    if (!hasRole([user.role!], roles)) return null;
+  if (!hasRole([user.role!], roles)) return null;
 
-    return <>{children}</>;
+  return <>{children}</>;
 };

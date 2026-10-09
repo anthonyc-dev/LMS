@@ -23,6 +23,7 @@ import {
 } from "@/features/auth/validations/schemas";
 import { LoadingOverlay } from "@/shared/components/Modal/loading-overlay";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { getRoleDashboardPath } from "@/shared/utils/roles";
 
 export function LoginPage() {
   usePageTitle("Login");
@@ -47,7 +48,7 @@ export function LoginPage() {
       setAuth(user, token);
       toast.success("Login successful!");
 
-      navigate("/student/dashboard");
+      navigate(getRoleDashboardPath(user.role));
     } catch (error: unknown) {
       console.error("Login failed:", error);
       const err = error as { response?: { data?: { message?: string } } };

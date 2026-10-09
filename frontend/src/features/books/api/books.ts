@@ -19,7 +19,7 @@ export const booksApi = {
   },
 
   createBook: async (data: CreateBookDto): Promise<Book> => {
-    if (data.coverImage && typeof data.coverImage === 'object') {
+    if (data.coverImage && typeof data.coverImage === "object") {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined && key !== "coverImage") {
@@ -29,7 +29,7 @@ export const booksApi = {
       formData.append("coverImage", data.coverImage as Blob);
 
       const response = await api.post("/books", formData, {
-        headers: { "Content-Type": undefined }
+        headers: { "Content-Type": undefined },
       });
       return response.data;
     }
@@ -40,7 +40,7 @@ export const booksApi = {
   },
 
   updateBook: async (id: string, data: UpdateBookDto): Promise<Book> => {
-    if (data.coverImage && typeof data.coverImage === 'object') {
+    if (data.coverImage && typeof data.coverImage === "object") {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined && key !== "coverImage") {
@@ -50,7 +50,7 @@ export const booksApi = {
       formData.append("coverImage", data.coverImage as Blob);
 
       const response = await api.put(`/books/${id}`, formData, {
-        headers: { "Content-Type": undefined }
+        headers: { "Content-Type": undefined },
       });
       return response.data;
     }
