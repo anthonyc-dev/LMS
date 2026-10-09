@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Role } from 'src/common/enums/role.enum';
 import { User } from 'src/modules/identity/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import type { ObjectLiteral, Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
 import { NotificationsGateway } from './notifications.gateway';
 import { NotificationsService } from './notifications.service';
@@ -12,7 +12,9 @@ jest.mock('src/config/jwt.config', () => ({
   jwtConstants: { secret: 'notification-test-secret' },
 }));
 
-type RepositoryMock<T> = Partial<Record<keyof Repository<T>, jest.Mock>>;
+type RepositoryMock<T extends ObjectLiteral> = Partial<
+  Record<keyof Repository<T>, jest.Mock>
+>;
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
