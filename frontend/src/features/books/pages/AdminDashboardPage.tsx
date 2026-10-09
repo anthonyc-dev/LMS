@@ -16,7 +16,6 @@ import {
   Users,
   BookOpen,
   AlertTriangle,
-  DollarSign,
   Plus,
   ArrowUpRight,
   Clock,

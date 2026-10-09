@@ -26,56 +26,44 @@ async function bootstrap() {
     }),
   );
 
-const corsOriginEnv = process.env.CORS_ORIGIN;
+  const corsOriginEnv = process.env.CORS_ORIGIN;
 
-if (!corsOriginEnv) {
-  throw new Error(
-    'CORS_ORIGIN environment variable is not set. Refusing to start.',
-  );
-}
+  if (!corsOriginEnv) {
+    throw new Error(
+      'CORS_ORIGIN environment variable is not set. Refusing to start.',
+    );
+  }
 
-const allowedOrigins = corsOriginEnv
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+  const allowedOrigins = corsOriginEnv
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('CORS allowed origins:', allowedOrigins);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('CORS allowed origins:', allowedOrigins);
 
-app.enableCors({
-  origin: (origin, callback) => {
-    // Allow non-browser requests such as Postman, curl, mobile apps, etc.
-    if (!origin) {
-      return callback(null, true);
-    }
+  app.enableCors({
+    origin: (origin, callback) => {
+      // Allow non-browser requests such as Postman, curl, mobile apps, etc.
+      if (!origin) {
+        return callback(null, true);
+      }
 
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-    console.warn(`CORS rejected origin: ${origin}`);
+      console.warn(`CORS rejected origin: ${origin}`);
 
-    return callback(new Error('Not allowed by CORS'), false);
-  },
+      return callback(new Error('Not allowed by CORS'), false);
+    },
 
-  credentials: true,
+    credentials: true,
 
-  methods: [
-    'GET',
-    'HEAD',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS',
-  ],
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-CSRF-Token',
-  ],
-});
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+  });
 
   // const corsOrigin =
   //   process.env.CORS_ORIGIN?.split(',') ?? 'http://localhost:5173';

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getUserAnalytics } from "@/features/books/services/dashboardApi";
 import { useAuthStore } from "@/app/store/authStore";
@@ -11,7 +10,6 @@ import {
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
-import { Input } from "@/shared/components/ui/input";
 import { toast } from "sonner";
 import {
   BookOpen,
@@ -62,12 +60,6 @@ const mockAcquisitions = [
 export function FacultyDashboardPage() {
   usePageTitle("Faculty Dashboard");
   const { user: _user } = useAuthStore();
-  // Acquisition Request Form state
-  const [reqTitle, setReqTitle] = useState("");
-  const [reqAuthor, setReqAuthor] = useState("");
-  const [reqCourse, setReqCourse] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { data: stats, isLoading } = useQuery({
     queryKey: ["user-analytics"],
     queryFn: getUserAnalytics,
@@ -77,7 +69,7 @@ export function FacultyDashboardPage() {
   const loans = stats?.activeLoans || [];
 
   // Request lists
-  const [acquisitions, setAcquisitions] = useState(mockAcquisitions);
+  const acquisitions = mockAcquisitions;
 
   /* const _currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -85,37 +77,6 @@ export function FacultyDashboardPage() {
     month: "long",
     day: "numeric",
   }); */
-
-  // Form submit handler
-  const handleAcquisitionSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reqTitle || !reqAuthor || !reqCourse) {
-      toast.error("Please fill in all acquisition request fields.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setTimeout(() => {
-      const newReq = {
-        id: acquisitions.length + 1,
-        title: reqTitle,
-        author: reqAuthor,
-        status: "Submitted",
-        date: new Date().toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-      };
-
-      setAcquisitions([newReq, ...acquisitions]);
-      setIsSubmitting(false);
-      setReqTitle("");
-      setReqAuthor("");
-      setReqCourse("");
-      toast.success("Book acquisition request submitted to library registry!");
-    }, 1000);
-  };
 
   // Renewal click handler (Updates remaining days and renew counter with feedback)
   const handleRenew = (_id: string) => {
