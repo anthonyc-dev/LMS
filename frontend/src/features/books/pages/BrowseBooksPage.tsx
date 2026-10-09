@@ -21,6 +21,7 @@ import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { useBooks } from "@/features/books/hooks/useBooks";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
+import { useRoleBasePath } from "@/shared/hooks/useRoleBasePath";
 
 const BOOK_COLORS = [
   "from-blue-100 to-blue-50",
@@ -39,6 +40,7 @@ const getBookColor = (id: string) => {
 };
 
 export function BrowseBooksPage() {
+  const basePath = useRoleBasePath();
   usePageTitle("Browse Books");
   const [activeCategory, setActiveCategory] = useState("All Books");
   const [searchQuery, setSearchQuery] = useState("");
@@ -299,7 +301,7 @@ export function BrowseBooksPage() {
                       <Button
                         className="mt-3 w-full rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white transition-all duration-200 hover:bg-blue-600 hover:shadow-md hover:shadow-blue-200 active:scale-[0.98] sm:text-sm"
                         onClick={() =>
-                          navigate(`/student/books/details/${book.id}`)
+                          navigate(`${basePath}/books/details/${book.id}`)
                         }
                       >
                         View Book

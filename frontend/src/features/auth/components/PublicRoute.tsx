@@ -1,12 +1,17 @@
 import { useAuthStore } from "@/app/store/authStore";
 import { Navigate } from "react-router-dom";
+import { getRoleDashboardPath } from "@/shared/utils/roles";
 
-export default function PublicRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+export default function PublicRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { isAuthenticated, user } = useAuthStore();
 
   if (isAuthenticated) {
-    return <Navigate to="/student/dashboard" replace />;
+    return <Navigate to={getRoleDashboardPath(user?.role)} replace />;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }

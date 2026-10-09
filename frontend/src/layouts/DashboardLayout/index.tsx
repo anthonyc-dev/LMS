@@ -6,7 +6,6 @@ import {
 } from "@/shared/components/ui/sidebar";
 import {
   LibraryIcon,
-  CalendarIcon,
   HomeIcon,
   Book,
   Tag,
@@ -21,37 +20,38 @@ import { SidebarContentInner } from "@/shared/components/Sidebar";
 import { MobileNav } from "@/shared/components/MobileNav";
 import { NotificationBell } from "@/shared/components/NotificationBell";
 import { useNotificationSocket } from "@/shared/hooks/useNotificationSocket";
+import { getRoleBasePath } from "@/shared/utils/roles";
 
-const menuItems = [
+const createMenuItems = (basePath: string) => [
   {
     icon: HomeIcon,
     label: "Dashboard",
-    path: "/student/dashboard",
+    path: `${basePath}/dashboard`,
     roles: ["admin", "student", "faculty"],
   },
   {
     icon: LibraryIcon,
     label: "Books",
-    path: "/student/books",
+    path: `${basePath}/books`,
     roles: ["student", "faculty"],
     items: [
-      { label: "Browse Books", path: "/student/books/browse" },
-      { label: "Borrow Books", path: "/student/books/borrow" },
-      { label: "Borrowing History", path: "/student/books/history" },
+      { label: "Browse Books", path: `${basePath}/books/browse` },
+      { label: "Borrow Books", path: `${basePath}/books/borrow` },
+      { label: "Borrowing History", path: `${basePath}/books/history` },
     ],
   },
   // {
   //   icon: Book,
   //   label: "My Books",
-  //   path: "/student/my-books",
+  //   path: `${basePath}/my-books`,
   //   roles: ["student", "faculty"], // Example: might not need this for admin if admin has Admin Books
   // },
-  {
-    icon: CalendarIcon,
-    label: "Schedule",
-    path: "/student/schedule",
-    roles: ["admin", "student", "faculty"],
-  },
+  // {
+  //   icon: CalendarIcon,
+  //   label: "Schedule",
+  //   path: `${basePath}/schedule`,
+  //   roles: ["admin", "student", "faculty"],
+  // },
   {
     icon: BookOpen,
     label: "Logbook",
@@ -111,6 +111,8 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthStore();
+  const basePath = getRoleBasePath(user?.role);
+  const menuItems = createMenuItems(basePath);
 
   // Activate real-time notification listener
   useNotificationSocket();
@@ -121,7 +123,7 @@ export function AdminLayout() {
   });
 
   const getPageTitle = (pathname: string) => {
-    if (/^\/student\/books\/details\/[^/]+$/.test(pathname)) {
+    if (/^\/(student|faculty)\/books\/details\/[^/]+$/.test(pathname)) {
       return "Book Details";
     }
 

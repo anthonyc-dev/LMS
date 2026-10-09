@@ -19,6 +19,7 @@ import {
 import api from "@/shared/lib/axios";
 import { toast } from "sonner";
 import { LoadingOverlay } from "@/shared/components/Modal/loading-overlay";
+import { getRoleBasePath } from "@/shared/utils/roles";
 import {
   Collapsible,
   CollapsibleContent,
@@ -44,6 +45,7 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
+  const basePath = getRoleBasePath(user?.role);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [activeSheet, setActiveSheet] = useState<string | null>(null);
@@ -311,14 +313,14 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
                 </div>
 
                 <button
-                  onClick={() => handleNavigate("/student/profile")}
+                  onClick={() => handleNavigate(`${basePath}/profile`)}
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
                 >
                   <User className="size-5" />
                   Profile
                 </button>
                 <button
-                  onClick={() => handleNavigate("/student/settings")}
+                  onClick={() => handleNavigate(`${basePath}/settings`)}
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
                 >
                   <SettingsIcon className="size-5" />

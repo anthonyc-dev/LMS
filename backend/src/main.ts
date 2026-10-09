@@ -26,37 +26,56 @@ async function bootstrap() {
     }),
   );
 
-  const corsOriginEnv = process.env.CORS_ORIGIN;
-  if (!corsOriginEnv) {
-    throw new Error(
-      'CORS_ORIGIN environment variable is not set. Refusing to start.',
-    );
-  }
-  const corsOrigin = corsOriginEnv.split(',').map((o) => o.trim());
+const corsOriginEnv = process.env.CORS_ORIGIN;
 
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-  console.log('CORS_ORIGIN allowed:', corsOrigin);
+if (!corsOriginEnv) {
+  throw new Error(
+    'CORS_ORIGIN environment variable is not set. Refusing to start.',
+  );
+}
 
-  app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
+const allowedOrigins = corsOriginEnv
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
-      const isValid = corsOrigin.some((o) => {
-        if (o.startsWith('https://')) return origin === o;
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('CORS allowed origins:', allowedOrigins);
 
-        const hostname = new URL(origin).hostname;
-        const pattern = o
-          .replace('.', '\\.')
-          .replace('*', '(?:.*)')
-          .replace(/\/$/, '');
-        return new RegExp(`^${pattern}$`).test(hostname);
-      });
+app.enableCors({
+  origin: (origin, callback) => {
+    // Allow non-browser requests such as Postman, curl, mobile apps, etc.
+    if (!origin) {
+      return callback(null, true);
+    }
 
-      if (isValid) callback(null, true);
-      else callback(new Error('Not allowed by CORS'), false);
-    },
-    credentials: true,
-  });
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.warn(`CORS rejected origin: ${origin}`);
+
+    return callback(new Error('Not allowed by CORS'), false);
+  },
+
+  credentials: true,
+
+  methods: [
+    'GET',
+    'HEAD',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+  ],
+
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-CSRF-Token',
+  ],
+});
 
   // const corsOrigin =
   //   process.env.CORS_ORIGIN?.split(',') ?? 'http://localhost:5173';

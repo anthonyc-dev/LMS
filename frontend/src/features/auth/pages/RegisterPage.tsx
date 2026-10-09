@@ -78,7 +78,7 @@ export function RegisterPage() {
     try {
       await api.post("/auth/register", payload);
       toast.success("Account created successfully! Please sign in.");
-      navigate("/student/dashboard");
+      navigate("/login");
     } catch (error: unknown) {
       console.error("Registration failed:", error);
       const err = error as { response?: { data?: { message?: string } } };

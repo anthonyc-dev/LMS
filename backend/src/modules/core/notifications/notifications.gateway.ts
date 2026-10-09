@@ -10,6 +10,7 @@ import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
 import { jwtConstants } from 'src/config/jwt.config';
 import type { JwtPayload } from 'src/common/guard/auth.guard';
+import type { NotificationView } from './notifications.service';
 
 export interface NotificationPayload {
   type: string;
@@ -107,32 +108,15 @@ export class NotificationsGateway
     }
   }
 
-  /**
-   * Send a notification to a specific user (all their connected tabs/devices).
-   */
-  sendToUser(userId: string, payload: NotificationPayload) {
+  emitToUser(userId: string, notification: NotificationView): void {
     const sockets = this.connectedClients.get(userId);
     if (sockets) {
       for (const socket of sockets) {
-        socket.emit('notification', {
-          ...payload,
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-          createdAt: new Date().toISOString(),
-        });
+        socket.emit('notification', notification);
       }
-      this.logger.debug(`Sent notification to user ${userId}: ${payload.type}`);
+      this.logger.debug(
+        `Sent notification to user ${userId}: ${notification.type}`,
+      );
     }
-  }
-
-  /**
-   * Send a notification to all users with a specific role.
-   */
-  sendToRole(role: string, payload: NotificationPayload) {
-    this.server.to(`role:${role}`).emit('notification', {
-      ...payload,
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      createdAt: new Date().toISOString(),
-    });
-    this.logger.debug(`Sent notification to role=${role}: ${payload.type}`);
   }
 }

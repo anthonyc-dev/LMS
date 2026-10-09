@@ -320,7 +320,11 @@ function roleConfig(role: UserRole) {
     case "faculty":
       return { label: "Faculty", icon: GraduationCap, cls: "text-blue-600" };
     case "student":
-      return { label: "Student", icon: GraduationCap, cls: "text-success-text" };
+      return {
+        label: "Student",
+        icon: GraduationCap,
+        cls: "text-success-text",
+      };
   }
 }
 
@@ -447,11 +451,11 @@ function RecordDetailModal({
               </p>
             </div>
             {record.returnDate && (
-              <div className="col-span-2 space-y-1 rounded-xl bg-success-bg p-3">
-                <p className="text-[10px] font-bold tracking-wider text-success-bg0 uppercase">
+              <div className="bg-success-bg col-span-2 space-y-1 rounded-xl p-3">
+                <p className="text-success-bg0 text-[10px] font-bold tracking-wider uppercase">
                   Returned On
                 </p>
-                <p className="text-sm font-bold text-success-text">
+                <p className="text-success-text text-sm font-bold">
                   {record.returnDate}
                 </p>
               </div>
@@ -471,11 +475,11 @@ function RecordDetailModal({
 
           {/* Notes */}
           {record.notes && (
-            <div className="rounded-xl border border-warning-bg bg-warning-bg p-3">
-              <p className="mb-1 text-[10px] font-bold tracking-wider text-warning-bg0 uppercase">
+            <div className="border-warning-bg bg-warning-bg rounded-xl border p-3">
+              <p className="text-warning-bg0 mb-1 text-[10px] font-bold tracking-wider uppercase">
                 Notes
               </p>
-              <p className="text-sm text-warning-text">{record.notes}</p>
+              <p className="text-warning-text text-sm">{record.notes}</p>
             </div>
           )}
         </div>
@@ -973,7 +977,7 @@ export function AdminBorrowingHistory() {
                                 {record.dueDate}
                                 {record.status === "overdue" &&
                                   record.overdueDays && (
-                                    <span className="ml-1 rounded-full bg-error-bg px-1.5 py-0.5 text-[10px] font-black text-error-text">
+                                    <span className="bg-error-bg text-error-text ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-black">
                                       +{record.overdueDays}d
                                     </span>
                                   )}
@@ -1056,7 +1060,7 @@ export function AdminBorrowingHistory() {
                                   </span>
                                   {record.status === "overdue" &&
                                     record.overdueDays && (
-                                      <span className="rounded-full bg-error-bg px-1.5 py-0.5 text-[10px] font-black text-error-text">
+                                      <span className="bg-error-bg text-error-text rounded-full px-1.5 py-0.5 text-[10px] font-black">
                                         +{record.overdueDays}d
                                       </span>
                                     )}

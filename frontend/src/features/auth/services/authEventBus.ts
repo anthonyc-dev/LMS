@@ -1,4 +1,4 @@
-type AuthEventType = 'logout' | 'session_expired' | 'token_refresh';
+type AuthEventType = "logout" | "session_expired" | "token_refresh";
 
 type AuthEventCallback = (payload?: unknown) => void;
 
@@ -14,7 +14,7 @@ class AuthEventBus {
     // Return unsubscribe function
     return () => {
       this.listeners[event] = this.listeners[event].filter(
-        (cb) => cb !== callback
+        (cb) => cb !== callback,
       );
     };
   }

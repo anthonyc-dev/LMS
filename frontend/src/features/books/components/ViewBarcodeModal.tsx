@@ -24,7 +24,9 @@ export function ViewBarcodeModal({
   onClose,
 }: ViewBarcodeModalProps) {
   const [barcodeSrc, setBarcodeSrc] = useState<string>("");
-  const { data: barcodeBlob, isLoading: loading } = useBookCopyBarcode(open && bookCopy ? bookCopy.id : undefined);
+  const { data: barcodeBlob, isLoading: loading } = useBookCopyBarcode(
+    open && bookCopy ? bookCopy.id : undefined,
+  );
 
   useEffect(() => {
     if (!open || !bookCopy || !barcodeBlob) {
@@ -45,7 +47,7 @@ export function ViewBarcodeModal({
 
   const handleDownload = () => {
     if (!barcodeSrc || !bookCopy) return;
-    
+
     const doc = new jsPDF({
       orientation: "landscape",
       unit: "mm",
@@ -55,13 +57,14 @@ export function ViewBarcodeModal({
     const title = bookCopy.book?.title || "Unknown Book";
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    
+
     // Attempt to center title
     const titleWidth = doc.getTextWidth(title);
     const xPos = Math.max((80 - titleWidth) / 2, 2);
-    
+
     // Add text slightly truncated if too long
-    const truncatedTitle = title.length > 40 ? title.substring(0, 37) + "..." : title;
+    const truncatedTitle =
+      title.length > 40 ? title.substring(0, 37) + "..." : title;
     doc.text(truncatedTitle, xPos, 8);
 
     const img = new Image();
@@ -70,7 +73,7 @@ export function ViewBarcodeModal({
       // Put image centered
       // Image is 60x15 typically for Code128 in bwip-js
       doc.addImage(img, "PNG", 10, 12, 60, 20);
-      
+
       doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
       doc.text("LMS Library System", 40, 36, { align: "center" });
@@ -116,26 +119,33 @@ export function ViewBarcodeModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md rounded-2xl">
+      <DialogContent className="rounded-2xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle>View Barcode</DialogTitle>
           <DialogDescription>
-            Barcode for {bookCopy.book?.title || "Unknown Book"} ({bookCopy.barcode})
+            Barcode for {bookCopy.book?.title || "Unknown Book"} (
+            {bookCopy.barcode})
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center justify-center p-6 space-y-6">
-          <div className="flex min-h-[96px] items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm w-full">
+        <div className="flex flex-col items-center justify-center space-y-6 p-6">
+          <div className="flex min-h-[96px] w-full items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
             {loading ? (
               <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
             ) : barcodeSrc ? (
-              <img src={barcodeSrc} alt={`Barcode ${bookCopy.barcode}`} className="h-24 w-auto" />
+              <img
+                src={barcodeSrc}
+                alt={`Barcode ${bookCopy.barcode}`}
+                className="h-24 w-auto"
+              />
             ) : (
-              <span className="text-sm text-slate-500">Failed to load barcode</span>
+              <span className="text-sm text-slate-500">
+                Failed to load barcode
+              </span>
             )}
           </div>
-          
-          <div className="flex gap-4 w-full">
+
+          <div className="flex w-full gap-4">
             <Button
               variant="outline"
               className="flex-1 rounded-xl"

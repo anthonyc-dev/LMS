@@ -42,7 +42,7 @@ function Field({
         {label}
       </Label>
       {children}
-      {err && <p className="text-xs font-medium text-error-bg0">{err}</p>}
+      {err && <p className="text-error-bg0 text-xs font-medium">{err}</p>}
     </div>
   );
 }
@@ -220,7 +220,7 @@ export function ShelfFormModal({
                         />
                         {hasBooks ? (
                           <span
-                            className="shrink-0 rounded-md bg-warning-bg px-2 py-0.5 text-[10px] font-bold tracking-wider text-warning-bg0 uppercase"
+                            className="bg-warning-bg text-warning-bg0 shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase"
                             title="Cannot delete — section has book copies"
                           >
                             Has books
@@ -229,7 +229,7 @@ export function ShelfFormModal({
                           <button
                             type="button"
                             onClick={() => removeSection(s.name)}
-                            className="shrink-0 rounded-md bg-error-bg px-2 py-0.5 text-[10px] font-bold tracking-wider text-error-text uppercase hover:bg-error-bg hover:text-error-text"
+                            className="bg-error-bg text-error-text hover:bg-error-bg hover:text-error-text shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase"
                           >
                             Remove
                           </button>
@@ -238,13 +238,13 @@ export function ShelfFormModal({
                     ) : (
                       <div
                         key={s.name}
-                        className="inline-flex items-center gap-1 rounded-lg bg-success-bg px-2.5 py-1 text-xs font-semibold text-success-text"
+                        className="bg-success-bg text-success-text inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold"
                       >
                         {s.name}
                         <button
                           type="button"
                           onClick={() => removeSection(s.name)}
-                          className="ml-0.5 text-success-text hover:text-error-bg0"
+                          className="text-success-text hover:text-error-bg0 ml-0.5"
                         >
                           ×
                         </button>

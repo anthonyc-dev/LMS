@@ -21,7 +21,7 @@ import {
 import { Role } from 'src/common/enums/role.enum';
 import { User } from '../../identity/users/entities/user.entity';
 import { BookCopy } from '../book-copies/entities/book-copy.entity';
-import { NotificationsGateway } from '../../core/notifications/notifications.gateway';
+import { NotificationsService } from '../../core/notifications/notifications.service';
 
 @Injectable()
 export class BorrowingsService {
@@ -31,7 +31,7 @@ export class BorrowingsService {
     @InjectRepository(Borrowing)
     private borrowingRepository: Repository<Borrowing>,
     @InjectDataSource() private dataSource: DataSource,
-    private readonly notificationsGateway: NotificationsGateway,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async selfBorrow(bookId: string, userId: string) {
@@ -121,14 +121,14 @@ export class BorrowingsService {
       // 8. Send real-time notifications
       const bookTitle = availableCopy.book?.title || 'a book';
 
-      this.notificationsGateway.sendToUser(userId, {
+      await this.notificationsService.sendToUser(userId, {
         type: 'BORROW_PENDING',
         title: 'Borrow Request Pending',
         message: `Your request to borrow "${bookTitle}" is pending admin confirmation.`,
         data: { borrowingId: saved.id, bookId },
       });
 
-      this.notificationsGateway.sendToRole('admin', {
+      await this.notificationsService.sendToRole(Role.ADMIN, {
         type: 'NEW_BORROWING_REQUEST',
         title: 'New Borrowing Request',
         message: `${borrower.fullName} requested to borrow "${bookTitle}". Pending confirmation.`,
@@ -174,7 +174,7 @@ export class BorrowingsService {
         year: 'numeric',
       });
 
-      this.notificationsGateway.sendToUser(borrowing.userId, {
+      await this.notificationsService.sendToUser(borrowing.userId, {
         type: 'BORROW_CONFIRMED',
         title: 'Borrow Request Confirmed',
         message: `Your request to borrow "${bookTitle}" has been confirmed by an admin. Due date: ${dueDateStr}.`,
@@ -215,7 +215,7 @@ export class BorrowingsService {
       // Notify user
       const bookTitle = copy?.book?.title || 'a book';
 
-      this.notificationsGateway.sendToUser(borrowing.userId, {
+      await this.notificationsService.sendToUser(borrowing.userId, {
         type: 'BORROW_REJECTED',
         title: 'Borrow Request Rejected',
         message: `Your request to borrow "${bookTitle}" was not approved by the admin.`,
@@ -378,14 +378,14 @@ export class BorrowingsService {
       // Send real-time notifications
       const bookTitle = bookCopy.book?.title || 'a book';
 
-      this.notificationsGateway.sendToUser(userId!, {
+      await this.notificationsService.sendToUser(userId!, {
         type: 'BORROW_CONFIRMED',
         title: 'Book Borrowed Successfully',
         message: `You have borrowed "${bookTitle}".`,
         data: { borrowingId: savedBorrowing.id },
       });
 
-      this.notificationsGateway.sendToRole('admin', {
+      await this.notificationsService.sendToRole(Role.ADMIN, {
         type: 'NEW_BORROWING',
         title: 'New Borrowing',
         message: `A student borrowed "${bookTitle}".`,
@@ -482,14 +482,14 @@ export class BorrowingsService {
         .filter(Boolean)
         .join(', ');
 
-      this.notificationsGateway.sendToUser(userId, {
+      await this.notificationsService.sendToUser(userId, {
         type: 'BORROW_CONFIRMED',
         title: 'Books Borrowed Successfully',
         message: `You have borrowed ${bookCopyIds.length} book(s): ${bookTitles || 'multiple books'}.`,
         data: { borrowingIds: savedBorrowings.map((b) => b.id) },
       });
 
-      this.notificationsGateway.sendToRole('admin', {
+      await this.notificationsService.sendToRole(Role.ADMIN, {
         type: 'NEW_BORROWING',
         title: 'New Bulk Borrowing',
         message: `${borrower.fullName} borrowed ${bookCopyIds.length} book(s).`,

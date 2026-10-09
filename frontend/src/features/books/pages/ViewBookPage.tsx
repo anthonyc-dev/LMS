@@ -28,10 +28,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import bookDark1Img from "@/assets/images/dashboard/book_dark1.png";
+import { useRoleBasePath } from "@/shared/hooks/useRoleBasePath";
 
 export function ViewBookPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const basePath = useRoleBasePath();
   const { data: book, isLoading, isError } = useBook(id || "");
   const selfBorrowMutation = useSelfBorrowBook();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -89,7 +91,7 @@ export function ViewBookPage() {
           We couldn't find the book you are looking for.
         </p>
         <Button
-          onClick={() => navigate("/student/books/browse")}
+          onClick={() => navigate(`${basePath}/books/browse`)}
           variant="outline"
           className="mt-4"
         >
@@ -117,7 +119,7 @@ export function ViewBookPage() {
       <div className="mb-5 flex items-center justify-between">
         <Button
           variant="ghost"
-          onClick={() => navigate("/student/books/browse")}
+          onClick={() => navigate(`${basePath}/books/browse`)}
           className="group -ml-3 flex items-center gap-2 rounded-xl text-slate-500 hover:bg-slate-100/80 hover:text-slate-900"
         >
           <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />

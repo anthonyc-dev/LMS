@@ -64,7 +64,7 @@ function Field({
         {label}
       </Label>
       {children}
-      {err && <p className="text-xs font-medium text-error-bg0">{err}</p>}
+      {err && <p className="text-error-bg0 text-xs font-medium">{err}</p>}
     </div>
   );
 }
@@ -189,7 +189,7 @@ export function BookCopyFormModal({
         {b.title} {b.isbn ? `(${b.isbn})` : ""}
       </CommandItem>
     ));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [books, form.bookId]);
 
   const shelfItems = useMemo(() => {

@@ -21,7 +21,7 @@ export function DeleteShelfModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-w-sm">
         <div className="space-y-5 p-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-error-bg text-error-bg0">
+          <div className="bg-error-bg text-error-bg0 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
             <AlertCircle size={32} />
           </div>
           <div className="space-y-2">
@@ -46,7 +46,7 @@ export function DeleteShelfModal({
             <Button
               onClick={onConfirm}
               disabled={isPending}
-              className="h-11 flex-1 rounded-xl bg-error-bg0 font-bold text-white shadow-md shadow-error-bg hover:bg-error-text"
+              className="bg-error-bg0 shadow-error-bg hover:bg-error-text h-11 flex-1 rounded-xl font-bold text-white shadow-md"
             >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete

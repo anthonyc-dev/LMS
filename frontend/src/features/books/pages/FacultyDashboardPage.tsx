@@ -426,7 +426,7 @@ export function FacultyDashboardPage() {
       {/* Forms & Tables Section */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Book Request Form (1/3 size) */}
-        <Card className="shadow-xs transition-shadow hover:shadow-md">
+        {/* <Card className="shadow-xs transition-shadow hover:shadow-md">
           <CardHeader className="border-b border-slate-50 pb-4">
             <CardTitle className="flex items-center gap-1.5 text-base font-black text-slate-800">
               <PlusCircle className="size-4 text-slate-500" />
@@ -480,7 +480,7 @@ export function FacultyDashboardPage() {
               </Button>
             </form>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* My Active Borrows Registry (2/3 size) */}
         <Card className="shadow-xs transition-shadow hover:shadow-md lg:col-span-2">

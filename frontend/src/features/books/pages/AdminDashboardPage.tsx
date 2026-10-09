@@ -310,7 +310,7 @@ export function AdminDashboardPage() {
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
               <div className="bg-warning-bg text-warning-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
-                <DollarSign className="size-5" />
+                <span className="size-5">₱</span>
               </div>
               <Badge className="bg-warning-bg text-warning-text hover:bg-warning-bg border-none text-[10px] font-bold">
                 Month-to-Date
@@ -321,7 +321,7 @@ export function AdminDashboardPage() {
                 Fine Collections
               </span>
               <h3 className="text-2xl font-black text-slate-800">
-                ${stats.fineCollections.toFixed(2)}
+                ₱{stats.fineCollections.toFixed(2)}
               </h3>
             </div>
             <div className="space-y-1.5 pt-1">

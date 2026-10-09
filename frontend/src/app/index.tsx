@@ -6,6 +6,18 @@ import api from "@/shared/lib/axios";
 import PublicRoute from "@/features/auth/components/PublicRoute";
 import ProtectedRoute from "@/features/auth/components/ProtectedRoute";
 import LoadingSpinner from "@/shared/components/GlobalLoading";
+import { getRoleDashboardPath } from "@/shared/utils/roles";
+
+function RoleHomeRedirect() {
+  const { isAuthenticated, user } = useAuthStore();
+
+  return (
+    <Navigate
+      to={isAuthenticated ? getRoleDashboardPath(user?.role) : "/login"}
+      replace
+    />
+  );
+}
 
 // Lazy load all pages
 const LoginPage = lazy(() =>
@@ -242,12 +254,11 @@ function App() {
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* Protected Routes */}
-          <Route
-            element={
-              <ProtectedRoute allowedRoles={["admin", "student", "faculty"]} />
-            }
-          >
+          {/* Legacy portal links resolve to the authenticated role dashboard. */}
+          <Route path="/portal/*" element={<RoleHomeRedirect />} />
+
+          {/* Student Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
             <Route path="/student" element={<DashboardLayout />}>
               <Route
                 index
@@ -267,9 +278,35 @@ function App() {
             </Route>
           </Route>
 
+          {/* Faculty Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["faculty"]} />}>
+            <Route path="/faculty" element={<DashboardLayout />}>
+              <Route
+                index
+                element={<Navigate to="/faculty/dashboard" replace />}
+              />
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="books">
+                <Route path="browse" element={<BrowseBooksPage />} />
+                <Route path="details/:id" element={<ViewBookPage />} />
+                <Route path="borrow" element={<BorrowBooksPage />} />
+                <Route path="history" element={<BorrowingHistoryPage />} />
+              </Route>
+              <Route path="my-books" element={<MyBooksPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="schedule" element={<SchedulePage />} />
+            </Route>
+          </Route>
+
           {/* Protected Admin Only Routes */}
           <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
             <Route path="/admin" element={<DashboardLayout />}>
+              <Route
+                index
+                element={<Navigate to="/admin/dashboard" replace />}
+              />
+              <Route path="dashboard" element={<DashboardPage />} />
               <Route path="books" element={<AdminBooksPage />} />
               <Route path="books/add" element={<AdminAddBookPage />} />
               <Route path="inventory" element={<AdminInventoryPage />} />
@@ -294,6 +331,9 @@ function App() {
                 element={<CirculationRecordsPage />}
               />
               <Route path="visits-logbook" element={<VisitsLogbookPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+              <Route path="schedule" element={<SchedulePage />} />
             </Route>
           </Route>
 

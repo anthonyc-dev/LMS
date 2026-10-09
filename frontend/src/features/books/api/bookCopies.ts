@@ -43,7 +43,7 @@ async function fetchBookCopies(
   page = 1,
   limit = 10,
   search?: string,
-  status?: string
+  status?: string,
 ): Promise<PaginatedBookCopies> {
   const response = await api.get("/book-copies", {
     params: { page, limit, search, status },
@@ -51,7 +51,12 @@ async function fetchBookCopies(
   return response.data;
 }
 
-export function useBookCopies(page = 1, limit = 10, search?: string, status?: string) {
+export function useBookCopies(
+  page = 1,
+  limit = 10,
+  search?: string,
+  status?: string,
+) {
   return useQuery({
     queryKey: ["book-copies", page, limit, search, status],
     queryFn: () => fetchBookCopies(page, limit, search, status),
