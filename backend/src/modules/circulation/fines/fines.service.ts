@@ -1,9 +1,14 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateFineDto } from './dto/create-fine.dto';
 import { UpdateFineDto } from './dto/update-fine.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Fine } from './entities/fine.entity';
+import { Fine, FineStatus } from './entities/fine.entity';
 import { Borrowing } from '../borrowings/entities/borrowing.entity';
 
 @Injectable()
@@ -80,6 +85,22 @@ export class FinesService {
 
     await this.fineRepository.update(id, updateFineDto);
     return await this.findOne(id);
+  }
+
+  async markPaid(id: string) {
+    return this.fineRepository.manager.transaction(async (manager) => {
+      const fine = await manager.getRepository(Fine).findOne({
+        where: { id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!fine) throw new NotFoundException(`Fine with ID ${id} not found`);
+      if (fine.status !== FineStatus.UNPAID)
+        throw new ConflictException('Fine is already settled');
+
+      fine.status = FineStatus.PAID;
+      fine.paidAt = new Date();
+      return manager.getRepository(Fine).save(fine);
+    });
   }
 
   async remove(id: string) {

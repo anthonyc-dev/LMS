@@ -7,6 +7,7 @@ import {
 import { Badge } from "@/shared/components/ui/badge";
 import { type User, roleConfig } from "@/features/users/pages/UserManagement";
 import { Users, Mail, Phone, Building2, School, BookOpen } from "lucide-react";
+import { formatPhilippinePeso } from "@/shared/utils/currency";
 
 export interface ViewUserModalProps {
   open: boolean;
@@ -24,17 +25,9 @@ export function ViewUserModal({ open, onClose, user }: ViewUserModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] w-[95vw] overflow-x-hidden overflow-y-auto rounded-3xl border-none p-0 shadow-2xl sm:max-w-[700px]">
+      <DialogContent className="border-primary/20 max-h-[90vh] w-[95vw] overflow-x-hidden overflow-y-auto rounded-xl border p-0 shadow-sm sm:max-w-[700px]">
         {/* Header */}
-        <div
-          className={`relative overflow-hidden p-6 text-white ${
-            user.role === "admin"
-              ? "bg-slate-600"
-              : user.role === "faculty"
-                ? "bg-linear-to-br from-blue-600 to-blue-700"
-                : "bg-blue-600"
-          }`}
-        >
+        <div className="bg-primary text-primary-foreground relative overflow-hidden p-6">
           <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/5" />
           <div className="absolute top-6 right-8 opacity-10">
             <Users size={90} className="-rotate-12" />
@@ -48,7 +41,7 @@ export function ViewUserModal({ open, onClose, user }: ViewUserModalProps) {
               </AvatarFallback>
             </Avatar>
             <div className="pt-2">
-              <h2 className="text-2xl font-black text-white">
+              <h2 className="text-2xl font-semibold text-white">
                 {user.fullName}
               </h2>
               <p className="font-medium text-white/80">{user.schoolId}</p>
@@ -168,11 +161,23 @@ export function ViewUserModal({ open, onClose, user }: ViewUserModalProps) {
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
                       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {borrowings.map((b: any) => (
-                        <tr
-                          key={b.id}
-                          className="transition-colors hover:bg-slate-50/50"
-                        >
+                      {borrowings.map((b: any) => {
+                        const bookCondition =
+                          b.book?.status === "LOST" ||
+                          b.fines?.some((fine: { type: string }) => fine.type === "LOST")
+                            ? "LOST"
+                            : b.book?.condition === "DAMAGED" ||
+                                b.fines?.some(
+                                  (fine: { type: string }) => fine.type === "DAMAGED",
+                                )
+                              ? "DAMAGED"
+                              : b.book?.condition || "GOOD";
+
+                        return (
+                          <tr
+                            key={b.id}
+                            className="transition-colors hover:bg-slate-50/50"
+                          >
                           <td className="px-4 py-3">
                             <p className="font-bold text-slate-900">
                               {b.book?.title || "Unknown Book"}
@@ -180,6 +185,24 @@ export function ViewUserModal({ open, onClose, user }: ViewUserModalProps) {
                             <p className="text-xs text-slate-500">
                               ISBN: {b.book?.isbn || "N/A"}
                             </p>
+                            <Badge
+                              variant={
+                                bookCondition === "GOOD" ? "outline" : "destructive"
+                              }
+                              className={`mt-1 text-[10px] ${
+                                bookCondition === "GOOD"
+                                  ? "border-green-200 bg-green-50 text-green-700"
+                                  : ""
+                              }`}
+                            >
+                              {bookCondition.charAt(0) +
+                                bookCondition.slice(1).toLowerCase()}
+                            </Badge>
+                            {b.fines?.map((fine: { id: string; amount: string; type: string; status: string }) => (
+                              <p key={fine.id} className="mt-1 text-xs font-medium text-slate-500">
+                                Fine: {formatPhilippinePeso(fine.amount)} {fine.type} ({fine.status})
+                              </p>
+                            ))}
                           </td>
                           <td className="px-4 py-3 text-slate-600">
                             {new Date(b.borrowDate).toLocaleDateString()}
@@ -195,8 +218,9 @@ export function ViewUserModal({ open, onClose, user }: ViewUserModalProps) {
                                 b.status.slice(1)}
                             </Badge>
                           </td>
-                        </tr>
-                      ))}
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

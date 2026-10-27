@@ -26,7 +26,7 @@ export function LoadingOverlay({ isOpen, className }: LoadingOverlayProps) {
       )}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70" />
+      <div className="bg-primary/25 absolute inset-0 backdrop-blur-sm" />
 
       {/* Lottie Animation */}
       <div className="flex items-center justify-center">

@@ -19,13 +19,15 @@ export function DeleteShelfModal({
   if (!shelf) return null;
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-w-sm">
+      <DialogContent className="border-primary/20 overflow-hidden rounded-xl border p-0 shadow-sm sm:max-w-sm">
         <div className="space-y-5 p-8 text-center">
           <div className="bg-error-bg text-error-bg0 mx-auto flex h-16 w-16 items-center justify-center rounded-full">
             <AlertCircle size={32} />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-black text-slate-900">Delete Shelf?</h3>
+            <h3 className="text-xl font-semibold text-slate-900">
+              Delete Shelf?
+            </h3>
             <p className="text-sm font-medium text-slate-500">
               Remove shelf{" "}
               <span className="font-bold text-slate-800">

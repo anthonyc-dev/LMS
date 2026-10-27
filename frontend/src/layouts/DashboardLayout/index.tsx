@@ -144,7 +144,7 @@ export function AdminLayout() {
         <Sidebar
           collapsible="icon"
           variant="sidebar"
-          className="hidden border-none text-white md:flex"
+          className="border-sidebar-border text-sidebar-foreground hidden md:flex"
         >
           <SidebarContentInner
             navigate={navigate}
@@ -152,15 +152,18 @@ export function AdminLayout() {
             menuItems={filteredMenuItems}
           />
         </Sidebar>
-        <main className="relative flex flex-1 flex-col overflow-hidden pb-20 md:pb-0">
-          <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center gap-4 border-b bg-white/80 px-4 backdrop-blur-md lg:px-6">
+        <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden pb-20 md:pb-0">
+          <header className="bg-card sticky top-0 z-50 flex h-16 shrink-0 items-center gap-4 border-b px-4 lg:px-6">
             <div className="hidden md:block">
               <SidebarTrigger />
             </div>
-            <h1 className="text-foreground text-lg font-semibold capitalize">
+            <h1 className="text-foreground text-base font-semibold capitalize">
               {getPageTitle(location.pathname)}
             </h1>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-4">
+              <span className="text-muted-foreground hidden text-xs sm:inline">
+                NCMC Library
+              </span>
               <NotificationBell />
             </div>
           </header>

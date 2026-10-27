@@ -1,3 +1,4 @@
+import { TablePageNumbers } from "@/shared/components/DataTable/TablePageNumbers";
 import { useState, useMemo, Fragment } from "react";
 import {
   Plus,
@@ -659,17 +660,11 @@ export function ShelfPage() {
             >
               <ChevronLeft className="size-4" />
             </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <Button
-                key={p}
-                variant={p === page ? "default" : "outline"}
-                size="icon"
-                className={`h-8 w-8 rounded-lg text-xs font-bold ${p === page ? "border-slate-900 bg-slate-900 shadow-sm hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                onClick={() => setPage(p)}
-              >
-                {p}
-              </Button>
-            ))}
+            <TablePageNumbers
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
             <Button
               variant="outline"
               size="icon"

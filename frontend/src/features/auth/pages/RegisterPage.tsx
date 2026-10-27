@@ -1,3 +1,4 @@
+import { AuthBrandPanel } from "@/features/auth/components/AuthBrandPanel";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
@@ -89,97 +90,19 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="relative hidden items-center justify-center overflow-hidden p-10 lg:flex lg:flex-col">
-        <img
-          src="/img/register.jpg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/60 to-transparent" />
-        <div className="relative z-10 flex max-w-md flex-col items-center text-center">
-          <h2 className="mb-3 text-3xl font-bold text-white">
-            Join Our Community
-          </h2>
-          <p className="text-lg leading-relaxed text-white/80">
-            Start your learning journey today. Get access to world-class
-            courses, expert instructors, and a supportive community.
-          </p>
-          <div className="mt-8 space-y-3 text-left">
-            <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/20">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-4 text-white"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <path d="m9 11 3 3L22 4" />
-                </svg>
-              </div>
-              <span className="text-sm text-white/90">
-                Free access to introductory courses
-              </span>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/20">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-4 text-white"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <path d="m9 11 3 3L22 4" />
-                </svg>
-              </div>
-              <span className="text-sm text-white/90">
-                Personalized learning paths
-              </span>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/20">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="size-4 text-white"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <path d="m9 11 3 3L22 4" />
-                </svg>
-              </div>
-              <span className="text-sm text-white/90">
-                Certificate upon completion
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-col items-center justify-center p-6 sm:p-10">
-        <div className="w-full max-w-md">
-          <div className="mb-6 flex flex-col items-center text-center">
-            <div className="mb-4 flex size-32 shrink-0 items-center justify-center overflow-hidden">
+    <div className="bg-card grid min-h-svh lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <AuthBrandPanel />
+      <div className="flex flex-col items-center justify-center px-6 py-12 sm:p-12">
+        <div className="w-full max-w-[420px]">
+          <div className="mb-8 flex flex-col items-start text-left">
+            <div className="mb-6 flex size-14 shrink-0 items-center justify-center overflow-hidden">
               <img
                 src="/img/logo.png"
                 alt="NCMC Library"
                 className="h-full w-full object-contain"
               />
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-3xl font-semibold tracking-tight">
               Create your account
             </h1>
             <p className="text-muted-foreground mt-2 text-sm">
@@ -360,7 +283,9 @@ export function RegisterPage() {
                         />
                         <button
                           type="button"
-                          aria-label="Toggle password visibility"
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
                           onClick={() => setShowPassword(!showPassword)}
                           className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
                         >

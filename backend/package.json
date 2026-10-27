@@ -24,6 +24,7 @@
     "hash-passwords": "ts-node -r tsconfig-paths/register scripts/hash-passwords.ts"
   },
   "dependencies": {
+    "@emailjs/browser": "^5.0.3",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",

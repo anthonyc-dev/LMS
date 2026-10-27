@@ -194,7 +194,7 @@ const SchedulePage = () => {
       await returnMutation.mutateAsync({ borrowingId: id });
       toast.success("Book returned successfully");
       setSelectedEvent(null);
-    // eslint-disable-next-line unused-imports/no-unused-vars
+      // eslint-disable-next-line unused-imports/no-unused-vars
     } catch (error) {
       toast.error("Failed to return book");
     }
@@ -585,8 +585,8 @@ const SchedulePage = () => {
         open={!!selectedEvent}
         onOpenChange={(o) => !o && setSelectedEvent(null)}
       >
-        <DialogContent className="overflow-hidden rounded-3xl border-none p-0 shadow-2xl sm:max-w-[425px]">
-          <div className={cn("h-3 w-full", colors.bg)} />
+        <DialogContent className="border-primary/20 overflow-hidden rounded-xl border p-0 shadow-sm sm:max-w-[425px]">
+          <div className={"bg-primary h-3 w-full"} />
           <div className="p-6">
             <DialogHeader className="mb-6">
               <div className="mb-2 flex items-center justify-between">
@@ -670,7 +670,7 @@ const SchedulePage = () => {
                 <Button
                   onClick={() => handleReturn(data.id)}
                   disabled={returnMutation.isPending}
-                  className="w-full rounded-xl bg-slate-900 text-white hover:bg-slate-800 sm:w-auto"
+                  className="bg-primary hover:bg-primary/90 w-full rounded-xl text-white sm:w-auto"
                 >
                   {returnMutation.isPending ? (
                     <LoadingSpinner />

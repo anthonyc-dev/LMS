@@ -60,6 +60,14 @@ export class FinesController {
     return this.finesService.update(id, updateFineDto);
   }
 
+  @Patch(':id/paid')
+  @Roles(Role.ADMIN)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  markPaid(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.finesService.markPaid(id);
+  }
+
   @Delete(':id')
   @Roles(Role.ADMIN)
   @Throttle({ default: { limit: 5, ttl: 60000 } })

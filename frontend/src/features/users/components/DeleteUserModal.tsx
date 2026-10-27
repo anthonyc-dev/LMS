@@ -19,19 +19,22 @@ export function DeleteUserModal({
   if (!user) return null;
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] overflow-hidden rounded-3xl border-none p-0 shadow-2xl sm:max-w-sm">
+      <DialogContent className="border-primary/20 w-[95vw] overflow-hidden rounded-xl border p-0 shadow-sm sm:max-w-sm">
         <div className="space-y-5 p-8 text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
             <AlertCircle size={32} className="text-red-500" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-black text-slate-900">Delete User?</h3>
+            <h3 className="text-xl font-semibold text-slate-900">
+              Deactivate User?
+            </h3>
             <p className="text-sm font-medium text-slate-500">
-              Are you sure you want to permanently remove{" "}
+              Deactivate{" "}
               <span className="font-bold text-slate-800">
                 "{user.fullName}"
               </span>{" "}
-              from the system? This cannot be undone.
+              and disable access? Library history stays saved. An administrator
+              can restore this account.
             </p>
           </div>
           <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
@@ -49,7 +52,7 @@ export function DeleteUserModal({
               className="h-11 w-full rounded-xl bg-red-500 font-bold text-white shadow-md shadow-red-200 hover:bg-red-600 sm:flex-1"
             >
               {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Delete User
+              Deactivate User
             </Button>
           </div>
         </div>

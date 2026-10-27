@@ -25,6 +25,7 @@ function getField<T>(
 
 export interface ApiUser {
   _id: string;
+  deletedAt?: string | null;
   schoolId: string;
   fullName: string;
   email: string;
@@ -44,6 +45,7 @@ export interface ApiUser {
 export function normalizeApiUser(raw: Record<string, unknown>): ApiUser {
   return {
     _id: getField<string>(raw, "_id", "id") ?? "",
+    deletedAt: getField<string | null>(raw, "deletedAt"),
     schoolId: getField<string>(raw, "schoolId", "school_id") ?? "",
     fullName: getField<string>(raw, "fullName", "full_name", "name") ?? "",
     email: getField<string>(raw, "email") ?? "",
@@ -97,14 +99,28 @@ export interface UpdateUserPayload {
   role?: Role;
 }
 
-async function fetchUsers(): Promise<ApiUser[]> {
-  const res = await api.get("/users");
-  const data = res.data;
-  let rawList: Record<string, unknown>[] = [];
-  if (Array.isArray(data)) rawList = data;
-  else if (data?.users && Array.isArray(data.users)) rawList = data.users;
-  else if (data?.data && Array.isArray(data.data)) rawList = data.data;
-  else console.warn("Unexpected users API response shape:", data);
+async function fetchUsers(
+  status: "active" | "deactivated",
+  signal?: AbortSignal,
+): Promise<ApiUser[]> {
+  const rawList: Record<string, unknown>[] = [];
+  let page = 1;
+  let totalPages: number;
+  do {
+    const res = await api.get("/users", {
+      params: { status, page, limit: 100 },
+      signal,
+    });
+    const data = res.data;
+    if (Array.isArray(data)) rawList.push(...data);
+    else if (Array.isArray(data?.users)) rawList.push(...data.users);
+    else if (Array.isArray(data?.data)) rawList.push(...data.data);
+    else throw new Error("Invalid users API response");
+    totalPages = Number.isInteger(data?.meta?.totalPages)
+      ? data.meta.totalPages
+      : 1;
+    page++;
+  } while (page <= totalPages);
   return rawList.map(normalizeApiUser);
 }
 
@@ -134,8 +150,8 @@ async function updateUser(
   return raw;
 }
 
-async function deleteUser(id: string): Promise<void> {
-  await api.delete(`/users/${id}`);
+async function deactivateUser(id: string): Promise<void> {
+  await api.post(`/users/${id}/deactivate`);
 }
 
 export async function updateUserProfile(
@@ -154,10 +170,10 @@ export async function updateUserProfile(
   return raw;
 }
 
-export function useUsers() {
+export function useUsers(status: "active" | "deactivated" = "active") {
   return useQuery({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
+    queryKey: ["users", status],
+    queryFn: ({ signal }) => fetchUsers(status, signal),
   });
 }
 
@@ -189,12 +205,24 @@ export function useUpdateUser() {
   });
 }
 
-export function useDeleteUser() {
+export function useDeactivateUser() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: deleteUser,
+    mutationFn: deactivateUser,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+}
+
+export function useRestoreUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.post("/users/" + id + "/restore");
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["users"] });
     },
   });
 }

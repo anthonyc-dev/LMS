@@ -8,9 +8,15 @@ import { JwtStrategy } from 'src/common/guard/jwt.strategy';
 import { UsersController } from './users.controller';
 import { Borrowing } from '../../circulation/borrowings/entities/borrowing.entity';
 import { Visit } from '../../circulation/visits/entities/visit.entity';
+import { MailModule } from '../../core/mail/mail.module';
+import { NotificationsModule } from '../../core/notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Session, Borrowing, Visit])],
+  imports: [
+    TypeOrmModule.forFeature([User, Session, Borrowing, Visit]),
+    MailModule,
+    NotificationsModule,
+  ],
   controllers: [UsersController],
   providers: [UsersService, RolesGuard, JwtStrategy],
   exports: [UsersService],

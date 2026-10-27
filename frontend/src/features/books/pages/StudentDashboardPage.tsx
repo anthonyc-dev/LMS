@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getUserAnalytics } from "@/features/books/services/dashboardApi";
-import { useAuthStore } from "@/app/store/authStore";
 import {
   Card,
   CardContent,
@@ -12,26 +10,15 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
 
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Clock,
-  TrendingUp,
   Award,
   ChevronRight,
   ShieldCheck,
   ArrowRight,
 } from "lucide-react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 
 // Asset imports
 /* import book1Img from "@/assets/images/dashboard/book1.png";
@@ -40,17 +27,7 @@ import bookDark1Img from "@/assets/images/dashboard/book_dark1.png";
 import bookDark2Img from "@/assets/images/dashboard/book_dark2.png"; */
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { useRoleBasePath } from "@/shared/hooks/useRoleBasePath";
-
-// Mock Data
-const readingStats = [
-  { day: "Mon", hours: 1.5 },
-  { day: "Tue", hours: 2.2 },
-  { day: "Wed", hours: 1.8 },
-  { day: "Thu", hours: 3.0 },
-  { day: "Fri", hours: 2.5 },
-  { day: "Sat", hours: 4.2 },
-  { day: "Sun", hours: 2.0 },
-];
+import { formatPhilippinePeso } from "@/shared/utils/currency";
 
 /* const _mockEvents = [
   {
@@ -117,7 +94,6 @@ const readingStats = [
 
 export function StudentDashboardPage() {
   usePageTitle("Student Dashboard");
-  const { user: _user } = useAuthStore();
   const navigate = useNavigate();
   const basePath = useRoleBasePath();
   // const [searchQuery, _setSearchQuery] = useState("");
@@ -137,13 +113,7 @@ export function StudentDashboardPage() {
   // const ringCircumference = 2 * Math.PI * ringRadius;
   // const _ringOffset = ringCircumference * (1 - readBooksCount / goalBooksCount);
 
-  // Stateful books array for interactions (using API data as initial state)
   const borrowedBooks = stats?.activeLoans || [];
-
-  const [_greeting, _setGreeting] = useState(() => {
-    const h = new Date().getHours();
-    return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-  });
 
   /* const _handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,14 +125,7 @@ export function StudentDashboardPage() {
     }
   }; */
 
-  const handleRenewBook = (id: string) => {
-    // This will be replaced by a real API call later
-    toast.info(
-      `Renew functionality for book ${id} will trigger a backend call in the future`,
-    );
-  };
-
-  if (isLoading || !stats) {
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center text-slate-500">
         Loading dashboard data...
@@ -170,10 +133,18 @@ export function StudentDashboardPage() {
     );
   }
 
+  if (!stats) {
+    return (
+      <div className="flex h-screen items-center justify-center text-slate-500">
+        Dashboard data could not be loaded.
+      </div>
+    );
+  }
+
   return (
     <div className="animate-fade-in mx-auto max-w-[1600px] space-y-6 pb-12">
       {/* Modern Gradient Hero Welcome Banner */}
-      {/* <section className="group relative flex flex-col items-center justify-between overflow-hidden rounded-2xl bg-linear-to-r from-blue-900 via-blue-950 to-slate-900 p-6 shadow-sm transition-all duration-300 hover:shadow-md md:flex-row md:p-8">
+      {/* <section className="group relative flex flex-col items-center justify-between overflow-hidden rounded-2xl bg-linear-to-r from-blue-900 via-blue-950 to-slate-900 p-6 shadow-sm transition-all duration-300  md:flex-row md:p-8">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-blue-400 via-blue-900 to-slate-900 opacity-10" />
         <div className="absolute top-0 right-0 h-80 w-80 translate-x-12 -translate-y-12 rounded-full bg-blue-500/10 blur-3xl" />
 
@@ -184,7 +155,7 @@ export function StudentDashboardPage() {
           </div>
 
           <div className="space-y-1.5">
-            <h1 className="text-2xl leading-tight font-black tracking-tight text-white sm:text-3xl lg:text-4xl">
+            <h1 className="text-2xl leading-tight font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">
               {greeting},{" "}
               <span className="bg-linear-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">
                 {user?.fullName || "Scholar"}
@@ -234,70 +205,70 @@ export function StudentDashboardPage() {
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         {/* Active Loan Count */}
-        <Card className="group transition-all duration-300 hover:border-blue-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-blue-200">
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div className="space-y-1">
-              <span className="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
+              <span className="text-xs leading-none font-bold tracking-widest text-slate-400 uppercase">
                 Checked Out
               </span>
-              <h3 className="text-2xl leading-normal font-black text-slate-800">
+              <h3 className="text-2xl leading-normal font-semibold text-slate-800">
                 {stats.checkedOut}{" "}
                 <span className="text-xs font-semibold text-slate-400">
                   books
                 </span>
               </h3>
               <p
-                className="flex cursor-pointer items-center gap-0.5 text-[10px] font-bold text-blue-600 hover:underline"
+                className="flex cursor-pointer items-center gap-0.5 text-xs font-bold text-blue-600 hover:underline"
                 onClick={() => navigate(`${basePath}/books/browse`)}
               >
                 <span>View library list</span>
                 <ArrowRight size={10} />
               </p>
             </div>
-            <div className="rounded-xl bg-blue-50 p-3 text-blue-600 transition-transform group-hover:scale-110">
+            <div className="rounded-xl bg-blue-50 p-3 text-blue-600 transition-transform">
               <BookOpen className="size-5" />
             </div>
           </CardContent>
         </Card>
 
         {/* Return Countdown Deadline */}
-        <Card className="group hover:border-warning-bg transition-all duration-300 hover:shadow-md">
+        <Card className="group hover:border-warning-bg transition-all duration-300">
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div className="space-y-1">
-              <span className="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
+              <span className="text-xs leading-none font-bold tracking-widest text-slate-400 uppercase">
                 Next Deadline
               </span>
-              <h3 className="text-2xl leading-normal font-black text-slate-800">
+              <h3 className="text-2xl leading-normal font-semibold text-slate-800">
                 {stats.nextDeadlineDays !== "None"
                   ? `${stats.nextDeadlineDays} Days`
                   : "None"}
               </h3>
-              <p className="text-[10px] font-semibold text-slate-500">
+              <p className="text-xs font-semibold text-slate-500">
                 {stats.nextDeadlineDate !== "All clear"
                   ? `Due: ${stats.nextDeadlineDate}`
                   : "All clear"}
               </p>
             </div>
-            <div className="bg-warning-bg text-warning-text animate-pulse rounded-xl p-3 transition-transform group-hover:scale-110">
+            <div className="bg-warning-bg text-warning-text animate-pulse rounded-xl p-3 transition-transform">
               <Clock className="size-5" />
             </div>
           </CardContent>
         </Card>
 
         {/* Semester Reading Goal (Custom Circular Ring Indicator) */}
-        {/* <Card className="group transition-all duration-300 hover:border-slate-200 hover:shadow-md">
+        {/* <Card className="group transition-all duration-300 hover:border-slate-200 ">
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div className="space-y-1">
-              <span className="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
+              <span className="text-xs leading-none font-bold tracking-widest text-slate-400 uppercase">
                 Reading Goals
               </span>
-              <h3 className="text-2xl leading-normal font-black text-slate-800">
+              <h3 className="text-2xl leading-normal font-semibold text-slate-800">
                 {readBooksCount}{" "}
                 <span className="text-xs font-semibold text-slate-400">
                   / {goalBooksCount} read
                 </span>
               </h3>
-              <p className="text-[10px] font-semibold text-slate-500">
+              <p className="text-xs font-semibold text-slate-500">
                 {progressPercent}% semester goal
               </p>
             </div>
@@ -325,7 +296,7 @@ export function StudentDashboardPage() {
                   cy="24"
                 />
               </svg>
-              <div className="absolute text-[9px] font-black text-slate-700">
+              <div className="absolute text-[9px] font-semibold text-slate-700">
                 {progressPercent}%
               </div>
             </div>
@@ -333,14 +304,14 @@ export function StudentDashboardPage() {
         </Card> */}
 
         {/* Fines & Violations Status */}
-        <Card className="group hover:border-success-bg transition-all duration-300 hover:shadow-md">
+        <Card className="group hover:border-success-bg transition-all duration-300">
           <CardContent className="flex items-center justify-between gap-4 p-5">
             <div className="space-y-1">
-              <span className="text-[10px] leading-none font-bold tracking-widest text-slate-400 uppercase">
+              <span className="text-xs leading-none font-bold tracking-widest text-slate-400 uppercase">
                 Outstanding Fines
               </span>
-              <h3 className="text-2xl leading-normal font-black text-slate-800">
-                ₱ {stats.outstandingFines.toFixed(2)}
+              <h3 className="text-2xl leading-normal font-semibold text-slate-800">
+                {formatPhilippinePeso(stats.outstandingFines)}
               </h3>
               {stats.outstandingFines === 0 ? (
                 <Badge className="bg-success-bg0/10 text-success-bg0 hover:bg-success-bg0/10 flex w-fit items-center gap-0.5 border-none text-[8px] font-bold">
@@ -354,7 +325,7 @@ export function StudentDashboardPage() {
                 </Badge>
               )}
             </div>
-            <div className="bg-success-bg text-success-text rounded-xl p-3 transition-transform group-hover:scale-110">
+            <div className="bg-success-bg text-success-text rounded-xl p-3 transition-transform">
               <Award className="size-5" />
             </div>
           </CardContent>
@@ -367,7 +338,7 @@ export function StudentDashboardPage() {
         <div className="space-y-4 lg:col-span-2">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <h2 className="text-lg font-black tracking-tight text-slate-900">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900">
                 Active Loans Details
               </h2>
               <p className="text-xs font-medium text-slate-500">
@@ -389,7 +360,7 @@ export function StudentDashboardPage() {
               {borrowedBooks.map((book) => (
                 <Card
                   key={book.id}
-                  className="relative overflow-hidden border-slate-100 transition-shadow hover:shadow-md"
+                  className="relative overflow-hidden border-slate-100 transition-shadow"
                 >
                   <div className="absolute top-2 right-2">
                     <Badge
@@ -411,10 +382,10 @@ export function StudentDashboardPage() {
                     {/* Title and stats details */}
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="min-w-0 space-y-0.5">
-                        <h4 className="truncate text-xs leading-tight font-black text-slate-800">
+                        <h4 className="truncate text-xs leading-tight font-semibold text-slate-800">
                           {book.title}
                         </h4>
-                        <p className="text-[10px] leading-none font-medium text-slate-400">
+                        <p className="text-xs leading-none font-medium text-slate-400">
                           {book.author}
                         </p>
                       </div>
@@ -450,13 +421,6 @@ export function StudentDashboardPage() {
                         />
                       </div>
 
-                      <Button
-                        variant="outline"
-                        onClick={() => handleRenewBook(book.id)}
-                        className="mt-1 h-7 w-full cursor-pointer rounded-lg border-slate-200 px-3 text-[9px] font-bold text-slate-600 transition-all hover:border-blue-600 hover:bg-blue-50/50 hover:text-blue-600"
-                      >
-                        <span>Extend Loan (1 week)</span>
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -484,69 +448,27 @@ export function StudentDashboardPage() {
           )}
         </div>
 
-        {/* Reading hours area chart (1/3 width) */}
-        <Card className="shadow-xs transition-shadow hover:shadow-md">
+        {/* Completed borrowing history from dashboard API */}
+        <Card className="shadow-xs transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
-              <CardTitle className="text-base font-black text-slate-800">
-                Reading Track
+              <CardTitle className="text-base font-semibold text-slate-800">
+                Borrowing History
               </CardTitle>
               <p className="text-xs font-medium text-slate-400">
-                Weekly analysis of study time (Hours)
+                Books returned to library
               </p>
             </div>
-            <TrendingUp className="text-success-bg0 size-4" />
           </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={readingStats}>
-                <defs>
-                  <linearGradient id="hoursGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="#f8fafc"
-                />
-                <XAxis
-                  dataKey="day"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 600 }}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 600 }}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "rgba(255,255,255,0.95)",
-                    border: "none",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.05)",
-                  }}
-                />
-                <Area
-                  type="monotone"
-                  name="Hours"
-                  dataKey="hours"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#hoursGrad)"
-                  dot={{
-                    stroke: "#3b82f6",
-                    strokeWidth: 1.5,
-                    fill: "#fff",
-                    r: 3,
-                  }}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <CardContent className="flex min-h-[180px] items-center justify-center pt-6">
+            <div className="text-center">
+              <p className="text-4xl font-semibold text-slate-800">
+                {stats.readBooksCount}
+              </p>
+              <p className="mt-2 text-xs font-medium text-slate-500">
+                returned books
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -557,7 +479,7 @@ export function StudentDashboardPage() {
         {/* <div className="space-y-4 lg:col-span-2">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <h2 className="text-lg font-black tracking-tight text-slate-900">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900">
                 Recommended For You
               </h2>
               <p className="text-xs font-medium text-slate-500">
@@ -579,7 +501,7 @@ export function StudentDashboardPage() {
               <div
                 key={book.id}
                 onClick={() => navigate(`${basePath}/books/browse`)}
-                className="group cursor-pointer rounded-xl border border-slate-100 bg-white p-3 shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md"
+                className="group cursor-pointer rounded-xl border border-slate-100 bg-white p-3 shadow-xs transition-all duration-300  "
               >
                 <div
                   className={`relative mb-3 aspect-[3/4.2] overflow-hidden rounded-lg shadow-xs ${book.color}`}
@@ -591,13 +513,13 @@ export function StudentDashboardPage() {
                   />
                   <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 rounded bg-white/95 px-1 py-0.5 shadow-xs backdrop-blur-md">
                     <Star className="fill-warning-text text-warning-text size-2.5" />
-                    <span className="text-[8px] font-black text-slate-700">
+                    <span className="text-[8px] font-semibold text-slate-700">
                       {book.rating}
                     </span>
                   </div>
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className="truncate text-[11px] leading-tight font-black text-slate-800 transition-colors group-hover:text-blue-600">
+                  <h4 className="truncate text-xs leading-tight font-semibold text-slate-800 transition-colors group-hover:text-blue-600">
                     {book.title}
                   </h4>
                   <p className="truncate text-[9px] font-medium text-slate-400">
@@ -610,9 +532,9 @@ export function StudentDashboardPage() {
         </div> */}
 
         {/* Calendar Events (1/3 width) */}
-        {/* <Card className="shadow-xs transition-shadow hover:shadow-md">
+        {/* <Card className="shadow-xs transition-shadow ">
           <CardHeader className="border-b border-slate-50 pb-4">
-            <CardTitle className="flex items-center gap-1.5 text-base font-black text-slate-800">
+            <CardTitle className="flex items-center gap-1.5 text-base font-semibold text-slate-800">
               <CalendarDays className="size-4 text-slate-500" />
               <span>Library Events</span>
             </CardTitle>
@@ -639,7 +561,7 @@ export function StudentDashboardPage() {
                     )}
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">
-                    <h5 className="truncate text-xs leading-tight font-black text-slate-800">
+                    <h5 className="truncate text-xs leading-tight font-semibold text-slate-800">
                       {evt.title}
                     </h5>
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[9px] font-semibold text-slate-400">

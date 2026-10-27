@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Role } from 'src/common/enums/role.enum';
 import { User } from 'src/modules/identity/users/entities/user.entity';
-import type { ObjectLiteral, Repository } from 'typeorm';
+import type { EntityManager, ObjectLiteral, Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
 import { NotificationsGateway } from './notifications.gateway';
 import { NotificationsService } from './notifications.service';
@@ -20,7 +20,7 @@ describe('NotificationsService', () => {
   let service: NotificationsService;
   let notifications: RepositoryMock<Notification>;
   let users: RepositoryMock<User>;
-  let gateway: { emitToUser: jest.Mock };
+  let gateway: { emitToUser: jest.Mock; emitChanged: jest.Mock };
 
   const storedNotification = (): Notification =>
     ({
@@ -49,7 +49,7 @@ describe('NotificationsService', () => {
       delete: jest.fn(),
     };
     users = { find: jest.fn() };
-    gateway = { emitToUser: jest.fn() };
+    gateway = { emitToUser: jest.fn(), emitChanged: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -83,6 +83,7 @@ describe('NotificationsService', () => {
     expect(notification.readAt).toBeInstanceOf(Date);
     expect(notifications.save).toHaveBeenCalledWith(notification);
     expect(result.read).toBe(true);
+    expect(gateway.emitChanged).toHaveBeenCalledWith(notification.userId);
   });
 
   it('does not reveal another user notification', async () => {
@@ -125,31 +126,34 @@ describe('NotificationsService', () => {
     );
   });
 
-  it('creates one durable notification per role recipient', async () => {
-    users.find!.mockResolvedValue([{ id: 'user-1' }, { id: 'user-2' }]);
-    notifications.save!.mockImplementation((values: Notification[]) =>
-      Promise.resolve(
-        values.map((value, index) => ({
-          ...value,
-          id: `notification-${index}`,
-          createdAt: new Date('2026-08-28T00:00:00.000Z'),
-        })),
-      ),
-    );
+  it.each([Role.ADMIN, Role.FACULTY, Role.STUDENT])(
+    'creates durable notifications for each %s recipient',
+    async (role) => {
+      users.find!.mockResolvedValue([{ id: 'user-1' }, { id: 'user-2' }]);
+      notifications.save!.mockImplementation((values: Notification[]) =>
+        Promise.resolve(
+          values.map((value, index) => ({
+            ...value,
+            id: `notification-${index}`,
+            createdAt: new Date('2026-08-28T00:00:00.000Z'),
+          })),
+        ),
+      );
 
-    const count = await service.sendToRole(Role.ADMIN, {
-      type: 'TEST',
-      title: 'Admin event',
-      message: 'Message',
-    });
+      const count = await service.sendToRole(role, {
+        type: 'TEST',
+        title: 'Admin event',
+        message: 'Message',
+      });
 
-    expect(users.find).toHaveBeenCalledWith({
-      where: { role: Role.ADMIN },
-      select: { id: true },
-    });
-    expect(count).toBe(2);
-    expect(gateway.emitToUser).toHaveBeenCalledTimes(2);
-  });
+      expect(users.find).toHaveBeenCalledWith({
+        where: { role },
+        select: { id: true },
+      });
+      expect(count).toBe(2);
+      expect(gateway.emitToUser).toHaveBeenCalledTimes(2);
+    },
+  );
 
   it('hard-deletes only records selected by expiration time', async () => {
     notifications.delete!.mockResolvedValue({ affected: 3 });
@@ -161,5 +165,60 @@ describe('NotificationsService', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       expiresAt: expect.any(Object),
     });
+  });
+
+  it('uses loan transaction and defers realtime delivery until commit', async () => {
+    const notification = storedNotification();
+    const transactionRepository = {
+      create: jest.fn((value: unknown) => value),
+      save: jest.fn().mockResolvedValue(notification),
+    };
+    const transaction = {
+      manager: {
+        getRepository: () => transactionRepository,
+      } as unknown as EntityManager,
+      pending: [],
+    };
+    await service.sendToUser(
+      notification.userId,
+      {
+        type: 'TEST',
+        title: 'Test',
+        message: 'Message',
+      },
+      transaction,
+    );
+    expect(transactionRepository.save).toHaveBeenCalled();
+    expect(notifications.save).not.toHaveBeenCalled();
+    expect(gateway.emitToUser).not.toHaveBeenCalled();
+    service.publishCommitted(transaction);
+    expect(gateway.emitToUser).toHaveBeenCalledWith(
+      notification.userId,
+      expect.objectContaining({ id: notification.id }),
+    );
+  });
+
+  it('keeps committed operation successful when transport fails', () => {
+    gateway.emitToUser.mockImplementation(() => {
+      throw new Error('transport unavailable');
+    });
+    expect(() =>
+      service.publishCommitted({
+        manager: {} as EntityManager,
+        pending: [
+          {
+            userId: 'user-id',
+            view: {
+              id: 'notification-id',
+              type: 'TEST',
+              title: 'Test',
+              message: 'Message',
+              createdAt: new Date().toISOString(),
+              read: false,
+            },
+          },
+        ],
+      }),
+    ).not.toThrow();
   });
 });

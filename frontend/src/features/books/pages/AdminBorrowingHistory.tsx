@@ -1,3 +1,4 @@
+import { TablePageNumbers } from "@/shared/components/DataTable/TablePageNumbers";
 import { useState, useMemo, Fragment } from "react";
 import {
   Search,
@@ -360,11 +361,9 @@ function RecordDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden rounded-3xl border-none p-0 shadow-2xl sm:max-w-[520px]">
+      <DialogContent className="border-primary/20 overflow-hidden rounded-xl border p-0 shadow-sm sm:max-w-[520px]">
         {/* Header gradient */}
-        <div
-          className={`relative overflow-hidden bg-linear-to-br ${record.bookCover} p-6 text-white`}
-        >
+        <div className={`bg-primary relative overflow-hidden p-6 text-white`}>
           <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/5" />
           <div className="absolute top-4 right-6 opacity-10">
             <BookMarked size={80} className="-rotate-12" />
@@ -375,7 +374,7 @@ function RecordDetailModal({
                 {record.id}
               </span>
             </div>
-            <DialogTitle className="text-xl leading-tight font-black text-white">
+            <DialogTitle className="text-xl leading-tight font-semibold text-white">
               {record.bookTitle}
             </DialogTitle>
             <p className="text-sm font-medium text-white/70">
@@ -410,7 +409,7 @@ function RecordDetailModal({
           {/* Borrower */}
           <div className="flex items-center gap-3">
             <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-black text-white ${record.borrowerAvatar}`}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white ${record.borrowerAvatar}`}
             >
               {getInitials(record.borrowerName)}
             </div>
@@ -1111,21 +1110,11 @@ export function AdminBorrowingHistory() {
             >
               <ChevronLeft className="size-4" />
             </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-              <Button
-                key={n}
-                variant={n === page ? "default" : "outline"}
-                size="sm"
-                onClick={() => setPage(n)}
-                className={`h-8 w-8 rounded-xl p-0 text-xs font-bold ${
-                  n === page
-                    ? "bg-slate-900 text-white shadow-md shadow-slate-200 hover:bg-slate-800"
-                    : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-600"
-                }`}
-              >
-                {n}
-              </Button>
-            ))}
+            <TablePageNumbers
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
             <Button
               variant="outline"
               size="sm"

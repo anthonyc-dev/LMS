@@ -11,6 +11,10 @@ import * as jwt from 'jsonwebtoken';
 import { jwtConstants } from 'src/config/jwt.config';
 import type { JwtPayload } from 'src/common/guard/auth.guard';
 import type { NotificationView } from './notifications.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from 'src/modules/identity/users/entities/user.entity';
+import type { IncomingMessage } from 'node:http';
 
 export interface NotificationPayload {
   type: string;
@@ -19,10 +23,27 @@ export interface NotificationPayload {
   data?: Record<string, unknown>;
 }
 
+function isAllowedOrigin(origin: string | undefined): boolean {
+  const allowed = (process.env.CORS_ORIGIN ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return !origin || allowed.includes(origin);
+}
+
 @WebSocketGateway({
   cors: {
-    origin: process.env.CORS_ORIGIN?.split(',') ?? 'http://localhost:5173',
+    origin: (origin, callback) => {
+      callback(null, isAllowedOrigin(origin));
+    },
     credentials: true,
+  },
+  // CORS alone does not enforce origin restrictions on WebSocket upgrades.
+  allowRequest: (
+    request: IncomingMessage,
+    callback: (error: string | null, allowed: boolean) => void,
+  ) => {
+    callback(null, isAllowedOrigin(request.headers.origin));
   },
 })
 export class NotificationsGateway
@@ -32,6 +53,10 @@ export class NotificationsGateway
   server: Server;
 
   private readonly logger = new Logger(NotificationsGateway.name);
+
+  constructor(
+    @InjectRepository(User) private readonly users: Repository<User>,
+  ) {}
 
   /**
    * Maps userId -> Set of connected sockets (supports multiple tabs/devices).
@@ -47,7 +72,7 @@ export class NotificationsGateway
     this.logger.log('Notifications WebSocket Gateway initialized');
   }
 
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     try {
       let token =
         (client.handshake.auth?.token as string) ||
@@ -65,10 +90,26 @@ export class NotificationsGateway
         return;
       }
 
-      const payload = jwt.verify(token, jwtConstants.secret) as JwtPayload;
+      const payload = jwt.verify(token, jwtConstants.secret) as JwtPayload &
+        jwt.JwtPayload;
+      if (typeof payload.sub !== 'string' || !payload.sub || !payload.exp) {
+        client.disconnect(true);
+        return;
+      }
+
+      const user = await this.users.findOne({
+        where: { id: payload.sub },
+        select: { id: true, role: true, authVersion: true },
+      });
+      if (!user || user.authVersion !== (payload.authVersion ?? 0)) {
+        client.disconnect();
+        return;
+      }
+      // Database lookup may finish after the transport has disconnected.
+      if (!client.connected) return;
 
       const userId = payload.sub;
-      const role = payload.role;
+      const role = user.role;
 
       // Track the socket
       if (!this.connectedClients.has(userId)) {
@@ -76,9 +117,22 @@ export class NotificationsGateway
       }
       this.connectedClients.get(userId)!.add(client);
       this.socketMeta.set(client.id, { userId, role });
+      const expiresIn = payload.exp * 1000 - Date.now();
+      if (expiresIn <= 0) {
+        client.disconnect(true);
+        return;
+      }
+      const expiryTimer = setTimeout(() => {
+        client.emit('notifications:expired');
+        client.disconnect(true);
+      }, expiresIn);
+      expiryTimer.unref();
+      client.once('disconnect', () => clearTimeout(expiryTimer));
 
       // Join role-based room so we can broadcast by role
       void client.join(`role:${role}`);
+      // Client transport "connect" fires before async authorization finishes.
+      client.emit('notifications:ready');
 
       this.logger.log(
         `Client connected: ${client.id} | user=${userId} | role=${role}`,
@@ -117,6 +171,19 @@ export class NotificationsGateway
       this.logger.debug(
         `Sent notification to user ${userId}: ${notification.type}`,
       );
+    }
+  }
+
+  disconnectUser(userId: string): void {
+    const sockets = this.connectedClients.get(userId);
+    if (!sockets) return;
+    for (const socket of [...sockets]) socket.disconnect(true);
+    this.connectedClients.delete(userId);
+  }
+
+  emitChanged(userId: string): void {
+    for (const socket of this.connectedClients.get(userId) ?? []) {
+      socket.emit('notifications:changed');
     }
   }
 }

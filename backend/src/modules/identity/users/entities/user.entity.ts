@@ -59,6 +59,9 @@ export class User {
   })
   role: Role;
 
+  @Column({ default: 0 })
+  authVersion: number;
+
   @Column({ nullable: true })
   avatarUrl?: string;
 

@@ -39,6 +39,7 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { formatPhilippinePeso } from "@/shared/utils/currency";
 
 // Traffic data remains mocked since we don't have visitor tracking yet
 const trafficData = [
@@ -107,7 +108,7 @@ export function AdminDashboardPage() {
         </div>
 
         <div className="z-10 space-y-1.5">
-          <h1 className="text-2xl font-black tracking-tight text-white md:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-white md:text-3xl">
             Welcome back,{" "}
             <span className="bg-linear-to-r from-blue-400 to-blue-400 bg-clip-text text-transparent">
               {user?.fullName || "Administrator"}
@@ -124,7 +125,7 @@ export function AdminDashboardPage() {
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
             <Cpu className="size-4 text-blue-400" />
             <div className="flex flex-col">
-              <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
+              <span className="text-xs leading-none font-semibold text-slate-400 uppercase">
                 CPU Core
               </span>
               <span className="text-xs leading-normal font-bold text-slate-200">
@@ -135,7 +136,7 @@ export function AdminDashboardPage() {
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
             <Database className="text-success-text size-4" />
             <div className="flex flex-col">
-              <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
+              <span className="text-xs leading-none font-semibold text-slate-400 uppercase">
                 DB Latency
               </span>
               <span className="text-xs leading-normal font-bold text-slate-200">
@@ -146,7 +147,7 @@ export function AdminDashboardPage() {
           <div className="flex items-center gap-2.5 rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-1 shadow-inner">
             <Wifi className="size-4 animate-pulse text-blue-400" />
             <div className="flex flex-col">
-              <span className="text-[10px] leading-none font-semibold text-slate-400 uppercase">
+              <span className="text-xs leading-none font-semibold text-slate-400 uppercase">
                 Gateway
               </span>
               <span className="text-success-text flex items-center gap-1 text-xs leading-normal font-bold">
@@ -161,13 +162,13 @@ export function AdminDashboardPage() {
       {/* Primary KPI Metrics Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {/* Total Catalog Size */}
-        <Card className="group transition-all duration-300 hover:border-blue-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-blue-200">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform">
                 <Library className="size-5" />
               </div>
-              <Badge className="border-none bg-blue-50 text-[10px] font-bold text-blue-700 hover:bg-blue-50">
+              <Badge className="border-none bg-blue-50 text-xs font-bold text-blue-700 hover:bg-blue-50">
                 +1.4k New
               </Badge>
             </div>
@@ -175,12 +176,12 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Total Catalog
               </span>
-              <h3 className="text-2xl font-black text-slate-800">
+              <h3 className="text-2xl font-semibold text-slate-800">
                 {stats.totalCatalog.toLocaleString()}
               </h3>
             </div>
             <div className="space-y-1.5 pt-1">
-              <div className="flex justify-between text-[10px] font-bold text-slate-500">
+              <div className="flex justify-between text-xs font-bold text-slate-500">
                 <span>Available</span>
                 <span>
                   {Math.round(
@@ -204,13 +205,13 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Active Members */}
-        <Card className="group transition-all duration-300 hover:border-blue-200 hover:shadow-md">
+        <Card className="group transition-all duration-300 hover:border-blue-200">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform">
                 <Users className="size-5" />
               </div>
-              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none text-[10px] font-bold">
+              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none text-xs font-bold">
                 +12% Growth
               </Badge>
             </div>
@@ -218,11 +219,11 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Active Members
               </span>
-              <h3 className="text-2xl font-black text-slate-800">
+              <h3 className="text-2xl font-semibold text-slate-800">
                 {stats.activeMembers.toLocaleString()}
               </h3>
             </div>
-            <p className="text-[11px] font-medium text-slate-500">
+            <p className="text-xs font-medium text-slate-500">
               Daily active users:{" "}
               <span className="font-bold text-slate-800">Online now</span>
             </p>
@@ -230,13 +231,13 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Active Borrowed Books */}
-        <Card className="group hover:border-success-bg transition-all duration-300 hover:shadow-md">
+        <Card className="group hover:border-success-bg transition-all duration-300">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="bg-success-bg text-success-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
+              <div className="bg-success-bg text-success-text rounded-xl p-2.5 transition-transform">
                 <BookOpen className="size-5" />
               </div>
-              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none text-[10px] font-bold">
+              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none text-xs font-bold">
                 +24% checked
               </Badge>
             </div>
@@ -244,12 +245,12 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Active Borrows
               </span>
-              <h3 className="text-2xl font-black text-slate-800">
+              <h3 className="text-2xl font-semibold text-slate-800">
                 {stats.activeBorrows.toLocaleString()}
               </h3>
             </div>
             <div className="space-y-1.5 pt-1">
-              <div className="flex justify-between text-[10px] font-bold text-slate-500">
+              <div className="flex justify-between text-xs font-bold text-slate-500">
                 <span>Returns Rate</span>
                 <span>
                   {Math.round(
@@ -273,13 +274,13 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Overdue/Alert Books */}
-        <Card className="group hover:border-error-bg transition-all duration-300 hover:shadow-md">
+        <Card className="group hover:border-error-bg transition-all duration-300">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="bg-error-bg text-error-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
+              <div className="bg-error-bg text-error-text rounded-xl p-2.5 transition-transform">
                 <AlertTriangle className="size-5" />
               </div>
-              <Badge className="bg-error-bg text-error-text hover:bg-error-bg border-none text-[10px] font-bold">
+              <Badge className="bg-error-bg text-error-text hover:bg-error-bg border-none text-xs font-bold">
                 Action Required
               </Badge>
             </div>
@@ -287,11 +288,11 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Overdue Alert
               </span>
-              <h3 className="text-error-text text-2xl font-black">
+              <h3 className="text-error-text text-2xl font-semibold">
                 {stats.overdueAlerts}
               </h3>
             </div>
-            <p className="text-[11px] font-medium text-slate-500">
+            <p className="text-xs font-medium text-slate-500">
               Overdue rate:{" "}
               <span className="text-error-bg0 font-bold">
                 {(
@@ -305,13 +306,13 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Fine Collection */}
-        <Card className="group hover:border-warning-bg transition-all duration-300 hover:shadow-md">
+        <Card className="group hover:border-warning-bg transition-all duration-300">
           <CardContent className="space-y-4 p-6">
             <div className="flex items-start justify-between">
-              <div className="bg-warning-bg text-warning-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
+              <div className="bg-warning-bg text-warning-text rounded-xl p-2.5 transition-transform">
                 <span className="size-5">₱</span>
               </div>
-              <Badge className="bg-warning-bg text-warning-text hover:bg-warning-bg border-none text-[10px] font-bold">
+              <Badge className="bg-warning-bg text-warning-text hover:bg-warning-bg border-none text-xs font-bold">
                 Month-to-Date
               </Badge>
             </div>
@@ -319,12 +320,12 @@ export function AdminDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 Fine Collections
               </span>
-              <h3 className="text-2xl font-black text-slate-800">
-                ₱{stats.fineCollections.toFixed(2)}
+              <h3 className="text-2xl font-semibold text-slate-800">
+                {formatPhilippinePeso(stats.fineCollections)}
               </h3>
             </div>
             <div className="space-y-1.5 pt-1">
-              <div className="flex justify-between text-[10px] font-bold text-slate-500">
+              <div className="flex justify-between text-xs font-bold text-slate-500">
                 <span>Collections Target</span>
                 <span>92%</span>
               </div>
@@ -340,10 +341,10 @@ export function AdminDashboardPage() {
       {/* Interactive Charts Panels */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Borrowing & Returns Trends Chart */}
-        <Card className="shadow-xs transition-shadow hover:shadow-md">
+        <Card className="shadow-xs transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
-              <CardTitle className="text-base font-black text-slate-800">
+              <CardTitle className="text-base font-semibold text-slate-800">
                 Borrowing Dynamics
               </CardTitle>
               <p className="text-xs font-medium text-slate-400">
@@ -362,8 +363,16 @@ export function AdminDashboardPage() {
               <BarChart data={stats.borrowingTrendsData} barGap={6}>
                 <defs>
                   <linearGradient id="checkoutGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2563EB" stopOpacity={0.9} />
-                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0.3} />
+                    <stop
+                      offset="0%"
+                      stopColor="var(--chart-1)"
+                      stopOpacity={0.9}
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor="var(--chart-1)"
+                      stopOpacity={0.3}
+                    />
                   </linearGradient>
                   <linearGradient id="returnGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#94A3B8" stopOpacity={0.9} />
@@ -422,10 +431,10 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Visitor Traffic & Peak Hours */}
-        <Card className="shadow-xs transition-shadow hover:shadow-md">
+        <Card className="shadow-xs transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
-              <CardTitle className="text-base font-black text-slate-800">
+              <CardTitle className="text-base font-semibold text-slate-800">
                 Library Foot Traffic
               </CardTitle>
               <p className="text-xs font-medium text-slate-400">
@@ -444,8 +453,16 @@ export function AdminDashboardPage() {
               <AreaChart data={trafficData}>
                 <defs>
                   <linearGradient id="trafficGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2563EB" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0.0} />
+                    <stop
+                      offset="0%"
+                      stopColor="var(--chart-1)"
+                      stopOpacity={0.2}
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor="var(--chart-1)"
+                      stopOpacity={0.0}
+                    />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -476,12 +493,12 @@ export function AdminDashboardPage() {
                   type="monotone"
                   name="Visitors"
                   dataKey="visitors"
-                  stroke="#2563EB"
+                  stroke="var(--chart-1)"
                   strokeWidth={2.5}
                   fillOpacity={1}
                   fill="url(#trafficGrad)"
                   dot={{
-                    stroke: "#2563EB",
+                    stroke: "var(--chart-1)",
                     strokeWidth: 2,
                     fill: "#fff",
                     r: 4,
@@ -496,9 +513,9 @@ export function AdminDashboardPage() {
       {/* Visualizations Bottom Row: Category breakdown + Quick Actions & logs */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Category breakdown (1/3 size) */}
-        <Card className="shadow-xs transition-shadow hover:shadow-md">
+        <Card className="shadow-xs transition-shadow">
           <CardHeader className="border-b border-slate-50 pb-4">
-            <CardTitle className="text-base font-black text-slate-800">
+            <CardTitle className="text-base font-semibold text-slate-800">
               Genre Distribution
             </CardTitle>
             <p className="text-xs font-medium text-slate-400">
@@ -534,7 +551,7 @@ export function AdminDashboardPage() {
             </ResponsiveContainer>
 
             {/* Custom Interactive Legend */}
-            <div className="mt-4 grid w-full grid-cols-3 gap-2 text-[10px] font-bold text-slate-500">
+            <div className="mt-4 grid w-full grid-cols-3 gap-2 text-xs font-bold text-slate-500">
               {stats.categoryDistribution.map((entry, idx) => (
                 <div key={idx} className="flex items-center gap-1.5 truncate">
                   <span
@@ -549,10 +566,10 @@ export function AdminDashboardPage() {
         </Card>
 
         {/* Audit Logs Timelines (2/3 size) */}
-        <Card className="shadow-xs transition-shadow hover:shadow-md lg:col-span-2">
+        <Card className="shadow-xs transition-shadow lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
-              <CardTitle className="text-base font-black text-slate-800">
+              <CardTitle className="text-base font-semibold text-slate-800">
                 Recent Live Activity
               </CardTitle>
               <p className="text-xs font-medium text-slate-400">
@@ -564,7 +581,7 @@ export function AdminDashboardPage() {
                 <span className="bg-success-text absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"></span>
                 <span className="bg-success-bg0 relative inline-flex h-2 w-2 rounded-full"></span>
               </span>
-              <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+              <span className="text-xs font-bold tracking-wider text-slate-400 uppercase">
                 Live Logs
               </span>
             </div>
@@ -608,7 +625,7 @@ export function AdminDashboardPage() {
                       <p className="text-xs font-bold text-slate-800">
                         {log.user}
                       </p>
-                      <p className="text-[11px] font-medium text-slate-500">
+                      <p className="text-xs font-medium text-slate-500">
                         {log.book}
                       </p>
                     </div>
@@ -627,7 +644,7 @@ export function AdminDashboardPage() {
                     >
                       {log.type}
                     </Badge>
-                    <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-400">
+                    <span className="flex items-center gap-1 text-xs font-semibold text-slate-400">
                       <Clock className="size-3 text-slate-300" />
                       {log.time}
                     </span>
@@ -643,7 +660,7 @@ export function AdminDashboardPage() {
       <Card className="border-dashed shadow-xs transition-colors hover:border-blue-400">
         <CardContent className="flex flex-col items-center justify-between gap-4 p-6 sm:flex-row">
           <div className="space-y-1 text-center sm:text-left">
-            <h4 className="flex items-center justify-center gap-1.5 text-sm font-black tracking-tight text-slate-800 sm:justify-start">
+            <h4 className="flex items-center justify-center gap-1.5 text-sm font-semibold tracking-tight text-slate-800 sm:justify-start">
               <span>Admin Tool Belt</span>
             </h4>
             <p className="text-xs font-medium text-slate-400">

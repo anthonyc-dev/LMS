@@ -41,11 +41,11 @@ import {
   TableRow,
 } from "@/shared/components/ui/table";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { formatPhilippinePeso } from "@/shared/utils/currency";
 
 import {
   useBorrowings,
-  useConfirmBorrowing,
-  useRejectBorrowing,
+  useMarkFinePaid,
   type Borrowing,
   type BorrowingStatus,
 } from "@/features/circulation/api/circulation";
@@ -113,8 +113,7 @@ export function BorrowingRecordsPage() {
   const [selectedRecord, setSelectedRecord] = useState<Borrowing | null>(null);
 
   const { data: borrowings, isLoading, error } = useBorrowings();
-  const confirmMutation = useConfirmBorrowing();
-  const rejectMutation = useRejectBorrowing();
+  const markFinePaidMutation = useMarkFinePaid();
 
   const filtered = useMemo(() => {
     if (!borrowings) return [];
@@ -324,6 +323,14 @@ export function BorrowingRecordsPage() {
               {paginated.length > 0 ? (
                 paginated.map((record: Borrowing) => {
                   const sc = statusConfig(record.status);
+                  const bookCondition =
+                    record.bookCopy?.status === "LOST" ||
+                    record.fines?.some((fine) => fine.type === "LOST")
+                      ? "LOST"
+                      : record.bookCopy?.condition === "DAMAGED" ||
+                          record.fines?.some((fine) => fine.type === "DAMAGED")
+                        ? "DAMAGED"
+                        : record.bookCopy?.condition || "GOOD";
                   return (
                     <TableRow
                       key={record.id}
@@ -358,6 +365,19 @@ export function BorrowingRecordsPage() {
                         <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
                           BC: {record.bookCopy?.barcode}
                         </p>
+                        <Badge
+                          variant={
+                            bookCondition === "GOOD" ? "outline" : "destructive"
+                          }
+                          className={`mt-1 text-[10px] ${
+                            bookCondition === "GOOD"
+                              ? "border-green-200 bg-green-50 text-green-700"
+                              : ""
+                          }`}
+                        >
+                          {bookCondition.charAt(0) +
+                            bookCondition.slice(1).toLowerCase()}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <span className="font-medium text-slate-700">
@@ -372,11 +392,30 @@ export function BorrowingRecordsPage() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium text-slate-700">
-                          {record.fines && record.fines.length > 0
-                            ? `₱${record.fines.reduce((sum, f) => sum + Number(f.amount), 0).toFixed(2)}`
-                            : "-"}
-                        </span>
+                        {record.fines && record.fines.length > 0 ? (
+                          <div className="space-y-1">
+                            {record.fines.map((fine) => (
+                              <div key={fine.id} className="flex items-center gap-2">
+                                <span className="font-medium text-slate-700">
+                                  {formatPhilippinePeso(fine.amount)} {fine.type} {fine.status}
+                                </span>
+                                {fine.status === "UNPAID" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={markFinePaidMutation.isPending}
+                                    onClick={() => markFinePaidMutation.mutate(fine.id)}
+                                    className="h-6 px-2 text-[10px]"
+                                  >
+                                    Mark paid
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="font-medium text-slate-700">-</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -402,18 +441,6 @@ export function BorrowingRecordsPage() {
                             align="end"
                             className="w-[160px]"
                           >
-                            {record.status === 'pending' && (
-                              <>
-                                <DropdownMenuItem onClick={() => confirmMutation.mutate(record.id)}>
-                                  <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                                  <span>Confirm Borrowing</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => rejectMutation.mutate(record.id)}>
-                                  <X className="mr-2 h-4 w-4 text-red-500" />
-                                  <span>Reject Borrowing</span>
-                                </DropdownMenuItem>
-                              </>
-                            )}
                             <DropdownMenuItem
                               onClick={() => setSelectedRecord(record)}
                             >

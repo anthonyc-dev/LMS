@@ -9,7 +9,12 @@ export class TokenService {
   constructor(private readonly jwtService: JwtService) {}
 
   async generateTokens(user: User) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      authVersion: user.authVersion ?? 0,
+    };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload),

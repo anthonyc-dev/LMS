@@ -1,3 +1,4 @@
+import { TablePageNumbers } from "@/shared/components/DataTable/TablePageNumbers";
 import { useState, useEffect, Fragment } from "react";
 import {
   Search,
@@ -495,19 +496,11 @@ export function BooksPage() {
               <ChevronLeft className="size-4" />
             </Button>
             <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={i}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold transition-colors ${
-                    page === i + 1
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "text-slate-500 hover:bg-slate-200"
-                  }`}
-                  onClick={() => setPage(i + 1)}
-                >
-                  {i + 1}
-                </button>
-              ))}
+              <TablePageNumbers
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             </div>
             <Button
               variant="outline"

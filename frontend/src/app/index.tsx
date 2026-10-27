@@ -135,12 +135,6 @@ const AdminUserManagementPage = lazy(() =>
     default: m.UserManagement,
   })),
 );
-const AdminBorrowingHistoryPage = lazy(() =>
-  import("@/features/books/pages/AdminBorrowingHistory").then((m) => ({
-    default: m.AdminBorrowingHistory,
-  })),
-);
-
 // Circulation pages
 const CirculationBorrowPage = lazy(() =>
   import("@/features/circulation/pages/BorrowBookPage").then((m) => ({
@@ -316,7 +310,7 @@ function App() {
               <Route path="users" element={<AdminUserManagementPage />} />
               <Route
                 path="borrowing-history"
-                element={<AdminBorrowingHistoryPage />}
+                element={<CirculationRecordsPage />}
               />
               <Route
                 path="circulation/borrow"

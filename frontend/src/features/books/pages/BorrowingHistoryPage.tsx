@@ -1,3 +1,4 @@
+import { TablePageNumbers } from "@/shared/components/DataTable/TablePageNumbers";
 import { useState, useMemo, Fragment } from "react";
 import {
   Search,
@@ -550,16 +551,11 @@ export function BorrowingHistoryPage() {
             >
               <ChevronLeft className="size-4" />
             </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <Button
-                key={p}
-                size="icon"
-                className={`h-8 w-8 rounded-lg text-xs font-bold ${p === page ? "bg-slate-900 text-white shadow-sm shadow-blue-200 hover:bg-slate-800" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
-                onClick={() => setPage(p)}
-              >
-                {p}
-              </Button>
-            ))}
+            <TablePageNumbers
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
             <Button
               variant="outline"
               size="icon"

@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Body,
   Param,
   ParseUUIDPipe,
@@ -13,6 +12,8 @@ import {
   Ip,
   UseInterceptors,
   UploadedFile,
+  Req,
+  ParseEnumPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
@@ -63,8 +64,14 @@ export class UsersController {
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query(
+      'status',
+      new DefaultValuePipe('active'),
+      new ParseEnumPipe({ ACTIVE: 'active', DEACTIVATED: 'deactivated' }),
+    )
+    status: string,
   ) {
-    return this.usersService.findAll(page, limit);
+    return this.usersService.findAll(page, limit, status);
   }
 
   // GET ENUMS FORMS
@@ -155,12 +162,29 @@ export class UsersController {
     return this.usersService.changePassword(id, changePasswordDto);
   }
 
-  // DELETE USER
+  // DEACTIVATE USER
   @Throttle({ default: { limit: 5, ttl: 60000 } }) //for development only
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    return this.usersService.delete(id);
+  @Post(':id/deactivate')
+  delete(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() request: { user: { sub: string } },
+  ): Promise<void> {
+    return this.usersService.deactivate(id, request.user.sub);
+  }
+
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @Post(':id/restore')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  async restore(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<UserResponseDto> {
+    return plainToInstance(
+      UserResponseDto,
+      await this.usersService.restore(id),
+      { excludeExtraneousValues: true },
+    );
   }
 }

@@ -41,6 +41,7 @@ export interface Borrowing {
   returnedDate?: string;
   status: BorrowingStatus;
   fines?: {
+    id: string;
     borrowingId: string;
     type: string;
     status: string;
@@ -136,6 +137,7 @@ export const useBorrowBook = () => {
       qc.invalidateQueries({ queryKey: ["borrowings"] });
       qc.invalidateQueries({ queryKey: ["users"] });
       qc.invalidateQueries({ queryKey: ["book-copies"] });
+      qc.invalidateQueries({ queryKey: ["user-analytics"] });
     },
   });
 };
@@ -151,6 +153,7 @@ export const useSelfBorrowBook = () => {
       qc.invalidateQueries({ queryKey: ["borrowings"] });
       qc.invalidateQueries({ queryKey: ["books"] });
       qc.invalidateQueries({ queryKey: ["book-copies"] });
+      qc.invalidateQueries({ queryKey: ["user-analytics"] });
     },
   });
 };
@@ -193,35 +196,22 @@ export const useReturnBook = () => {
   });
 };
 
-export const useConfirmBorrowing = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (borrowingId: string) => {
-      const res = await api.patch(`/borrowings/${borrowingId}/confirm`);
-      return res.data;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["borrowings"] });
-      qc.invalidateQueries({ queryKey: ["book-copies"] });
-    },
-  });
-};
-
-export const useRejectBorrowing = () => {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (borrowingId: string) => {
-      const res = await api.patch(`/borrowings/${borrowingId}/reject`);
-      return res.data;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["borrowings"] });
-      qc.invalidateQueries({ queryKey: ["book-copies"] });
-    },
-  });
-};
-
 //Fines--------------------------------
+export const useMarkFinePaid = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (fineId: string) => {
+      const res = await api.patch(`/fines/${fineId}/paid`);
+      return res.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["borrowings"] });
+      qc.invalidateQueries({ queryKey: ["fines"] });
+      qc.invalidateQueries({ queryKey: ["user-analytics"] });
+    },
+  });
+};
+
 export const useCreateFine = () => {
   const qc = useQueryClient();
   return useMutation({

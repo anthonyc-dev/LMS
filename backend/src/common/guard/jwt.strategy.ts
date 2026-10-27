@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { User } from 'src/modules/identity/users/entities/user.entity';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { Request } from 'express';
@@ -7,7 +10,7 @@ import { jwtConstants } from 'src/config/jwt.config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(@InjectDataSource() private readonly dataSource: DataSource) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -17,7 +20,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: JwtPayload) {
-    return { sub: payload.sub, email: payload.email, role: payload.role };
+  async validate(payload: JwtPayload) {
+    const user = await this.dataSource.getRepository(User).findOne({
+      where: { id: payload.sub },
+      select: { id: true, email: true, role: true, authVersion: true },
+    });
+    if (!user || user.authVersion !== (payload.authVersion ?? 0)) {
+      throw new UnauthorizedException(
+        'Account unavailable. Please sign in again.',
+      );
+    }
+    return { sub: user.id, email: user.email, role: user.role };
   }
 }
