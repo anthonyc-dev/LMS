@@ -167,5 +167,4 @@ export class BorrowingsController {
   extendBorrowing(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.borrowingsService.extendBorrowing(id);
   }
-
 }

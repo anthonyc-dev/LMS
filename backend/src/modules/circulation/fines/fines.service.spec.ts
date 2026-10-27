@@ -6,18 +6,25 @@ import { Borrowing } from '../borrowings/entities/borrowing.entity';
 
 describe('FinesService', () => {
   const fine = { id: 'fine-id', status: FineStatus.UNPAID } as Fine;
-  let findOne: jest.Mock;
-  let save: jest.Mock;
+  let currentFine: Fine | null;
+  let findOne: jest.Mock<Promise<Fine | null>, []>;
+  let save: jest.Mock<Promise<Fine>, [Fine]>;
   let service: FinesService;
 
   beforeEach(() => {
-    findOne = jest.fn().mockResolvedValue(fine);
-    save = jest.fn().mockImplementation(async (value: Fine) => value);
+    currentFine = fine;
+    findOne = jest.fn<Promise<Fine | null>, []>(() =>
+      Promise.resolve(currentFine),
+    );
+    save = jest.fn<Promise<Fine>, [Fine]>((value) => Promise.resolve(value));
+    const manager = {
+      getRepository: () => ({ findOne, save }),
+    };
     const fineRepository = {
       manager: {
-        transaction: async (
-          action: (manager: { getRepository: () => unknown }) => unknown,
-        ) => action({ getRepository: () => ({ findOne, save }) }),
+        transaction: <T>(
+          action: (transactionManager: typeof manager) => Promise<T>,
+        ): Promise<T> => action(manager),
       },
     };
     service = new FinesService(
@@ -28,13 +35,13 @@ describe('FinesService', () => {
 
   it('marks an unpaid fine paid with payment timestamp', async () => {
     await service.markPaid(fine.id);
-    expect(save).toHaveBeenCalledWith(
-      expect.objectContaining({ status: FineStatus.PAID, paidAt: expect.any(Date) }),
-    );
+    const [[savedFine]] = save.mock.calls;
+    expect(savedFine.status).toBe(FineStatus.PAID);
+    expect(savedFine.paidAt).toBeInstanceOf(Date);
   });
 
   it('does not pay an already settled fine twice', async () => {
-    findOne.mockResolvedValue({ ...fine, status: FineStatus.PAID });
+    currentFine = { ...fine, status: FineStatus.PAID };
     await expect(service.markPaid(fine.id)).rejects.toThrow(ConflictException);
     expect(save).not.toHaveBeenCalled();
   });

@@ -175,14 +175,15 @@ export class UsersService {
                   condition: borrowing.bookCopy.condition,
                 }
               : null,
-            fines: borrowing.fines?.map((fine) => ({
-              id: fine.id,
-              type: fine.type,
-              status: fine.status,
-              amount: fine.amount,
-              reason: fine.reason,
-              paidAt: fine.paidAt,
-            })) || [],
+            fines:
+              borrowing.fines?.map((fine) => ({
+                id: fine.id,
+                type: fine.type,
+                status: fine.status,
+                amount: fine.amount,
+                reason: fine.reason,
+                paidAt: fine.paidAt,
+              })) || [],
           })) || [],
       };
     });

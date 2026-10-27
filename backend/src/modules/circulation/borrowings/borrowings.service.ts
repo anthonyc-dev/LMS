@@ -55,9 +55,7 @@ export class BorrowingsService {
   }
 
   async selfBorrow(bookId: string, userId: string) {
-    this.logger.log(
-      `Self-borrow | borrower=${userId} | book=${bookId}`,
-    );
+    this.logger.log(`Self-borrow | borrower=${userId} | book=${bookId}`);
 
     return this.withNotificationsTransaction(
       async (manager, notificationTransaction) => {

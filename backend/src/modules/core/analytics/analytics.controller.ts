@@ -20,9 +20,7 @@ export class AnalyticsController {
   }
 
   @Get('user')
-  getUserDashboardStats(
-    @Req() req: express.Request & { user: JwtPayload },
-  ) {
+  getUserDashboardStats(@Req() req: express.Request & { user: JwtPayload }) {
     return this.analyticsService.getUserDashboardStats(req.user.sub);
   }
 }

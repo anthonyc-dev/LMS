@@ -152,7 +152,9 @@ describe('UsersService account lifecycle', () => {
     users.findOne.mockResolvedValue(user);
     loans.count.mockResolvedValue(1);
     fineQuery.getCount.mockResolvedValue(1);
-    await expect(service.deactivate(user.id, 'admin-id')).resolves.toBeUndefined();
+    await expect(
+      service.deactivate(user.id, 'admin-id'),
+    ).resolves.toBeUndefined();
     expect(users.softDelete).toHaveBeenCalledWith(user.id);
     expect(sessions.delete).toHaveBeenCalledWith({ user: { id: user.id } });
   });
