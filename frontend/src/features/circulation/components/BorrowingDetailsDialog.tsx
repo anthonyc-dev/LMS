@@ -14,6 +14,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { type Borrowing } from "@/features/circulation/api/circulation";
 import { statusConfig } from "../pages/BorrowingRecordsPage";
+import { formatPhilippinePeso } from "@/shared/utils/currency";
 
 interface BorrowingDetailsDialogProps {
   selectedRecord: Borrowing | null;
@@ -26,9 +27,18 @@ export function BorrowingDetailsDialog({
 }: BorrowingDetailsDialogProps) {
   if (!selectedRecord) return null;
 
+  const bookCondition =
+    selectedRecord.bookCopy?.status === "LOST" ||
+    selectedRecord.fines?.some((fine) => fine.type === "LOST")
+      ? "Lost"
+      : selectedRecord.bookCopy?.condition === "DAMAGED" ||
+          selectedRecord.fines?.some((fine) => fine.type === "DAMAGED")
+        ? "Damaged"
+        : selectedRecord.bookCopy?.condition || "Good";
+
   return (
     <Dialog open={!!selectedRecord} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-x-hidden overflow-y-auto rounded-3xl p-6 sm:max-w-[600px]">
+      <DialogContent className="max-h-[90vh] overflow-x-hidden overflow-y-auto rounded-xl p-6 sm:max-w-[600px]">
         <div tabIndex={0} className="sr-only focus:outline-none" />
         <DialogHeader className="mb-4">
           <DialogTitle
@@ -123,6 +133,12 @@ export function BorrowingDetailsDialog({
                   {new Date(selectedRecord.dueDate).toLocaleString()}
                 </p>
               </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500">Book Condition</p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">
+                  {bookCondition.charAt(0) + bookCondition.slice(1).toLowerCase()}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -140,7 +156,7 @@ export function BorrowingDetailsDialog({
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-slate-800">
-                        ₱{Number(fine.amount).toFixed(2)}
+                        {formatPhilippinePeso(fine.amount)}
                       </span>
                       <Badge
                         variant={
@@ -169,10 +185,12 @@ export function BorrowingDetailsDialog({
                 <div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2 font-bold text-slate-900">
                   <span>Total Fines:</span>
                   <span>
-                    ₱
-                    {selectedRecord.fines
-                      .reduce((sum, f) => sum + Number(f.amount), 0)
-                      .toFixed(2)}
+                    {formatPhilippinePeso(
+                      selectedRecord.fines.reduce(
+                        (sum, fine) => sum + Number(fine.amount),
+                        0,
+                      ),
+                    )}
                   </span>
                 </div>
               </div>

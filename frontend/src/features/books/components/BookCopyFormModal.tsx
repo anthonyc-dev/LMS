@@ -273,16 +273,16 @@ export function BookCopyFormModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-w-lg">
-        <div className="relative overflow-hidden bg-linear-to-br from-slate-800 to-slate-900 p-6 text-white">
+      <DialogContent className="border-primary/20 overflow-hidden rounded-xl border p-0 shadow-sm sm:max-w-lg">
+        <div className="bg-primary relative overflow-hidden p-6 text-white">
           <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
           <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-white/5" />
           <DialogHeader className="relative z-10 space-y-1">
-            <DialogTitle className="flex items-center gap-2 text-xl font-black text-white">
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-white">
               <BookCopyIcon className="size-5" />{" "}
               {initial ? "Edit Book Copy" : "New Book Copy"}
             </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-slate-400">
+            <DialogDescription className="text-primary-foreground/85 text-sm font-medium">
               {initial
                 ? "Update book copy details."
                 : "Register a new physical copy of a book."}
@@ -408,7 +408,7 @@ export function BookCopyFormModal({
                     id="count"
                     type="number"
                     min="2"
-                    className="h-10 rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                    className="focus-visible:border-primary focus-visible:ring-primary/20 h-10 rounded-xl border-slate-200"
                     value={count}
                     onChange={(e) => {
                       setCount(e.target.value);
@@ -563,7 +563,7 @@ export function BookCopyFormModal({
                 <Input
                   id="acquired-at"
                   type="date"
-                  className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                  className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
                   value={form.acquiredAt}
                   onChange={(e) => set("acquiredAt")(e.target.value)}
                 />
@@ -579,7 +579,7 @@ export function BookCopyFormModal({
                   type="number"
                   step="0.01"
                   min="0"
-                  className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                  className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
                   value={form.purchasePrice}
                   onChange={(e) => set("purchasePrice")(e.target.value)}
                 />
@@ -591,7 +591,7 @@ export function BookCopyFormModal({
             <Input
               id="notes"
               placeholder="Any remarks..."
-              className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+              className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
               value={form.notes}
               onChange={(e) => set("notes")(e.target.value)}
             />
@@ -610,7 +610,7 @@ export function BookCopyFormModal({
           <Button
             onClick={handleSave}
             disabled={isPending}
-            className="w-full rounded-xl bg-slate-900 font-bold text-white shadow-md hover:bg-slate-800 sm:w-auto sm:flex-1"
+            className="bg-primary hover:bg-primary/90 w-full rounded-xl font-bold text-white shadow-md sm:w-auto sm:flex-1"
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {initial ? "Save Changes" : "Create Copy"}

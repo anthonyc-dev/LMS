@@ -1,9 +1,11 @@
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/app/store/authStore";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace("/api", "") ||
-  import.meta.env.VITE_API_URL?.replace(/\/+$/, "") ||
-  "http://localhost:3001";
+// Socket.IO uses the API origin, never a REST prefix or hostname substring.
+const SOCKET_URL = new URL(
+  import.meta.env.VITE_API_URL || "http://localhost:3000",
+  window.location.origin,
+).origin;
 
 let socket: Socket | null = null;
 
@@ -24,10 +26,9 @@ export function getSocket(): Socket | null {
   }
 
   socket = io(SOCKET_URL, {
-    auth: { token },
+    auth: (callback) => callback({ token: useAuthStore.getState().token }),
     transports: ["websocket", "polling"],
     reconnection: true,
-    reconnectionAttempts: 10,
     reconnectionDelay: 2000,
     reconnectionDelayMax: 10000,
   });
@@ -62,13 +63,17 @@ export function disconnectSocket() {
  * Reconnect with a fresh token (e.g., after token refresh).
  */
 export function reconnectSocket() {
-  disconnectSocket();
-  getSocket();
+  if (socket) {
+    // Preserve subscribers when credentials change.
+    socket.disconnect().connect();
+  }
 }
 
 // Auto-disconnect on logout
 useAuthStore.subscribe((state, prevState) => {
   if (prevState.isAuthenticated && !state.isAuthenticated) {
     disconnectSocket();
+  } else if (state.isAuthenticated && state.token !== prevState.token) {
+    reconnectSocket();
   }
 });

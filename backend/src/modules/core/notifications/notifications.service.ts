@@ -3,7 +3,13 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/common/enums/role.enum';
 import { User } from 'src/modules/identity/users/entities/user.entity';
-import { IsNull, LessThanOrEqual, MoreThan, Repository } from 'typeorm';
+import {
+  EntityManager,
+  IsNull,
+  LessThanOrEqual,
+  MoreThan,
+  Repository,
+} from 'typeorm';
 import { ListNotificationsQueryDto } from './dto/list-notifications-query.dto';
 import { Notification } from './entities/notification.entity';
 import {
@@ -12,6 +18,11 @@ import {
 } from './notifications.gateway';
 
 const RETENTION_DAYS = 90;
+
+export interface NotificationTransaction {
+  manager: EntityManager;
+  pending: { userId: string; view: NotificationView }[];
+}
 
 export interface NotificationView {
   id: string;
@@ -69,6 +80,7 @@ export class NotificationsService {
     if (!notification.readAt) {
       notification.readAt = new Date();
       await this.notificationRepository.save(notification);
+      this.notificationsGateway.emitChanged(userId);
     }
     return this.toView(notification);
   }
@@ -83,6 +95,7 @@ export class NotificationsService {
       },
       { readAt: new Date() },
     );
+    this.notificationsGateway.emitChanged(userId);
     return { updated: result.affected ?? 0 };
   }
 
@@ -90,6 +103,7 @@ export class NotificationsService {
     const notification = await this.findVisibleOwned(userId, id);
     notification.dismissedAt = new Date();
     await this.notificationRepository.save(notification);
+    this.notificationsGateway.emitChanged(userId);
   }
 
   async dismissAll(userId: string): Promise<{ updated: number }> {
@@ -101,14 +115,19 @@ export class NotificationsService {
       },
       { dismissedAt: new Date() },
     );
+    this.notificationsGateway.emitChanged(userId);
     return { updated: result.affected ?? 0 };
   }
 
   async sendToUser(
     userId: string,
     payload: NotificationPayload,
+    transaction?: NotificationTransaction,
   ): Promise<NotificationView> {
-    const notification = this.notificationRepository.create({
+    const repository =
+      transaction?.manager.getRepository(Notification) ??
+      this.notificationRepository;
+    const notification = repository.create({
       userId,
       ...payload,
       data: payload.data ?? null,
@@ -116,14 +135,24 @@ export class NotificationsService {
       dismissedAt: null,
       expiresAt: this.retentionDate(),
     });
-    const saved = await this.notificationRepository.save(notification);
+    const saved = await repository.save(notification);
     const view = this.toView(saved);
-    this.notificationsGateway.emitToUser(userId, view);
+    if (transaction) transaction.pending.push({ userId, view });
+    else this.notificationsGateway.emitToUser(userId, view);
     return view;
   }
 
-  async sendToRole(role: Role, payload: NotificationPayload): Promise<number> {
-    const recipients = await this.userRepository.find({
+  async sendToRole(
+    role: Role,
+    payload: NotificationPayload,
+    transaction?: NotificationTransaction,
+  ): Promise<number> {
+    const users =
+      transaction?.manager.getRepository(User) ?? this.userRepository;
+    const repository =
+      transaction?.manager.getRepository(Notification) ??
+      this.notificationRepository;
+    const recipients = await users.find({
       where: { role },
       select: { id: true },
     });
@@ -131,7 +160,7 @@ export class NotificationsService {
 
     const expiresAt = this.retentionDate();
     const notifications = recipients.map(({ id: userId }) =>
-      this.notificationRepository.create({
+      repository.create({
         userId,
         ...payload,
         data: payload.data ?? null,
@@ -140,16 +169,29 @@ export class NotificationsService {
         expiresAt,
       }),
     );
-    const saved = await this.notificationRepository.save(notifications, {
+    const saved = await repository.save(notifications, {
       chunk: 500,
     });
     saved.forEach((notification) => {
-      this.notificationsGateway.emitToUser(
-        notification.userId,
-        this.toView(notification),
-      );
+      const view = this.toView(notification);
+      if (transaction)
+        transaction.pending.push({ userId: notification.userId, view });
+      else this.notificationsGateway.emitToUser(notification.userId, view);
     });
     return saved.length;
+  }
+
+  publishCommitted(transaction: NotificationTransaction): void {
+    for (const { userId, view } of transaction.pending) {
+      try {
+        this.notificationsGateway.emitToUser(userId, view);
+      } catch {
+        // A transport failure cannot undo an already committed loan.
+        this.logger.warn(
+          'Realtime delivery failed; notification remains persisted',
+        );
+      }
+    }
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_3AM)

@@ -6,7 +6,6 @@ import {
   Star,
   ArrowRight,
   Library,
-  RotateCcw,
   Play,
   Sparkles,
 } from "lucide-react";
@@ -269,12 +268,6 @@ export function MyBooksPage() {
                 <div className="mt-5 flex flex-wrap items-center gap-2.5">
                   <Button className="h-10 rounded-xl bg-slate-900 px-5 text-xs font-bold text-white transition-all hover:bg-success-text active:scale-[0.98] sm:text-sm">
                     Continue Reading
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-10 gap-1.5 rounded-xl border-slate-200 px-4 text-xs font-semibold text-slate-600 hover:border-slate-300 sm:text-sm"
-                  >
-                    <RotateCcw size={14} /> Renew
                   </Button>
                   <Button
                     variant="ghost"

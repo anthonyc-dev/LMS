@@ -114,16 +114,16 @@ export function ShelfFormModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-w-lg">
-        <div className="relative overflow-hidden bg-linear-to-br from-slate-800 to-slate-900 p-6 text-white">
+      <DialogContent className="border-primary/20 overflow-hidden rounded-xl border p-0 shadow-sm sm:max-w-lg">
+        <div className="bg-primary relative overflow-hidden p-6 text-white">
           <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
           <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-white/5" />
           <DialogHeader className="relative z-10 space-y-1">
-            <DialogTitle className="flex items-center gap-2 text-xl font-black text-white">
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-white">
               <Layers className="size-5" />{" "}
               {initial ? "Edit Shelf" : "New Shelf"}
             </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-slate-400">
+            <DialogDescription className="text-primary-foreground/85 text-sm font-medium">
               {initial
                 ? "Update shelf details and capacity."
                 : "Register a new shelf in your library."}
@@ -136,7 +136,7 @@ export function ShelfFormModal({
             <Input
               id="shelf-code"
               placeholder="e.g. A-01"
-              className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+              className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
@@ -146,7 +146,7 @@ export function ShelfFormModal({
             <Input
               id="shelf-name"
               placeholder="e.g. Fiction — Row 1"
-              className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+              className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -260,7 +260,7 @@ export function ShelfFormModal({
             <Input
               id="shelf-notes"
               placeholder="Any remarks about this shelf…"
-              className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+              className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
@@ -279,7 +279,7 @@ export function ShelfFormModal({
           <Button
             onClick={handleSave}
             disabled={isPending}
-            className="w-full rounded-xl bg-slate-900 font-bold text-white shadow-md hover:bg-slate-800 sm:flex-1"
+            className="bg-primary hover:bg-primary/90 w-full rounded-xl font-bold text-white shadow-md sm:flex-1"
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {initial ? "Save Changes" : "Create Shelf"}

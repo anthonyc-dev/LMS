@@ -148,23 +148,15 @@ export function UserModal({
       open={open}
       onOpenChange={onClose}
     >
-      <DialogContent className="max-h-[90vh] w-[95vw] overflow-x-hidden overflow-y-auto rounded-3xl border-none p-0 shadow-2xl sm:max-w-[580px]">
+      <DialogContent className="border-primary/20 max-h-[90vh] w-[95vw] overflow-x-hidden overflow-y-auto rounded-xl border p-0 shadow-sm sm:max-w-[580px]">
         {/* Gradient Header */}
-        <div
-          className={`relative overflow-hidden p-6 text-white ${
-            form.role === "admin"
-              ? "bg-slate-600"
-              : form.role === "faculty"
-                ? "bg-linear-to-br from-blue-600 to-blue-700"
-                : "bg-blue-600"
-          }`}
-        >
+        <div className="bg-primary text-primary-foreground relative overflow-hidden p-6">
           <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/5" />
           <div className="absolute top-6 right-8 opacity-10">
             <Users size={90} className="-rotate-12" />
           </div>
           <DialogHeader className="relative z-10 space-y-1">
-            <DialogTitle className="flex items-center gap-2.5 text-xl font-black text-white">
+            <DialogTitle className="flex items-center gap-2.5 text-xl font-semibold text-white">
               {isEdit ? (
                 <>
                   <Edit className="size-5" />
@@ -218,13 +210,13 @@ export function UserModal({
               </Avatar>
 
               {isPending && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-slate-900/10 backdrop-blur-[1px]">
-                  <Loader2 className="size-6 animate-spin text-blue-600" />
+                <div className="bg-primary/10 absolute inset-0 flex items-center justify-center rounded-full backdrop-blur-[1px]">
+                  <Loader2 className="size-6 animate-spin text-primary" />
                 </div>
               )}
 
               <label
-                className={`absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-white shadow-sm transition-transform ${isPending ? "cursor-not-allowed bg-slate-400" : "cursor-pointer bg-blue-600 hover:scale-110"}`}
+                className={`absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-white shadow-sm transition-transform ${isPending ? "cursor-not-allowed bg-slate-400" : "bg-primary cursor-pointer hover:scale-110"}`}
               >
                 <Camera className="size-3.5" />
                 <input
@@ -261,7 +253,7 @@ export function UserModal({
                   value={form.schoolId}
                   onChange={(e) => set("schoolId")(e.target.value)}
                   placeholder="22-0350"
-                  className={`rounded-xl pl-9 focus-visible:ring-blue-500/20 ${errors.schoolId ? "border-red-500 focus-visible:border-red-500" : "border-slate-200 focus-visible:border-blue-500"}`}
+                  className={`focus-visible:ring-primary/20 rounded-xl pl-9 ${errors.schoolId ? "border-red-500 focus-visible:border-red-500" : "focus-visible:border-primary border-slate-200"}`}
                 />
               </div>
               {errors.schoolId && (
@@ -278,7 +270,7 @@ export function UserModal({
                   value={form.fullName}
                   onChange={(e) => set("fullName")(e.target.value)}
                   placeholder="John Doe"
-                  className={`rounded-xl pl-9 focus-visible:ring-blue-500/20 ${errors.fullName ? "border-red-500 focus-visible:border-red-500" : "border-slate-200 focus-visible:border-blue-500"}`}
+                  className={`focus-visible:ring-primary/20 rounded-xl pl-9 ${errors.fullName ? "border-red-500 focus-visible:border-red-500" : "focus-visible:border-primary border-slate-200"}`}
                 />
               </div>
               {errors.fullName && (
@@ -300,7 +292,7 @@ export function UserModal({
                   value={form.email}
                   onChange={(e) => set("email")(e.target.value)}
                   placeholder="user@lms.edu"
-                  className={`rounded-xl pl-9 focus-visible:ring-blue-500/20 ${errors.email ? "border-red-500 focus-visible:border-red-500" : "border-slate-200 focus-visible:border-blue-500"}`}
+                  className={`focus-visible:ring-primary/20 rounded-xl pl-9 ${errors.email ? "border-red-500 focus-visible:border-red-500" : "focus-visible:border-primary border-slate-200"}`}
                 />
               </div>
               {errors.email && (
@@ -317,7 +309,7 @@ export function UserModal({
                   value={form.phoneNumber}
                   onChange={(e) => set("phoneNumber")(e.target.value)}
                   placeholder="09123457878"
-                  className="rounded-xl border-slate-200 pl-9 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                  className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200 pl-9"
                 />
               </div>
             </div>
@@ -336,7 +328,7 @@ export function UserModal({
                   onValueChange={set("department")}
                 >
                   <SelectTrigger
-                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-blue-500/20 [&>span]:line-clamp-none ${errors.department ? "border-red-500 focus:border-red-500" : "border-slate-200"}`}
+                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-primary/20 [&>span]:line-clamp-none ${errors.department ? "border-red-500 focus:border-red-500" : "border-slate-200"}`}
                   >
                     <SelectValue
                       placeholder={
@@ -371,7 +363,7 @@ export function UserModal({
                 <School className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
                 <Select value={form.yearLevel} onValueChange={set("yearLevel")}>
                   <SelectTrigger
-                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-blue-500/20 [&>span]:line-clamp-none ${errors.yearLevel ? "border-red-500 focus:border-red-500" : "border-slate-200"}`}
+                    className={`h-auto min-h-10 w-full rounded-xl py-2 pl-9 text-left whitespace-normal focus:ring-primary/20 [&>span]:line-clamp-none ${errors.yearLevel ? "border-red-500 focus:border-red-500" : "border-slate-200"}`}
                   >
                     <SelectValue
                       placeholder={
@@ -412,25 +404,25 @@ export function UserModal({
                   value={form.role}
                   onValueChange={(v) => set("role")((v ?? "") as string)}
                 >
-                  <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 pl-9 focus:ring-blue-500/20">
+                  <SelectTrigger className="h-10 w-full rounded-xl border-slate-200 pl-9 focus:ring-primary/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-slate-100 shadow-xl">
                     <SelectItem value="admin">
                       <div className="flex items-center gap-2">
-                        <Crown className="size-4 text-violet-500" />
+                        <Crown className="size-4 text-primary" />
                         <span className="font-semibold">Admin</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="faculty">
                       <div className="flex items-center gap-2">
-                        <GraduationCap className="size-4 text-blue-500" />
+                        <GraduationCap className="size-4 text-primary" />
                         <span className="font-semibold">Faculty</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="student">
                       <div className="flex items-center gap-2">
-                        <BookOpen className="size-4 text-emerald-500" />
+                        <BookOpen className="size-4 text-primary" />
                         <span className="font-semibold">Student</span>
                       </div>
                     </SelectItem>
@@ -453,13 +445,7 @@ export function UserModal({
           <Button
             onClick={handleSave}
             disabled={isPending}
-            className={`w-full rounded-xl font-bold text-white shadow-md transition-all hover:scale-[1.02] active:scale-95 sm:flex-1 ${
-              form.role === "admin"
-                ? "bg-violet-600 shadow-violet-200 hover:bg-violet-700"
-                : form.role === "faculty"
-                  ? "bg-blue-600 shadow-blue-200 hover:bg-blue-700"
-                  : "bg-emerald-600 shadow-emerald-200 hover:bg-emerald-700"
-            }`}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-xl font-bold sm:flex-1"
           >
             {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
             {isEdit ? "Save Changes" : "Create User"}

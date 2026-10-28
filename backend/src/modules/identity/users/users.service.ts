@@ -3,9 +3,10 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, QueryFailedError } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Session } from '../auth/entities/session.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -14,7 +15,10 @@ import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as bcrypt from 'bcrypt';
 import { normalizeIp } from 'src/common/utils/normalizedIp.util';
-import * as nodemailer from 'nodemailer';
+import { MailService } from '../../core/mail/mail.service';
+import { NotificationsGateway } from '../../core/notifications/notifications.gateway';
+import { UserResponseDto } from './dto/user-response.dto';
+import { plainToInstance } from 'class-transformer';
 import { randomBytes } from 'crypto';
 import cloudinary from 'src/config/cloudinary';
 import * as bwipjs from 'bwip-js';
@@ -23,55 +27,20 @@ import { BorrowingStatus } from 'src/common/enums/enum.enums';
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
-  private transporter: nodemailer.Transporter;
 
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(Session)
     private sessionRepository: Repository<Session>,
-  ) {
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PASSWORD,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-  }
+    private readonly mailService: MailService,
+    private readonly notificationsGateway: NotificationsGateway,
+  ) {}
 
   async create(userData: CreateUserDto): Promise<User> {
     this.logger.log(`Creating user: ${userData.email}`);
 
-    // Check if any user already exists with the same email, phone number, or school ID
-    const existingUser = await this.usersRepository.findOne({
-      where: [
-        { email: userData.email },
-        { phoneNumber: userData.phoneNumber },
-        { schoolId: userData.schoolId },
-      ],
-    });
-
-    if (existingUser) {
-      if (existingUser.email === userData.email) {
-        throw new ConflictException('Email already exists');
-      }
-
-      if (existingUser.phoneNumber === userData.phoneNumber) {
-        throw new ConflictException('Phone number already exists');
-      }
-
-      if (existingUser.schoolId === userData.schoolId) {
-        throw new ConflictException('School ID already exists');
-      }
-
-      throw new ConflictException('User already exists');
-    }
+    await this.assertAvailableIdentity(userData);
 
     const user = this.usersRepository.create(userData);
 
@@ -81,7 +50,7 @@ export class UsersService {
 
     user.barcode = await this.generateBarcode(user.schoolId);
 
-    return this.usersRepository.save(user);
+    return this.saveUser(user);
   }
 
   async createAdminUser(
@@ -90,26 +59,8 @@ export class UsersService {
   ): Promise<User> {
     this.logger.log(`Creating user: ${userData.email}`);
 
-    // Check if any user already exists with the same email, phone number, or school ID
-    const existingUser = await this.usersRepository.findOne({
-      where: [
-        { email: userData.email },
-        { phoneNumber: userData.phoneNumber },
-        { schoolId: userData.schoolId },
-      ],
-    });
+    await this.assertAvailableIdentity(userData);
 
-    if (existingUser?.email === userData.email) {
-      throw new ConflictException('Email already exists');
-    }
-
-    if (existingUser?.phoneNumber === userData.phoneNumber) {
-      throw new ConflictException('Phone number already exists');
-    }
-
-    if (existingUser?.schoolId === userData.schoolId) {
-      throw new ConflictException('School ID already exists');
-    }
     const cleanIp = normalizeIp(ipAddress);
 
     const generatedPassword = randomBytes(6).toString('hex');
@@ -129,32 +80,25 @@ export class UsersService {
 
     user.barcode = await this.generateBarcode(user.schoolId);
 
-    const savedUser = await this.usersRepository.save(user);
+    const htmlContent =
+      '<p>Your LMS library account has been created.</p>' +
+      '<p>Your temporary password is: <strong>' +
+      generatedPassword +
+      '</strong></p>' +
+      '<p>Sign in and change this password immediately. Keep it private.</p>';
 
-    const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-</head>
-<body style="font-family: Arial, sans-serif; padding: 20px;">
-    <div style="max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 10px;">
-        <h2 style="color: #333; text-align: center;">Account Created Successfully</h2>
-        <p style="color: #666; font-size: 16px;">Your account has been created successfully. Your temporary password is:</p>
-        <div style="background: #007bff; color: white; font-size: 32px; font-weight: bold; 
-            padding: 15px; text-align: center; border-radius: 5px; letter-spacing: 5px; margin: 20px 0;">
-            ${generatedPassword}
-        </div>
-        <p style="color: #666; font-size: 14px;">Please login and change your password as soon as possible.</p>
-    </div>
-</body>
-</html>`;
-
-    await this.transporter.sendMail({
-      from: process.env.SMTP_EMAIL,
-      to: savedUser.email,
-      subject: 'Account Created Successfully - Password',
-      html: htmlContent,
-    });
+    const savedUser = await this.usersRepository.manager.transaction(
+      async (manager) => {
+        const saved = await this.saveUser(user, manager.getRepository(User));
+        await this.mailService.queue(manager, {
+          kind: 'account',
+          to: saved.email,
+          subject: 'Account Created Successfully - Password',
+          html: htmlContent,
+        });
+        return saved;
+      },
+    );
 
     return savedUser;
   }
@@ -175,7 +119,11 @@ export class UsersService {
     });
   }
 
-  async findAll(page: number = 1, limit: number = 10) {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+    status: string = 'active',
+  ) {
     this.logger.log(`Fetching all users: page ${page}, limit ${limit}`);
 
     const query = this.usersRepository
@@ -183,10 +131,13 @@ export class UsersService {
       .leftJoinAndSelect('user.borrowings', 'borrowing')
       .leftJoinAndSelect('borrowing.bookCopy', 'bookCopy')
       .leftJoinAndSelect('bookCopy.book', 'book')
+      .leftJoinAndSelect('borrowing.fines', 'fine')
       .orderBy('user.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
 
+    if (status === 'deactivated')
+      query.withDeleted().andWhere('user.deletedAt IS NOT NULL');
     const [users, total] = await query.getManyAndCount();
 
     const data = users.map((user) => {
@@ -199,7 +150,10 @@ export class UsersService {
         : 0;
 
       return {
-        ...user,
+        ...plainToInstance(UserResponseDto, user, {
+          excludeExtraneousValues: true,
+        }),
+        deletedAt: user.deletedAt,
         activeBorrowingsCount,
         borrowingsCount: user.borrowings?.length || 0,
         borrowings:
@@ -217,8 +171,19 @@ export class UsersService {
                   id: borrowing.bookCopy.book?.id,
                   title: borrowing.bookCopy.book?.title,
                   isbn: borrowing.bookCopy.book?.isbn,
+                  status: borrowing.bookCopy.status,
+                  condition: borrowing.bookCopy.condition,
                 }
               : null,
+            fines:
+              borrowing.fines?.map((fine) => ({
+                id: fine.id,
+                type: fine.type,
+                status: fine.status,
+                amount: fine.amount,
+                reason: fine.reason,
+                paidAt: fine.paidAt,
+              })) || [],
           })) || [],
       };
     });
@@ -318,10 +283,82 @@ export class UsersService {
     return { message: 'Password changed successfully' };
   }
 
-  async delete(id: string) {
-    this.logger.log(`Deleting user: ${id}`);
-    await this.sessionRepository.delete({ user: { id } });
-    await this.usersRepository.softDelete(id);
+  async deactivate(id: string, actorId?: string) {
+    if (id === actorId)
+      throw new ForbiddenException('You cannot deactivate your own account');
+    await this.usersRepository.manager.transaction(async (manager) => {
+      const users = manager.getRepository(User);
+      const user = await users.findOne({
+        where: { id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!user) throw new NotFoundException('Active user not found');
+      await manager.getRepository(Session).delete({ user: { id } });
+      await users.increment({ id }, 'authVersion', 1);
+      await users.softDelete(id);
+    });
+    this.notificationsGateway.disconnectUser(id);
+  }
+
+  async restore(id: string) {
+    await this.usersRepository.manager.transaction(async (manager) => {
+      const users = manager.getRepository(User);
+      const user = await users.findOne({
+        where: { id },
+        withDeleted: true,
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!user) throw new NotFoundException('User not found');
+      if (!user.deletedAt)
+        throw new ConflictException('Account is already active');
+      await users.restore(id);
+      await users.update(id, { failedLoginAttempts: 0, lockoutUntil: null });
+    });
+    return this.findById(id);
+  }
+
+  private async assertAvailableIdentity(data: {
+    email: string;
+    schoolId: string;
+    phoneNumber: string;
+  }) {
+    const existing = await this.usersRepository.findOne({
+      where: [
+        { email: data.email },
+        { phoneNumber: data.phoneNumber },
+        { schoolId: data.schoolId },
+      ],
+      withDeleted: true,
+    });
+    if (!existing) return;
+    if (existing.deletedAt)
+      throw new ConflictException(
+        'Account deactivated. Contact the library administrator for account recovery.',
+      );
+    if (existing.email === data.email)
+      throw new ConflictException('Email already exists');
+    if (existing.phoneNumber === data.phoneNumber)
+      throw new ConflictException('Phone number already exists');
+    throw new ConflictException('School ID already exists');
+  }
+
+  private async saveUser(
+    user: User,
+    repository: Repository<User> = this.usersRepository,
+  ): Promise<User> {
+    try {
+      return await repository.save(user);
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error.driverError as { code?: string }).code === '23505'
+      ) {
+        throw new ConflictException(
+          'Email, phone number or school ID already exists. Contact the library administrator if your account was deactivated.',
+        );
+      }
+      throw error;
+    }
   }
 
   // ---------- Lockout and failed attempts functions || SOON

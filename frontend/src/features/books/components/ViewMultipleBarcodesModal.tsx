@@ -230,7 +230,7 @@ export function ViewMultipleBarcodesModal({
             Print All
           </Button>
           <Button
-            className="flex-1 rounded-xl bg-slate-900 text-white hover:bg-slate-800"
+            className="bg-primary hover:bg-primary/90 flex-1 rounded-xl text-white"
             onClick={handleDownload}
             disabled={isProcessing || !bookCopies.length}
           >

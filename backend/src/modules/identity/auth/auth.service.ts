@@ -17,7 +17,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
 import { Session } from './entities/session.entity';
 import { User } from '../users/entities/user.entity';
 import { normalizeIp } from 'src/common/utils/normalizedIp.util';
-import * as nodemailer from 'nodemailer';
+import { MailService } from '../../core/mail/mail.service';
 import { randomInt } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
@@ -28,8 +28,6 @@ const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 
 @Injectable()
 export class AuthService {
-  private transporter: nodemailer.Transporter;
-
   constructor(
     private usersService: UsersService,
     @InjectRepository(RefreshToken)
@@ -42,20 +40,8 @@ export class AuthService {
     private readonly refreshTokenService: RefreshTokenService,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
-  ) {
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PASSWORD,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-  }
+    private readonly mailService: MailService,
+  ) {}
 
   async register(
     schoolId: string,
@@ -74,11 +60,6 @@ export class AuthService {
     }
 
     await this.validateStudent(schoolId);
-
-    const existingUser = await this.usersService.findByEmail(email);
-    if (existingUser) {
-      throw new BadRequestException('Email already registered');
-    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const cleanIp = normalizeIp(ipAddress);
@@ -414,30 +395,15 @@ export class AuthService {
       resetPasswordExpires: expires,
     });
 
-    const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-</head>
-<body style="font-family: Arial, sans-serif; padding: 20px;">
-    <div style="max-width: 500px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 10px;">
-        <h2 style="color: #333; text-align: center;">Password Reset Request</h2>
-        <p style="color: #666; font-size: 16px;">Your OTP for password reset is:</p>
-        <div style="background: #007bff; color: white; font-size: 32px; font-weight: bold; 
-            padding: 15px; text-align: center; border-radius: 5px; letter-spacing: 5px; margin: 20px 0;">
-            ${otp}
-        </div>
-        <p style="color: #666; font-size: 14px;">This OTP will expire in <strong>5 minutes</strong>.</p>
-        <p style="color: #999; font-size: 12px; margin-top: 30px;">
-            If you didn't request this, please ignore this email. 
-            For security reasons, never share your OTP with anyone.
-        </p>
-    </div>
-</body>
-</html>`;
+    const htmlContent =
+      '<p>Your LMS password reset code is: <strong>' +
+      otp +
+      '</strong></p>' +
+      '<p>This code expires in 5 minutes. Never share it.</p>' +
+      '<p>If you did not request a password reset, ignore this email.</p>';
 
-    await this.transporter.sendMail({
-      from: process.env.SMTP_EMAIL,
+    await this.mailService.send({
+      kind: 'password-reset',
       to: email,
       subject: 'Password Reset OTP',
       html: htmlContent,

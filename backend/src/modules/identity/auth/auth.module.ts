@@ -15,9 +15,11 @@ import { RefreshTokenService } from 'src/common/services/refresh-token.service';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import { JwtStrategy } from 'src/common/guard/jwt.strategy';
 import { CsrfService } from 'src/common/services/csrf.service';
+import { MailModule } from '../../core/mail/mail.module';
 
 @Module({
   imports: [
+    MailModule,
     TypeOrmModule.forFeature([RefreshToken, Session, User]),
     UsersModule,
     JwtModule.register({

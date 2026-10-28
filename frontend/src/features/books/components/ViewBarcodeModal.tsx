@@ -155,7 +155,7 @@ export function ViewBarcodeModal({
               <Printer className="mr-2 size-4" /> Print
             </Button>
             <Button
-              className="flex-1 rounded-xl bg-slate-900 text-white hover:bg-slate-800"
+              className="bg-primary hover:bg-primary/90 flex-1 rounded-xl text-white"
               onClick={handleDownload}
               disabled={loading || !barcodeSrc}
             >

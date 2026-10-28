@@ -8,9 +8,10 @@ import { JwtStrategy } from 'src/common/guard/jwt.strategy';
 import { User } from '../../identity/users/entities/user.entity';
 import { BookCopy } from '../book-copies/entities/book-copy.entity';
 import { BorrowingsCronService } from './borrowings-cron.service';
+import { MailModule } from '../../core/mail/mail.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Borrowing, User, BookCopy])],
+  imports: [TypeOrmModule.forFeature([Borrowing, User, BookCopy]), MailModule],
   controllers: [BorrowingsController],
   providers: [
     BorrowingsService,

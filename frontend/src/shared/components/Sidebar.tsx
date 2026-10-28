@@ -91,14 +91,12 @@ function CollapsibleSidebarItem({
           render={
             <SidebarMenuButton
               tooltip={item.label}
-              className={`group relative flex items-center gap-3 rounded-xl px-4 py-2.5 transition-all duration-300 ${isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}
+              className={`group relative flex items-center gap-3 rounded-lg px-4 py-2.5 transition-all duration-300 ${isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"}`}
             >
               <item.icon
-                className={`transition-transform duration-300 group-hover:scale-110 ${isActive ? "text-sidebar-primary" : ""}`}
+                className={`transition-transform duration-300 ${isActive ? "text-sidebar-primary" : ""}`}
               />
-              <span className="text-sm font-medium tracking-wide">
-                {item.label}
-              </span>
+              <span className="text-sm font-medium">{item.label}</span>
               <ChevronRightIcon
                 className={`text-sidebar-foreground/50 group-hover:text-sidebar-accent-foreground group-data-[state=open]/collapsible:text-sidebar-primary ml-auto h-4 w-4 transition-all duration-300 ease-in-out group-data-[state=open]/collapsible:rotate-90 ${
                   !isOpen ? "rotate-180" : ""
@@ -127,7 +125,7 @@ function CollapsibleSidebarItem({
                   />
                   <SidebarMenuSubButton
                     onClick={() => handleNavigate(subItem.path)}
-                    className={`cursor-pointer rounded-lg px-3 py-2 text-xs transition-all duration-300 hover:translate-x-1 ${
+                    className={`cursor-pointer rounded-lg px-3 py-2 text-xs transition-all duration-300 ${
                       isSubActive
                         ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
                         : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -193,7 +191,7 @@ export function SidebarContentInner({
       />
       <div className="bg-sidebar text-sidebar-foreground flex h-full flex-col overflow-hidden">
         <SidebarHeader
-          className={`overflow-hidden border-b border-white/5 py-4 transition-all duration-300 ${isCollapsed ? "px-0" : "px-2"}`}
+          className={`border-sidebar-border overflow-hidden border-b py-4 transition-all duration-300 ${isCollapsed ? "px-0" : "px-2"}`}
         >
           <SidebarMenu>
             <SidebarMenuItem className="flex justify-center">
@@ -207,12 +205,12 @@ export function SidebarContentInner({
                   className={`flex items-center ${isCollapsed ? "" : "w-full gap-3"}`}
                 >
                   <div
-                    className={`flex shrink-0 items-center justify-center overflow-hidden shadow-inner transition-all duration-300 group-hover:scale-105 ${isCollapsed ? "size-10 p-2" : "size-14 p-2"}`}
+                    className={`flex shrink-0 items-center justify-center overflow-hidden transition-all duration-300 ${isCollapsed ? "size-10 p-2" : "size-11 p-1"}`}
                   >
                     <img
                       src="/img/logo.png"
                       alt="NCMC Library"
-                      className="h-full w-full object-contain drop-shadow-md filter"
+                      className="h-full w-full object-contain"
                     />
                   </div>
                   {!isCollapsed && (
@@ -220,7 +218,7 @@ export function SidebarContentInner({
                       <span className="text-sidebar-foreground group-hover:text-sidebar-accent-foreground text-sm leading-tight font-bold tracking-tight">
                         NCMC Library
                       </span>
-                      <span className="text-sidebar-foreground/70 mt-0.5 text-[10px] leading-tight font-semibold tracking-wider uppercase">
+                      <span className="text-sidebar-foreground mt-0.5 text-xs leading-tight font-semibold uppercase">
                         {user ? `${user.role!.toUpperCase()} Panel` : "Panel"}
                       </span>
                     </div>
@@ -236,7 +234,7 @@ export function SidebarContentInner({
         >
           <SidebarGroup>
             {!isCollapsed && (
-              <SidebarGroupLabel className="mb-2 px-4 text-[11px] font-bold tracking-widest text-white/30 uppercase">
+              <SidebarGroupLabel className="text-sidebar-foreground mb-2 px-4 text-[11px] font-bold uppercase">
                 Main Menu
               </SidebarGroupLabel>
             )}
@@ -265,13 +263,13 @@ export function SidebarContentInner({
                         tooltip={item.label}
                         isActive={location.pathname === item.path}
                         onClick={() => handleNavigate(item.path)}
-                        className={`group relative flex items-center rounded-xl transition-all duration-300 ${isCollapsed ? "h-10 w-10 justify-center px-0" : "w-full gap-3 px-4 py-2.5"} hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground`}
+                        className={`group relative flex items-center rounded-lg transition-all duration-300 ${isCollapsed ? "h-10 w-10 justify-center px-0" : "w-full gap-3 px-4 py-2.5"} hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground`}
                       >
                         <item.icon
-                          className={`h-5 w-5 transition-transform duration-300 group-hover:scale-110 group-data-[active=true]:scale-110`}
+                          className={`h-5 w-5 transition-transform duration-300`}
                         />
                         {!isCollapsed && (
-                          <span className="text-sm font-medium tracking-wide">
+                          <span className="text-sm font-medium">
                             {item.label}
                           </span>
                         )}
@@ -289,7 +287,7 @@ export function SidebarContentInner({
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="border-t border-white/5 p-2">
+        <SidebarFooter className="border-sidebar-border border-t p-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
@@ -297,19 +295,19 @@ export function SidebarContentInner({
                   render={
                     <SidebarMenuButton
                       size="lg"
-                      className={`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-xl transition-all duration-300 ${isCollapsed ? "h-12 justify-center px-0" : "px-3 py-6"}`}
-                      tooltip="Admin Settings"
+                      className={`hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-lg transition-all duration-300 ${isCollapsed ? "h-12 justify-center px-0" : "px-3 py-6"}`}
+                      tooltip="Account settings"
                     >
                       <div
                         className={`flex w-full items-center ${isCollapsed ? "justify-center" : "gap-3"}`}
                       >
                         <div
-                          className={`bg-sidebar-primary flex shrink-0 items-center justify-center rounded-full shadow-md transition-all duration-300 ${isCollapsed ? "size-8" : "size-9"}`}
+                          className={`bg-sidebar-primary flex shrink-0 items-center justify-center rounded-full shadow-none transition-all duration-300 ${isCollapsed ? "size-8" : "size-9"}`}
                         >
-                          <Avatar className="shadow ring-2 ring-blue-500">
+                          <Avatar className="ring-sidebar-border ring-1">
                             <AvatarImage src={user?.avatarUrl} />
                             <AvatarFallback
-                              className={`${isCollapsed ? "size-4" : "size-5"} text-lg font-bold text-blue-700`}
+                              className={`${isCollapsed ? "size-8" : "size-9"} text-lg font-bold text-blue-700`}
                             >
                               {user?.fullName?.charAt(0).toUpperCase()}
                             </AvatarFallback>
@@ -320,13 +318,13 @@ export function SidebarContentInner({
                             <span className="text-sidebar-foreground group-hover:text-sidebar-accent-foreground truncate text-sm font-semibold">
                               {user?.fullName || "Administrator"}
                             </span>
-                            <span className="text-sidebar-foreground/70 truncate text-[10px]">
+                            <span className="text-sidebar-foreground truncate text-xs">
                               {user?.email || "admin@ncmc.edu"}
                             </span>
                           </div>
                         )}
                         {!isCollapsed && (
-                          <ChevronUpIcon className="ml-auto h-4 w-4 text-white/30 transition-colors group-hover:text-white" />
+                          <ChevronUpIcon className="text-sidebar-foreground group-hover:text-sidebar-accent-foreground ml-auto h-4 w-4 transition-colors" />
                         )}
                       </div>
                     </SidebarMenuButton>
@@ -335,7 +333,7 @@ export function SidebarContentInner({
                 <DropdownMenuContent
                   side="top"
                   align="end"
-                  className="border-border bg-popover text-popover-foreground mb-2 w-56 overflow-hidden rounded-xl border p-1 shadow-lg"
+                  className="border-border bg-popover text-popover-foreground mb-2 w-56 overflow-hidden rounded-lg border p-1 shadow-lg"
                 >
                   <DropdownMenuItem
                     onClick={() => handleNavigate(`${basePath}/profile`)}

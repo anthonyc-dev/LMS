@@ -8,9 +8,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
-import { toast } from "sonner";
 import {
   BookOpen,
   PlusCircle,
@@ -18,7 +16,6 @@ import {
   CheckCircle2,
   Clock,
   BookMarked,
-  RotateCw,
   AlertCircle,
 } from "lucide-react";
 import {
@@ -31,31 +28,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
+import { formatPhilippinePeso } from "@/shared/utils/currency";
 
-// Mock Data
-const engagementData = [
-  { course: "Web Dev I", studentViews: 145, checkouts: 98 },
-  { course: "Data Systems", studentViews: 220, checkouts: 165 },
-  { course: "Artificial Intell.", studentViews: 310, checkouts: 240 },
-  { course: "Discrete Math", studentViews: 85, checkouts: 42 },
-];
-
-const mockAcquisitions = [
-  {
-    id: 1,
-    title: "Deep Learning with PyTorch",
-    author: "Eli Stevens",
-    status: "Approved",
-    date: "May 18, 2026",
-  },
-  {
-    id: 2,
-    title: "Designing Data-Intensive Applications",
-    author: "Martin Kleppmann",
-    status: "Cataloged",
-    date: "Apr 29, 2026",
-  },
-];
+const engagementData: { course: string; studentViews: number; checkouts: number }[] = [];
 
 export function FacultyDashboardPage() {
   usePageTitle("Faculty Dashboard");
@@ -65,11 +40,7 @@ export function FacultyDashboardPage() {
     queryFn: getUserAnalytics,
   });
 
-  // Active Loans list (Stateful so that we can trigger "Renew" interaction live!)
   const loans = stats?.activeLoans || [];
-
-  // Request lists
-  const acquisitions = mockAcquisitions;
 
   /* const _currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -78,15 +49,18 @@ export function FacultyDashboardPage() {
     day: "numeric",
   }); */
 
-  // Renewal click handler (Updates remaining days and renew counter with feedback)
-  const handleRenew = (_id: string) => {
-    toast.info("Renew functionality will trigger a backend call in the future");
-  };
-
-  if (isLoading || !stats) {
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center text-slate-500">
         Loading dashboard data...
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex h-screen items-center justify-center text-slate-500">
+        Dashboard data could not be loaded.
       </div>
     );
   }
@@ -103,7 +77,7 @@ export function FacultyDashboardPage() {
               Faculty Space
             </span>
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 md:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">
             Hello,{" "}
             <span className="bg-linear-to-r from-slate-600 to-blue-600 bg-clip-text text-transparent">
               {user?.fullName || "Professor"}
@@ -128,7 +102,7 @@ export function FacultyDashboardPage() {
             <span className="text-xs leading-tight font-bold text-slate-800">
               Faculty Member
             </span>
-            <span className="truncate text-[10px] font-semibold text-slate-400">
+            <span className="truncate text-xs font-semibold text-slate-400">
               {user?.email || "faculty@ncmc.edu"}
             </span>
           </div>
@@ -138,13 +112,13 @@ export function FacultyDashboardPage() {
       {/* KPI Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Active Personal Loans */}
-        <Card className="group transition-all hover:border-slate-200 hover:shadow-md">
+        <Card className="group transition-all hover:border-slate-200">
           <CardContent className="space-y-3 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-slate-50 p-2.5 text-slate-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-slate-50 p-2.5 text-slate-600 transition-transform">
                 <BookOpen className="size-5" />
               </div>
-              <Badge className="border-none bg-slate-50 text-[10px] font-bold text-slate-700 hover:bg-slate-50">
+              <Badge className="border-none bg-slate-50 text-xs font-bold text-slate-700 hover:bg-slate-50">
                 Quota: 15 Max
               </Badge>
             </div>
@@ -152,7 +126,7 @@ export function FacultyDashboardPage() {
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
                 My Active Loans
               </span>
-              <h3 className="text-2xl font-black text-slate-800">
+              <h3 className="text-2xl font-semibold text-slate-800">
                 {stats.checkedOut}{" "}
                 <span className="text-xs font-normal text-slate-400">
                   books borrowed
@@ -167,97 +141,96 @@ export function FacultyDashboardPage() {
         </Card>
 
         {/* Course Reserves */}
-        <Card className="group transition-all hover:border-blue-200 hover:shadow-md">
+        <Card className="group transition-all hover:border-blue-200">
           <CardContent className="space-y-3 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform">
                 <BookMarked className="size-5" />
               </div>
-              <Badge className="border-none bg-blue-50 text-[10px] font-bold text-blue-700 hover:bg-blue-50">
-                Curriculum
+              <Badge className="border-none bg-blue-50 text-xs font-bold text-blue-700 hover:bg-blue-50">
+                History
               </Badge>
             </div>
             <div className="space-y-0.5">
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
-                Course Reserves
+                Books Returned
               </span>
-              <h3 className="text-2xl font-black text-slate-800">
-                8{" "}
+              <h3 className="text-2xl font-semibold text-slate-800">
+                {stats.readBooksCount}{" "}
                 <span className="text-xs font-normal text-slate-400">
-                  books pinned
+                  books
                 </span>
               </h3>
             </div>
-            <p className="text-[11px] font-medium text-slate-500">
-              Assigned to:{" "}
-              <span className="font-bold text-slate-700">4 active courses</span>
+            <p className="text-xs font-medium text-slate-500">
+              Recorded returned borrowings
             </p>
           </CardContent>
         </Card>
 
         {/* Book Requests */}
-        <Card className="hover:border-success-bg group transition-all hover:shadow-md">
+        <Card className="hover:border-success-bg group transition-all">
           <CardContent className="space-y-3 p-6">
             <div className="flex items-start justify-between">
-              <div className="bg-success-bg text-success-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
+              <div className="bg-success-bg text-success-text rounded-xl p-2.5 transition-transform">
                 <PlusCircle className="size-5" />
               </div>
-              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none text-[10px] font-bold">
-                Acquisitions
+              <Badge className="bg-success-bg text-success-text hover:bg-success-bg border-none text-xs font-bold">
+                Account
               </Badge>
             </div>
             <div className="space-y-0.5">
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
-                Acquisitions Requested
+                Outstanding Fines
               </span>
-              <h3 className="text-2xl font-black text-slate-800">
-                {acquisitions.length}{" "}
-                <span className="text-xs font-normal text-slate-400">
-                  suggested
-                </span>
+              <h3 className="text-2xl font-semibold text-slate-800">
+                {formatPhilippinePeso(stats.outstandingFines)}
               </h3>
             </div>
-            <p className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
+            <p className="flex items-center gap-1 text-xs font-medium text-slate-500">
               <CheckCircle2 className="text-success-bg0 size-3.5" />
               <span>
-                {acquisitions.filter((a) => a.status === "Approved").length}{" "}
-                approved by admin
+                Current unpaid balance
               </span>
             </p>
           </CardContent>
         </Card>
 
         {/* Syllabus / Reading List Views */}
-        <Card className="group transition-all hover:border-pink-200 hover:shadow-md">
+        <Card className="group transition-all hover:border-pink-200">
           <CardContent className="space-y-3 p-6">
             <div className="flex items-start justify-between">
-              <div className="rounded-xl bg-pink-50 p-2.5 text-pink-600 transition-transform group-hover:scale-110">
+              <div className="rounded-xl bg-pink-50 p-2.5 text-pink-600 transition-transform">
                 <Eye className="size-5" />
               </div>
-              <Badge className="border-none bg-pink-50 text-[10px] font-bold text-pink-700 hover:bg-pink-50">
-                Engagement
+              <Badge className="border-none bg-pink-50 text-xs font-bold text-pink-700 hover:bg-pink-50">
+                Due Date
               </Badge>
             </div>
             <div className="space-y-0.5">
               <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
-                Reading List Views
+                Next Deadline
               </span>
-              <h3 className="text-2xl font-black text-slate-800">760</h3>
+              <h3 className="text-2xl font-semibold text-slate-800">
+                {stats.nextDeadlineDays === "None"
+                  ? "All clear"
+                  : `${stats.nextDeadlineDays} days`}
+              </h3>
             </div>
-            <p className="text-[11px] font-medium text-slate-500">
-              +18% student clicks this week
+            <p className="text-xs font-medium text-slate-500">
+              {stats.nextDeadlineDate}
             </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Core Modules: Charts & Stepper */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="hidden grid gap-6 md:grid-cols-3">
         {/* Student syllabus engagement (2/3 width) */}
-        <Card className="shadow-xs transition-shadow hover:shadow-md md:col-span-2">
+        <Card className="shadow-xs transition-shadow md:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
-              <CardTitle className="text-base font-black text-slate-800">
+              <CardTitle className="text-base font-semibold text-slate-800">
                 Course Syllabus Reading Stats
               </CardTitle>
               <p className="text-xs font-medium text-slate-400">
@@ -306,7 +279,7 @@ export function FacultyDashboardPage() {
                 <Bar
                   name="Book Checkouts"
                   dataKey="checkouts"
-                  fill="#3b82f6"
+                  fill="var(--chart-1)"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -315,9 +288,9 @@ export function FacultyDashboardPage() {
         </Card>
 
         {/* Acquisition Stepper HUD (1/3 width) */}
-        <Card className="shadow-xs transition-shadow hover:shadow-md">
+        <Card className="shadow-xs transition-shadow">
           <CardHeader className="border-b border-slate-50 pb-4">
-            <CardTitle className="text-base font-black text-slate-800">
+            <CardTitle className="text-base font-semibold text-slate-800">
               Acquisition Pipeline
             </CardTitle>
             <p className="text-xs font-medium text-slate-400">
@@ -332,10 +305,10 @@ export function FacultyDashboardPage() {
                   <CheckCircle2 className="size-4" />
                 </div>
                 <div className="space-y-1 pt-0.5">
-                  <h4 className="text-xs leading-tight font-black text-slate-800">
+                  <h4 className="text-xs leading-tight font-semibold text-slate-800">
                     Deep Learning with PyTorch
                   </h4>
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase">
+                  <p className="text-xs font-semibold text-slate-400 uppercase">
                     Acquisition Stage: Approved
                   </p>
                   <span className="text-success-text bg-success-bg rounded px-1.5 py-0.5 text-[9px] font-bold">
@@ -350,10 +323,10 @@ export function FacultyDashboardPage() {
                   <Clock className="size-4" />
                 </div>
                 <div className="space-y-1 pt-0.5">
-                  <h4 className="text-xs leading-tight font-black text-slate-800">
+                  <h4 className="text-xs leading-tight font-semibold text-slate-800">
                     Neural Networks & Deep Learning
                   </h4>
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase">
+                  <p className="text-xs font-semibold text-slate-400 uppercase">
                     Acquisition Stage: Submitted
                   </p>
                   <span className="rounded bg-slate-50 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
@@ -368,10 +341,10 @@ export function FacultyDashboardPage() {
                   <CheckCircle2 className="size-4" />
                 </div>
                 <div className="space-y-1 pt-0.5">
-                  <h4 className="text-xs leading-tight font-black text-slate-800">
+                  <h4 className="text-xs leading-tight font-semibold text-slate-800">
                     Designing Data-Intensive Systems
                   </h4>
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase">
+                  <p className="text-xs font-semibold text-slate-400 uppercase">
                     Acquisition Stage: Cataloged
                   </p>
                   <span className="rounded-sm bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-600">
@@ -387,9 +360,9 @@ export function FacultyDashboardPage() {
       {/* Forms & Tables Section */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Book Request Form (1/3 size) */}
-        {/* <Card className="shadow-xs transition-shadow hover:shadow-md">
+        {/* <Card className="shadow-xs transition-shadow ">
           <CardHeader className="border-b border-slate-50 pb-4">
-            <CardTitle className="flex items-center gap-1.5 text-base font-black text-slate-800">
+            <CardTitle className="flex items-center gap-1.5 text-base font-semibold text-slate-800">
               <PlusCircle className="size-4 text-slate-500" />
               <span>Acquisition Request</span>
             </CardTitle>
@@ -400,7 +373,7 @@ export function FacultyDashboardPage() {
           <CardContent className="p-6">
             <form onSubmit={handleAcquisitionSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                <label className="text-xs font-bold tracking-wider text-slate-400 uppercase">
                   Book Title
                 </label>
                 <Input
@@ -411,7 +384,7 @@ export function FacultyDashboardPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                <label className="text-xs font-bold tracking-wider text-slate-400 uppercase">
                   Author Name
                 </label>
                 <Input
@@ -422,7 +395,7 @@ export function FacultyDashboardPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                <label className="text-xs font-bold tracking-wider text-slate-400 uppercase">
                   Assigned Course
                 </label>
                 <Input
@@ -444,14 +417,14 @@ export function FacultyDashboardPage() {
         </Card> */}
 
         {/* My Active Borrows Registry (2/3 size) */}
-        <Card className="shadow-xs transition-shadow hover:shadow-md lg:col-span-2">
+        <Card className="shadow-xs transition-shadow lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-4">
             <div>
-              <CardTitle className="text-base font-black text-slate-800">
+              <CardTitle className="text-base font-semibold text-slate-800">
                 My Borrowed Books
               </CardTitle>
               <p className="text-xs font-medium text-slate-400">
-                Currently checked out titles with interactive renewal
+                Currently checked out titles and their due dates
               </p>
             </div>
             <Badge
@@ -469,17 +442,13 @@ export function FacultyDashboardPage() {
                   className="flex items-center justify-between p-4 transition-colors hover:bg-slate-50/50"
                 >
                   <div className="max-w-[280px] space-y-1.5">
-                    <h4 className="truncate text-xs leading-tight font-black text-slate-800">
+                    <h4 className="truncate text-xs leading-tight font-semibold text-slate-800">
                       {loan.title}
                     </h4>
-                    <p className="text-[10px] leading-none font-medium text-slate-400">
+                    <p className="text-xs leading-none font-medium text-slate-400">
                       {loan.author}
                     </p>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-bold text-slate-400">
-                        Renewals: {loan.renewCount}/2
-                      </span>
-                      <span className="text-slate-200">|</span>
                       <span className="text-[9px] font-bold text-slate-400">
                         Due: {loan.dueDate}
                       </span>
@@ -516,14 +485,6 @@ export function FacultyDashboardPage() {
                         <span>Near Due</span>
                       </Badge>
                     )}
-                    <Button
-                      variant="outline"
-                      onClick={() => handleRenew(loan.id)}
-                      className="flex h-8 cursor-pointer items-center gap-1 rounded-lg border-slate-200 px-3 text-[10px] font-bold text-slate-600 transition-all hover:border-slate-600 hover:bg-slate-50/30 hover:text-slate-600"
-                    >
-                      <RotateCw className="size-3" />
-                      <span>Renew</span>
-                    </Button>
                   </div>
                 </div>
               ))}

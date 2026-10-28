@@ -108,18 +108,18 @@ export function EditBookModal({
         }
       }}
     >
-      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden rounded-4xl border-none p-0 shadow-2xl sm:max-h-[85vh] sm:max-w-[560px]">
+      <DialogContent className="border-primary/20 flex max-h-[90vh] flex-col overflow-hidden rounded-xl border p-0 shadow-sm sm:max-h-[85vh] sm:max-w-[560px]">
         {/* Header */}
-        <div className="relative shrink-0 overflow-hidden bg-slate-900 p-6 text-white">
+        <div className="bg-primary relative shrink-0 overflow-hidden p-6 text-white">
           <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
           <div className="absolute top-4 right-10 opacity-10">
             <BookOpen size={80} className="-rotate-12" />
           </div>
           <DialogHeader className="relative z-10 space-y-1">
-            <DialogTitle className="flex items-center gap-2 text-xl font-black text-white">
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold text-white">
               <Edit className="size-5" /> Edit Book Metadata
             </DialogTitle>
-            <DialogDescription className="text-sm font-medium text-blue-200">
+            <DialogDescription className="text-primary-foreground/85 text-sm font-medium">
               Update the metadata for "{book.title}".
             </DialogDescription>
           </DialogHeader>
@@ -184,7 +184,7 @@ export function EditBookModal({
                   disabled={isUpdating}
                   value={form.title}
                   onChange={(e) => f("title")(e.target.value)}
-                  className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                  className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
                 />
               </div>
               <div className="space-y-1.5">
@@ -195,7 +195,7 @@ export function EditBookModal({
                   disabled={isUpdating}
                   value={form.author}
                   onChange={(e) => f("author")(e.target.value)}
-                  className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                  className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
                 />
               </div>
             </div>
@@ -243,7 +243,7 @@ export function EditBookModal({
                 value={form.isbn}
                 onChange={(e) => f("isbn")(e.target.value)}
                 placeholder="978-…"
-                className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
               />
             </div>
             <div className="space-y-1.5">
@@ -254,7 +254,7 @@ export function EditBookModal({
                 disabled={isUpdating}
                 value={form.publisher}
                 onChange={(e) => f("publisher")(e.target.value)}
-                className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
               />
             </div>
             <div className="space-y-1.5">
@@ -265,7 +265,7 @@ export function EditBookModal({
                 min="0"
                 value={form.pages}
                 onChange={(e) => f("pages")(e.target.value)}
-                className="rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+                className="focus-visible:border-primary focus-visible:ring-primary/20 rounded-xl border-slate-200"
               />
             </div>
           </div>
@@ -279,7 +279,7 @@ export function EditBookModal({
               value={form.description}
               onChange={(e) => f("description")(e.target.value)}
               placeholder="Brief summary…"
-              className="h-20 resize-none rounded-xl border-slate-200 focus-visible:border-blue-500 focus-visible:ring-blue-500/20"
+              className="focus-visible:border-primary focus-visible:ring-primary/20 h-20 resize-none rounded-xl border-slate-200"
             />
           </div>
         </div>
@@ -296,7 +296,7 @@ export function EditBookModal({
           <Button
             disabled={isUpdating}
             onClick={handleSave}
-            className="w-full rounded-xl bg-slate-900 font-bold text-white shadow-md shadow-slate-200 hover:bg-slate-800 sm:w-auto sm:flex-1"
+            className="bg-primary hover:bg-primary/90 w-full rounded-xl font-bold text-white shadow-md shadow-none sm:w-auto sm:flex-1"
           >
             {isUpdating ? <Spinner className="mr-2" /> : null}
             Save Changes

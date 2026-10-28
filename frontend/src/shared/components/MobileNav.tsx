@@ -90,7 +90,7 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
       />
 
       {/* Bottom Navigation Bar */}
-      <nav className="pb-safe fixed right-0 bottom-0 left-0 z-50 flex h-18 items-center justify-around border-t border-slate-200 bg-white px-2 pt-1 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] md:hidden">
+      <nav className="pb-safe fixed right-0 bottom-0 left-0 z-50 flex h-18 items-center justify-around border-t border-slate-200 bg-white px-2 pt-1 shadow-none md:hidden">
         {bottomBarItems.map((item) => {
           const active = isItemActive(item);
           const hasSubItems = item.items && item.items.length > 0;
@@ -121,7 +121,7 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
                         />
                       </div>
                       <span
-                        className={`truncate text-[10px] font-medium tracking-wide ${
+                        className={`truncate text-[11px] font-medium tracking-wide ${
                           active ? "font-bold text-blue-700" : "text-slate-500"
                         }`}
                       >
@@ -176,7 +176,7 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
                 <item.icon className="size-5" strokeWidth={active ? 2.5 : 2} />
               </div>
               <span
-                className={`truncate text-[10px] font-medium tracking-wide ${
+                className={`truncate text-[11px] font-medium tracking-wide ${
                   active ? "font-bold text-blue-700" : "text-slate-500"
                 }`}
               >
@@ -198,7 +198,7 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
                 >
                   <Menu className="size-5" />
                 </div>
-                <span className="truncate text-[10px] font-medium tracking-wide text-slate-500">
+                <span className="truncate text-[11px] font-medium tracking-wide text-slate-500">
                   Menu
                 </span>
               </button>
@@ -294,7 +294,7 @@ export function MobileNav({ menuItems }: { menuItems: MenuItem[] }) {
 
                 {/* Profile Info */}
                 <div className="mb-3 flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-tr from-blue-600 to-blue-500 text-white shadow-md">
+                  <div className="bg-primary flex size-10 shrink-0 items-center justify-center rounded-full text-white shadow-none">
                     <Avatar className="shadow ring-2 ring-slate-100">
                       <AvatarImage src={user?.avatarUrl} />
                       <AvatarFallback className="bg-amber-100 text-lg font-bold text-amber-700">

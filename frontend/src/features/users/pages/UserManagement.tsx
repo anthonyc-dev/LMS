@@ -1,9 +1,10 @@
+import { TablePageNumbers } from "@/shared/components/DataTable/TablePageNumbers";
 import { useState, useMemo, Fragment } from "react";
 import {
   Search,
   Plus,
   Edit,
-  Trash2,
+  UserX,
   Users,
   AlertCircle,
   MoreHorizontal,
@@ -18,6 +19,7 @@ import {
   Clock,
   ChevronDown,
   Eye,
+  RotateCcw,
 } from "lucide-react";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { Button } from "@/shared/components/ui/button";
@@ -53,7 +55,8 @@ import {
   useUsersMeta,
   useCreateUser,
   useUpdateUser,
-  useDeleteUser,
+  useDeactivateUser,
+  useRestoreUser,
   useUpdateUserProfile,
   type Role,
   type ApiUser,
@@ -75,6 +78,7 @@ import {
 
 export interface User {
   id: string;
+  deletedAt?: string | null;
   schoolId: string;
   fullName: string;
   email: string;
@@ -89,6 +93,14 @@ export interface User {
   avatarUrl?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   borrowings?: any[];
+}
+
+function getApiError(error: unknown, fallback: string): string {
+  const message = (
+    error as { response?: { data?: { message?: string | string[] } } }
+  )?.response?.data?.message;
+  if (Array.isArray(message)) return message.join(", ");
+  return message || (error instanceof Error ? error.message : fallback);
 }
 
 const AVATAR_COLORS = [
@@ -111,6 +123,7 @@ function pickAvatarColor(): string {
 function mapApiUser(u: ApiUser): User {
   return {
     id: u._id,
+    deletedAt: u.deletedAt,
     schoolId: u.schoolId,
     fullName: u.fullName,
     email: u.email,
@@ -211,6 +224,9 @@ export function UserManagement() {
   const isMobile = useIsMobile();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [accountStatus, setAccountStatus] = useState<"active" | "deactivated">(
+    "active",
+  );
   const [roleTab, setRoleTab] = useState<"all" | Role>("all");
   const [page, setPage] = useState(1);
 
@@ -222,11 +238,12 @@ export function UserManagement() {
   const [isSaving, setIsSaving] = useState(false);
 
   // API hooks
-  const { data: apiUsers, isLoading, isError, error } = useUsers();
+  const { data: apiUsers, isLoading, isError, error } = useUsers(accountStatus);
   const { data: meta, isLoading: isLoadingMeta } = useUsersMeta();
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
-  const deleteMutation = useDeleteUser();
+  const deactivateMutation = useDeactivateUser();
+  const restoreMutation = useRestoreUser();
   const uploadAvatarMutation = useUpdateUserProfile();
 
   const users = useMemo(() => (apiUsers ?? []).map(mapApiUser), [apiUsers]);
@@ -322,11 +339,11 @@ export function UserManagement() {
       toast.success(
         editUser
           ? "User updated successfully"
-          : "New user created successfully",
+          : "User created. Account email queued for delivery.",
       );
       setModalOpen(false);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to save user";
+      const msg = getApiError(err, "Failed to save user");
       toast.error(msg);
     } finally {
       setIsSaving(false);
@@ -335,17 +352,25 @@ export function UserManagement() {
 
   const handleDeleteConfirm = () => {
     if (!deleteUser) return;
-    deleteMutation.mutate(deleteUser.id, {
+    deactivateMutation.mutate(deleteUser.id, {
       onSuccess: () => {
-        toast.success("User removed from the system");
+        toast.success("User deactivated. Library history preserved.");
         setDeleteOpen(false);
       },
       onError: (err: unknown) => {
-        const msg =
-          err instanceof Error ? err.message : "Failed to delete user";
+        const msg = getApiError(err, "Failed to deactivate user");
         toast.error(msg);
       },
     });
+  };
+
+  const handleRestore = async (user: User) => {
+    try {
+      await restoreMutation.mutateAsync(user.id);
+      toast.success("Account restored. User can sign in again.");
+    } catch (err) {
+      toast.error(getApiError(err, "Failed to restore account"));
+    }
   };
 
   // Loading state
@@ -549,6 +574,23 @@ export function UserManagement() {
           </div>
 
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Select
+              value={accountStatus}
+              onValueChange={(value) => {
+                setAccountStatus(value as typeof accountStatus);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="h-10 w-full sm:w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active accounts</SelectItem>
+                <SelectItem value="deactivated">
+                  Deactivated accounts
+                </SelectItem>
+              </SelectContent>
+            </Select>
             {/* Search */}
             <div className="relative w-full sm:w-80">
               <Search className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
@@ -798,6 +840,7 @@ export function UserManagement() {
                                   View User
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
+                                  disabled={Boolean(user.deletedAt)}
                                   onClick={() => openEditModal(user)}
                                   className="gap-2 rounded-lg font-semibold text-slate-700 focus:bg-blue-50 focus:text-blue-700"
                                 >
@@ -806,11 +849,25 @@ export function UserManagement() {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-slate-100" />
                                 <DropdownMenuItem
-                                  onClick={() => openDeleteModal(user)}
+                                  disabled={
+                                    restoreMutation.isPending ||
+                                    deactivateMutation.isPending
+                                  }
+                                  onClick={() =>
+                                    user.deletedAt
+                                      ? void handleRestore(user)
+                                      : openDeleteModal(user)
+                                  }
                                   className="gap-2 rounded-lg font-semibold text-red-600 focus:bg-red-50 focus:text-red-700"
                                 >
-                                  <Trash2 className="size-4" />
-                                  Delete User
+                                  {user.deletedAt ? (
+                                    <RotateCcw className="size-4" />
+                                  ) : (
+                                    <UserX className="size-4" />
+                                  )}
+                                  {user.deletedAt
+                                    ? "Restore Account"
+                                    : "Deactivate User"}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -913,21 +970,11 @@ export function UserManagement() {
               >
                 <ChevronLeft className="size-4" />
               </Button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <Button
-                  key={p}
-                  variant={p === page ? "default" : "outline"}
-                  size="icon"
-                  className={`h-8 w-8 cursor-pointer rounded-lg text-xs font-bold ${
-                    p === page
-                      ? "bg-slate-900 text-white shadow-sm shadow-slate-200 hover:bg-slate-800"
-                      : "border-slate-200 text-slate-600"
-                  }`}
-                  onClick={() => setPage(p)}
-                >
-                  {p}
-                </Button>
-              ))}
+              <TablePageNumbers
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
               <Button
                 variant="outline"
                 size="icon"
@@ -962,7 +1009,7 @@ export function UserManagement() {
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
         onConfirm={handleDeleteConfirm}
-        isPending={deleteMutation.isPending}
+        isPending={deactivateMutation.isPending}
       />
     </div>
   );

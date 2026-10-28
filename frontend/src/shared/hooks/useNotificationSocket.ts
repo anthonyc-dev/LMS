@@ -15,6 +15,7 @@ import { toast } from "sonner";
  */
 export function useNotificationSocket() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const userId = useAuthStore((s) => s.user?.id);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -86,11 +87,19 @@ export function useNotificationSocket() {
 
     socket.on("notification", handleNotification);
     socket.on("connect", syncMissedNotifications);
+    socket.on("notifications:changed", syncMissedNotifications);
+    socket.on("notifications:ready", syncMissedNotifications);
+    socket.on("notifications:expired", syncMissedNotifications);
     syncMissedNotifications();
 
     return () => {
       socket.off("notification", handleNotification);
       socket.off("connect", syncMissedNotifications);
+      socket.off("notifications:changed", syncMissedNotifications);
+      socket.off("notifications:ready", syncMissedNotifications);
+      socket.off("notifications:expired", syncMissedNotifications);
+      disconnectSocket();
+      queryClient.removeQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
     };
-  }, [isAuthenticated, queryClient]);
+  }, [isAuthenticated, userId, queryClient]);
 }

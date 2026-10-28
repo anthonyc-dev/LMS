@@ -1,3 +1,4 @@
+import { AuthBrandPanel } from "@/features/auth/components/AuthBrandPanel";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
@@ -65,54 +66,23 @@ export function LoginPage() {
         label="Signing In"
         sublabel="Verifying your credentials..."
       />
-      <div className="grid min-h-svh lg:grid-cols-2">
-        <div className="relative hidden items-center justify-center overflow-hidden p-10 lg:flex lg:flex-col">
-          <img
-            src="/img/login.jpg"
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/60 to-transparent" />
-          <div className="relative z-10 flex max-w-md flex-col items-center text-center">
-            <h2 className="mb-3 text-5xl font-bold text-white">
-              Hybrid Library System for{" "}
-              <span className="text-primary">NCMC&apos;ians</span>
-            </h2>
-            <p className="text-lg leading-relaxed text-white/80">
-              A modern solution designed to transform the institution&apos;s
-              library operations.
-            </p>
-            <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-              <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-white">500+</div>
-                <div className="text-sm text-white/70">Courses</div>
-              </div>
-              <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-white">10k+</div>
-                <div className="text-sm text-white/70">Students</div>
-              </div>
-              <div className="rounded-xl bg-white/10 p-4 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-white">98%</div>
-                <div className="text-sm text-white/70">Success</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col items-center justify-center p-6 sm:p-10">
-          <div className="w-full max-w-md">
-            <div className="mb-6 flex flex-col items-center text-center">
-              <div className="mb-4 flex size-32 shrink-0 items-center justify-center overflow-hidden">
+      <div className="bg-card grid min-h-svh lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <AuthBrandPanel />
+        <div className="flex flex-col items-center justify-center px-6 py-12 sm:p-12">
+          <div className="w-full max-w-[420px]">
+            <div className="mb-8 flex flex-col items-start text-left">
+              <div className="mb-6 flex size-14 shrink-0 items-center justify-center overflow-hidden">
                 <img
                   src="/img/logo.png"
                   alt="NCMC Library"
                   className="h-full w-full object-contain"
                 />
               </div>
-              <h1 className="text-2xl font-semibold tracking-tight">
-                Sign in to your account
+              <h1 className="text-3xl font-semibold tracking-tight">
+                Welcome back
               </h1>
               <p className="text-muted-foreground mt-2 text-sm">
-                Enter your credentials to access your dashboard
+                Sign in to access your library account.
               </p>
             </div>
             <Form {...form}>
@@ -130,7 +100,8 @@ export function LoginPage() {
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="your@gmail.com"
+                          autoComplete="email"
+                          placeholder="you@example.com"
                           {...field}
                         />
                       </FormControl>
@@ -149,12 +120,16 @@ export function LoginPage() {
                         <div className="relative">
                           <Input
                             type={showPassword ? "text" : "password"}
+                            autoComplete="current-password"
                             placeholder="Enter your password"
                             className="pr-10"
                             {...field}
                           />
                           <button
                             type="button"
+                            aria-label={
+                              showPassword ? "Hide password" : "Show password"
+                            }
                             onClick={() => setShowPassword(!showPassword)}
                             className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
                           >
@@ -190,7 +165,7 @@ export function LoginPage() {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="h-11 w-full"
                   disabled={isSubmitting}
                 >
                   Sign In

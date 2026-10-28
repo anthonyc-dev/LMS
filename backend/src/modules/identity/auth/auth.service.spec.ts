@@ -1,5 +1,9 @@
+jest.mock('src/config/jwt.config', () => ({
+  jwtConstants: { secret: 'unit-test-secret' },
+}));
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
+import { MailService } from '../../core/mail/mail.service';
 import { UsersService } from '../users/users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -9,7 +13,12 @@ import { TokenService } from 'src/common/services/token.service';
 import { RefreshTokenService } from 'src/common/services/refresh-token.service';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
-import { UnauthorizedException } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
+import { DepartmentEnum } from 'src/common/enums/enum.enums';
 import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt', () => ({
@@ -20,6 +29,7 @@ jest.mock('bcrypt', () => ({
 // Mock dependencies
 const mockUsersService = {
   findById: jest.fn(),
+  create: jest.fn(),
 };
 
 const mockRefreshTokenRepo = {
@@ -56,6 +66,7 @@ describe('AuthService - Refresh Token Logic', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+        { provide: MailService, useValue: { send: jest.fn() } },
         { provide: UsersService, useValue: mockUsersService },
         {
           provide: getRepositoryToken(RefreshToken),
@@ -72,6 +83,51 @@ describe('AuthService - Refresh Token Logic', () => {
 
     service = module.get<AuthService>(AuthService);
     jest.clearAllMocks();
+  });
+
+  describe('public registration account recovery', () => {
+    const register = () =>
+      service.register(
+        '21-0123',
+        'Student',
+        'student@example.com',
+        '09123456789',
+        'strong-password',
+        undefined,
+        DepartmentEnum.EECS,
+        true,
+        '127.0.0.1',
+        'test-device',
+      );
+    it('propagates deleted identity conflict without issuing a session or tokens', async () => {
+      jest
+        .spyOn(service, 'validateStudent')
+        .mockResolvedValue({ success: true, data: {} });
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
+      mockUsersService.create.mockRejectedValue(
+        new ConflictException('Account deactivated. Contact administrator.'),
+      );
+      await expect(register()).rejects.toThrow(ConflictException);
+      expect(mockSessionRepo.save).not.toHaveBeenCalled();
+      expect(mockTokenService.generateTokens).not.toHaveBeenCalled();
+    });
+    it('requires accepted terms on the backend', async () => {
+      await expect(
+        service.register(
+          '21-0123',
+          'Student',
+          'student@example.com',
+          '09123456789',
+          'strong-password',
+          undefined,
+          DepartmentEnum.EECS,
+          false,
+          '127.0.0.1',
+          'test-device',
+        ),
+      ).rejects.toThrow(BadRequestException);
+      expect(mockUsersService.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('refreshTokens', () => {
