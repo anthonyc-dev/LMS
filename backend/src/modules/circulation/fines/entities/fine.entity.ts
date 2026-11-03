@@ -16,6 +16,7 @@ export enum FineStatus {
 
 export enum FineType {
   OVERDUE = 'OVERDUE',
+  NO_COVER = 'NO COVER',
   DAMAGED = 'DAMAGED',
   LOST = 'LOST',
 }

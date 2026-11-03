@@ -232,6 +232,8 @@ export function BorrowingRecordsPage() {
             <div className="flex gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
               {[
                 { value: "all", label: "All" },
+                { value: "pending", label: "Pending approval" },
+                { value: "rejected", label: "Rejected" },
                 { value: "borrowed", label: "Active" },
                 { value: "overdue", label: "Overdue" },
                 { value: "returned", label: "Returned" },
@@ -388,23 +390,33 @@ export function BorrowingRecordsPage() {
                         <span
                           className={`font-medium ${record.status === "overdue" ? "text-error-text" : "text-slate-700"}`}
                         >
-                          {new Date(record.dueDate).toLocaleDateString()}
+                          {record.status === "pending"
+                            ? "After approval"
+                            : record.status === "rejected"
+                              ? "—"
+                              : new Date(record.dueDate).toLocaleDateString()}
                         </span>
                       </TableCell>
                       <TableCell>
                         {record.fines && record.fines.length > 0 ? (
                           <div className="space-y-1">
                             {record.fines.map((fine) => (
-                              <div key={fine.id} className="flex items-center gap-2">
+                              <div
+                                key={fine.id}
+                                className="flex items-center gap-2"
+                              >
                                 <span className="font-medium text-slate-700">
-                                  {formatPhilippinePeso(fine.amount)} {fine.type} {fine.status}
+                                  {formatPhilippinePeso(fine.amount)}{" "}
+                                  {fine.type} {fine.status}
                                 </span>
                                 {fine.status === "UNPAID" && (
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     disabled={markFinePaidMutation.isPending}
-                                    onClick={() => markFinePaidMutation.mutate(fine.id)}
+                                    onClick={() =>
+                                      markFinePaidMutation.mutate(fine.id)
+                                    }
                                     className="h-6 px-2 text-[10px]"
                                   >
                                     Mark paid
@@ -445,7 +457,11 @@ export function BorrowingRecordsPage() {
                               onClick={() => setSelectedRecord(record)}
                             >
                               <ListTree className="mr-2 h-4 w-4" />
-                              <span>View Details</span>
+                              <span>
+                                {record.status === "pending"
+                                  ? "Review request"
+                                  : "View Details"}
+                              </span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

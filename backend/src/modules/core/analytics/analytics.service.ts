@@ -95,7 +95,8 @@ export class AnalyticsService {
         status = 'info';
       } else if (
         log.status === BorrowingStatus.OVERDUE ||
-        new Date(log.dueDate) < new Date()
+        (log.status === BorrowingStatus.BORROWED &&
+          new Date(log.dueDate) < new Date())
       ) {
         type = 'overdue';
         status = 'warning';

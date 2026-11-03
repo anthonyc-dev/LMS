@@ -105,9 +105,7 @@ export const useActiveBorrowingByBarcode = (barcode: string) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (b: any) =>
           b.bookCopy?.id === copy.id &&
-          (b.status === "borrowed" ||
-            b.status === "overdue" ||
-            b.status === "pending"),
+          (b.status === "borrowed" || b.status === "overdue"),
       );
 
       if (!active)
@@ -151,6 +149,7 @@ export const useSelfBorrowBook = () => {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["borrowings"] });
+      qc.invalidateQueries({ queryKey: ["borrowings-user"] });
       qc.invalidateQueries({ queryKey: ["books"] });
       qc.invalidateQueries({ queryKey: ["book-copies"] });
       qc.invalidateQueries({ queryKey: ["user-analytics"] });
@@ -217,7 +216,7 @@ export const useCreateFine = () => {
   return useMutation({
     mutationFn: async (data: {
       borrowingId: string;
-      type: "OVERDUE" | "DAMAGED" | "LOST";
+      type: "OVERDUE" | "NO COVER" | "DAMAGED" | "LOST";
       status: "UNPAID" | "PAID" | "WAIVED";
       amount: number;
       reason?: string;
@@ -229,6 +228,34 @@ export const useCreateFine = () => {
       qc.invalidateQueries({ queryKey: ["fines"] });
       qc.invalidateQueries({ queryKey: ["borrowings"] });
       qc.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+};
+
+export const useDecideBorrowing = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      decision,
+    }: {
+      id: string;
+      decision: "confirm" | "reject";
+    }) => {
+      const response = await api.patch("/borrowings/" + id + "/" + decision);
+      return response.data;
+    },
+    onSuccess: () => {
+      for (const key of [
+        "borrowings",
+        "borrowings-user",
+        "books",
+        "book-copies",
+        "user-analytics",
+        "admin-analytics",
+      ]) {
+        qc.invalidateQueries({ queryKey: [key] });
+      }
     },
   });
 };

@@ -11,7 +11,7 @@ import { CreateBulkBorrowingDto } from './dto/create-bulk-borrowing.dto';
 import { ReturnBorrowingDto } from './dto/return-borrowing.dto';
 import { DataSource, EntityManager, Repository, In } from 'typeorm';
 import { Borrowing } from './entities/borrowing.entity';
-import { LessThan, Not } from 'typeorm';
+import { LessThan } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import {
   BookCopyStatus,
@@ -91,7 +91,11 @@ export class BorrowingsService {
           .where('b.userId = :userId', { userId })
           .andWhere('bc.bookId = :bookId', { bookId })
           .andWhere('b.status IN (:...statuses)', {
-            statuses: [BorrowingStatus.BORROWED, BorrowingStatus.PENDING],
+            statuses: [
+              BorrowingStatus.BORROWED,
+              BorrowingStatus.PENDING,
+              BorrowingStatus.OVERDUE,
+            ],
           })
           .getOne();
 
@@ -103,7 +107,14 @@ export class BorrowingsService {
 
         // 4. Borrow limit validation (role-based)
         const activeBorrowingsCount = await borrowingRepository.count({
-          where: { userId, status: BorrowingStatus.BORROWED },
+          where: {
+            userId,
+            status: In([
+              BorrowingStatus.BORROWED,
+              BorrowingStatus.PENDING,
+              BorrowingStatus.OVERDUE,
+            ]),
+          },
         });
 
         let maxLimit = 5;
@@ -125,14 +136,18 @@ export class BorrowingsService {
           bookCopyId: availableCopy.id,
           borrowDate: new Date(),
           dueDate,
-          status: BorrowingStatus.BORROWED,
+          status: BorrowingStatus.PENDING,
         });
 
         const saved = await borrowingRepository.save(borrowing);
 
-        // 6. Lock the copy as borrowed in the same transaction.
-        availableCopy.status = BookCopyStatus.BORROWED;
-        await bookCopyRepository.save(availableCopy);
+        // Conditional claim serializes competing borrowers without locking joined tables.
+        const claim = await bookCopyRepository.update(
+          { id: availableCopy.id, status: BookCopyStatus.AVAILABLE },
+          { status: BookCopyStatus.RESERVED },
+        );
+        if (!claim.affected)
+          throw new ConflictException('Book copy is no longer available');
 
         // 7. Return complete entity
         const result = await borrowingRepository.findOne({
@@ -145,25 +160,33 @@ export class BorrowingsService {
 
         await this.mailService.queue(manager, {
           to: borrower.email,
-          subject: 'Library book borrowed',
+          subject: 'Library borrow request received',
           html:
-            '<p>You borrowed &quot;' +
+            '<p>Your request to borrow &quot;' +
             escapeEmailHtml(bookTitle) +
-            '&quot;. Due date: ' +
-            escapeEmailHtml(dueDate.toLocaleDateString('en-US')) +
-            '.</p>',
+            '&quot; is awaiting admin approval. Your 14-day loan starts when approved.</p>',
         });
         await this.notificationsService.sendToUser(
           userId,
           {
-            type: 'BORROW_CONFIRMED',
-            title: 'Book Borrowed',
-            message: `You borrowed "${bookTitle}". Due date: ${dueDate.toLocaleDateString('en-US')}.`,
+            type: 'BORROW_REQUESTED',
+            title: 'Borrow Request Pending',
+            message: `Your request to borrow "${bookTitle}" is awaiting admin approval.`,
             data: { borrowingId: saved.id, bookId },
           },
           notificationTransaction,
         );
 
+        await this.notificationsService.sendToRole(
+          Role.ADMIN,
+          {
+            type: 'BORROW_REQUESTED',
+            title: 'Borrow Request',
+            message: 'A book borrowing request needs approval.',
+            data: { borrowingId: saved.id, bookId },
+          },
+          notificationTransaction,
+        );
         return result;
       },
     );
@@ -177,6 +200,7 @@ export class BorrowingsService {
 
         const borrowing = await borrowingRepository.findOne({
           where: { id },
+          lock: { mode: 'pessimistic_write', tables: ['Borrowing'] },
           relations: { user: true, bookCopy: { book: true } },
         });
 
@@ -186,15 +210,24 @@ export class BorrowingsService {
           throw new BadRequestException('Borrowing is not in pending status');
         }
 
-        // Update borrowing status
+        if (!borrowing.user)
+          throw new BadRequestException('Borrower is no longer active');
         borrowing.status = BorrowingStatus.BORROWED;
+        borrowing.borrowDate = new Date();
+        borrowing.dueDate = new Date(
+          borrowing.borrowDate.getTime() + 14 * 86400000,
+        );
 
         // Update book copy status
         const copy = borrowing.bookCopy;
-        if (copy) {
-          copy.status = BookCopyStatus.BORROWED;
-          await bookCopyRepository.save(copy);
-        }
+        if (!copy) throw new NotFoundException('Book copy not found');
+        const claim = await bookCopyRepository.update(
+          { id: copy.id, status: BookCopyStatus.RESERVED },
+          { status: BookCopyStatus.BORROWED },
+        );
+        if (!claim.affected)
+          throw new ConflictException('Book copy is no longer reserved');
+        copy.status = BookCopyStatus.BORROWED;
 
         await borrowingRepository.save(borrowing);
 
@@ -240,6 +273,7 @@ export class BorrowingsService {
 
         const borrowing = await borrowingRepository.findOne({
           where: { id },
+          lock: { mode: 'pessimistic_write', tables: ['Borrowing'] },
           relations: { user: true, bookCopy: { book: true } },
         });
 
@@ -254,10 +288,14 @@ export class BorrowingsService {
 
         // Update book copy status back to available
         const copy = borrowing.bookCopy;
-        if (copy) {
-          copy.status = BookCopyStatus.AVAILABLE;
-          await bookCopyRepository.save(copy);
-        }
+        if (!copy) throw new NotFoundException('Book copy not found');
+        const release = await bookCopyRepository.update(
+          { id: copy.id, status: BookCopyStatus.RESERVED },
+          { status: BookCopyStatus.AVAILABLE },
+        );
+        if (!release.affected)
+          throw new ConflictException('Book copy is no longer reserved');
+        copy.status = BookCopyStatus.AVAILABLE;
 
         await borrowingRepository.save(borrowing);
 
@@ -383,7 +421,11 @@ export class BorrowingsService {
         const activeBorrowingsCount = await borrowingRepository.count({
           where: {
             userId,
-            status: BorrowingStatus.BORROWED,
+            status: In([
+              BorrowingStatus.BORROWED,
+              BorrowingStatus.PENDING,
+              BorrowingStatus.OVERDUE,
+            ]),
           },
         });
 
@@ -401,6 +443,12 @@ export class BorrowingsService {
      |--------------------------------------------------------------------------
      */
 
+        const claim = await bookCopyRepository.update(
+          { id: bookCopyId, status: BookCopyStatus.AVAILABLE },
+          { status: BookCopyStatus.BORROWED },
+        );
+        if (!claim.affected)
+          throw new ConflictException('Book copy is no longer available');
         const borrowing = borrowingRepository.create({
           userId,
           bookCopyId,
@@ -528,7 +576,11 @@ export class BorrowingsService {
         const activeBorrowingsCount = await borrowingRepository.count({
           where: {
             userId,
-            status: BorrowingStatus.BORROWED,
+            status: In([
+              BorrowingStatus.BORROWED,
+              BorrowingStatus.PENDING,
+              BorrowingStatus.OVERDUE,
+            ]),
           },
         });
 
@@ -543,6 +595,15 @@ export class BorrowingsService {
             `Borrow limit exceeded. Active: ${activeBorrowingsCount}, Requesting: ${bookCopyIds.length}, Max: ${MAX_BORROW_LIMIT}`,
           );
         }
+
+        const claim = await bookCopyRepository.update(
+          { id: In(bookCopyIds), status: BookCopyStatus.AVAILABLE },
+          { status: BookCopyStatus.BORROWED },
+        );
+        if (claim.affected !== bookCopyIds.length)
+          throw new ConflictException(
+            'One or more copies are no longer available',
+          );
 
         // 5. Create Borrowings
         const newBorrowings = bookCopyIds.map((bookCopyId) => {
@@ -633,14 +694,41 @@ export class BorrowingsService {
     });
   }
 
-  update(id: string, updateBorrowingDto: UpdateBorrowingDto) {
-    this.logger.log('Updating borrowing with id', id);
-    return this.borrowingRepository.update(id, updateBorrowingDto);
+  async update(id: string, updateBorrowingDto: UpdateBorrowingDto) {
+    return this.dataSource.transaction(async (manager) => {
+      const repository = manager.getRepository(Borrowing);
+      const borrowing = await repository.findOne({
+        where: { id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!borrowing) throw new NotFoundException('Borrowing record not found');
+      if (
+        borrowing.status === BorrowingStatus.PENDING ||
+        updateBorrowingDto.status === BorrowingStatus.PENDING
+      ) {
+        throw new BadRequestException(
+          'Use approval or rejection for pending requests',
+        );
+      }
+      return repository.update(id, updateBorrowingDto);
+    });
   }
 
-  remove(id: string) {
-    this.logger.log('Removing borrowing with id', id);
-    return this.borrowingRepository.delete(id);
+  async remove(id: string) {
+    return this.dataSource.transaction(async (manager) => {
+      const repository = manager.getRepository(Borrowing);
+      const borrowing = await repository.findOne({
+        where: { id },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!borrowing) throw new NotFoundException('Borrowing record not found');
+      if (borrowing.status === BorrowingStatus.PENDING) {
+        throw new BadRequestException(
+          'Reject the pending request before deleting it',
+        );
+      }
+      return repository.delete(id);
+    });
   }
 
   findHistory() {
@@ -679,7 +767,7 @@ export class BorrowingsService {
       where: [
         { status: BorrowingStatus.OVERDUE },
         {
-          status: Not(BorrowingStatus.RETURNED),
+          status: BorrowingStatus.BORROWED,
           dueDate: LessThan(new Date()),
         },
       ],
@@ -708,6 +796,14 @@ export class BorrowingsService {
 
       if (!borrowing) {
         throw new NotFoundException(`Borrowing with ID ${id} not found`);
+      }
+
+      if (
+        ![BorrowingStatus.BORROWED, BorrowingStatus.OVERDUE].includes(
+          borrowing.status,
+        )
+      ) {
+        throw new BadRequestException('Only active loans can be returned');
       }
 
       // Update Borrowing Record
@@ -745,8 +841,12 @@ export class BorrowingsService {
       throw new NotFoundException(`Borrowing with ID ${id} not found`);
     }
 
-    if (borrowing.status === BorrowingStatus.RETURNED) {
-      throw new Error('Cannot extend a returned book');
+    if (
+      ![BorrowingStatus.BORROWED, BorrowingStatus.OVERDUE].includes(
+        borrowing.status,
+      )
+    ) {
+      throw new BadRequestException('Only active loans can be extended');
     }
 
     // Extend due date by 7 days

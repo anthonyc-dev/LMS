@@ -70,10 +70,10 @@ export function BorrowBooksPage() {
         <div className="flex items-end justify-between">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
-              On Loan
+              Loans and Requests
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              {activeBorrowings.length} books currently borrowed
+              {activeBorrowings.length} active loans and pending requests
             </p>
           </div>
           <Button
@@ -124,7 +124,10 @@ export function BorrowBooksPage() {
                     <div className="flex items-center gap-1.5">
                       <Clock size={10} className="text-warning-bg0" />
                       <span className="text-warning-text text-[10px] font-semibold">
-                        Due {format(new Date(borrowing.dueDate), "dd/MM/yy")}
+                        {borrowing.status === "pending"
+                          ? "Pending admin approval"
+                          : "Due " +
+                            format(new Date(borrowing.dueDate), "dd/MM/yy")}
                       </span>
                     </div>
                   </div>

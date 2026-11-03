@@ -1,3 +1,4 @@
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FinesController } from './fines.controller';
 import { FinesService } from './fines.service';
@@ -8,8 +9,11 @@ describe('FinesController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [FinesController],
-      providers: [FinesService],
-    }).compile();
+      providers: [{ provide: FinesService, useValue: {} }],
+    })
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<FinesController>(FinesController);
   });

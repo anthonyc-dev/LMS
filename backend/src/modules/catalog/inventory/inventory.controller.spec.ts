@@ -1,3 +1,4 @@
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { Test, TestingModule } from '@nestjs/testing';
 import { InventoryController } from './inventory.controller';
 import { InventoryService } from './inventory.service';
@@ -8,8 +9,11 @@ describe('InventoryController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [InventoryController],
-      providers: [InventoryService],
-    }).compile();
+      providers: [{ provide: InventoryService, useValue: {} }],
+    })
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<InventoryController>(InventoryController);
   });

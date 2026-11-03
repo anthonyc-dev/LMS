@@ -61,6 +61,13 @@ export class Book {
   @Column({ nullable: true })
   edition?: string;
 
+  @Column({ type: 'varchar', nullable: true, select: false })
+  ebookPublicId: string | null;
+
+  @ApiPropertyOptional()
+  @Column({ type: 'varchar', nullable: true })
+  ebookFileName: string | null;
+
   @ApiPropertyOptional()
   @Column({ nullable: true })
   language?: string;

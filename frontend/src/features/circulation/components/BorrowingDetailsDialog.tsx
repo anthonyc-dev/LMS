@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { isAxiosError } from "axios";
+import { toast } from "sonner";
+import { useDecideBorrowing } from "@/features/circulation/api/circulation";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +29,8 @@ export function BorrowingDetailsDialog({
   selectedRecord,
   onClose,
 }: BorrowingDetailsDialogProps) {
+  const decisionMutation = useDecideBorrowing();
+  const [decision, setDecision] = useState<"confirm" | "reject">("confirm");
   if (!selectedRecord) return null;
 
   const bookCondition =
@@ -37,7 +43,10 @@ export function BorrowingDetailsDialog({
         : selectedRecord.bookCopy?.condition || "Good";
 
   return (
-    <Dialog open={!!selectedRecord} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={!!selectedRecord}
+      onOpenChange={(open) => !open && !decisionMutation.isPending && onClose()}
+    >
       <DialogContent className="max-h-[90vh] overflow-x-hidden overflow-y-auto rounded-xl p-6 sm:max-w-[600px]">
         <div tabIndex={0} className="sr-only focus:outline-none" />
         <DialogHeader className="mb-4">
@@ -50,6 +59,73 @@ export function BorrowingDetailsDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
+          <div>
+            <h3 className="font-semibold">
+              {selectedRecord.bookCopy?.book.title}
+            </h3>
+            <p className="text-sm text-slate-500">
+              Copy: {selectedRecord.bookCopy?.barcode}
+            </p>
+          </div>
+          {selectedRecord.status === "pending" && (
+            <form
+              className="space-y-4 rounded-xl border p-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                decisionMutation.mutate(
+                  { id: selectedRecord.id, decision },
+                  {
+                    onSuccess: () => {
+                      toast.success(
+                        decision === "confirm"
+                          ? "Borrowing approved"
+                          : "Borrowing rejected",
+                      );
+                      onClose();
+                    },
+                    onError: (error) =>
+                      toast.error(
+                        isAxiosError(error)
+                          ? error.response?.data?.message ||
+                              "Unable to save decision"
+                          : "Unable to save decision",
+                      ),
+                  },
+                );
+              }}
+            >
+              <h3 className="font-semibold">Borrowing Approval Form</h3>
+              <p className="text-sm text-slate-500">
+                Approval starts a 14-day loan. Rejection releases the reserved
+                copy.
+              </p>
+              <label className="block space-y-1 text-sm">
+                <span>Decision</span>
+                <select
+                  className="h-10 w-full rounded-md border bg-white px-3"
+                  value={decision}
+                  disabled={decisionMutation.isPending}
+                  onChange={(event) =>
+                    setDecision(event.target.value as "confirm" | "reject")
+                  }
+                >
+                  <option value="confirm">Approve borrowing</option>
+                  <option value="reject">Reject request</option>
+                </select>
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  required
+                  disabled={decisionMutation.isPending}
+                />
+                I reviewed the borrower and book details.
+              </label>
+              <Button type="submit" disabled={decisionMutation.isPending}>
+                {decisionMutation.isPending ? "Saving…" : "Confirm decision"}
+              </Button>
+            </form>
+          )}
           {/* User Info */}
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
             <h4 className="mb-3 text-sm font-bold tracking-wider text-slate-500 uppercase">
@@ -130,13 +206,20 @@ export function BorrowingDetailsDialog({
               <div>
                 <p className="text-xs font-medium text-slate-500">Due Date</p>
                 <p className="mt-1 text-sm font-semibold text-slate-800">
-                  {new Date(selectedRecord.dueDate).toLocaleString()}
+                  {selectedRecord.status === "pending"
+                    ? "Assigned on approval"
+                    : selectedRecord.status === "rejected"
+                      ? "—"
+                      : new Date(selectedRecord.dueDate).toLocaleString()}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-500">Book Condition</p>
+                <p className="text-xs font-medium text-slate-500">
+                  Book Condition
+                </p>
                 <p className="mt-1 text-sm font-semibold text-slate-800">
-                  {bookCondition.charAt(0) + bookCondition.slice(1).toLowerCase()}
+                  {bookCondition.charAt(0) +
+                    bookCondition.slice(1).toLowerCase()}
                 </p>
               </div>
             </div>
@@ -201,6 +284,7 @@ export function BorrowingDetailsDialog({
         </div>
         <DialogFooter className="mt-6">
           <Button
+            disabled={decisionMutation.isPending}
             onClick={onClose}
             className="w-full rounded-xl sm:w-auto"
           >
