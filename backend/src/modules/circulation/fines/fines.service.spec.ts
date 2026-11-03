@@ -1,3 +1,6 @@
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { CreateFineDto } from './dto/create-fine.dto';
 import { ConflictException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { FinesService } from './fines.service';
@@ -45,4 +48,19 @@ describe('FinesService', () => {
     await expect(service.markPaid(fine.id)).rejects.toThrow(ConflictException);
     expect(save).not.toHaveBeenCalled();
   });
+});
+
+describe('Fine type validation', () => {
+  it.each(['OVERDUE', 'NO COVER', 'DAMAGED', 'LOST'])(
+    'accepts %s without conflating fine types',
+    async (type) => {
+      const dto = plainToInstance(CreateFineDto, {
+        borrowingId: '00000000-0000-4000-8000-000000000001',
+        type,
+        status: 'UNPAID',
+        amount: 50,
+      });
+      await expect(validate(dto)).resolves.toHaveLength(0);
+    },
+  );
 });

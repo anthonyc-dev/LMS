@@ -1,3 +1,4 @@
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BookCopiesController } from './book-copies.controller';
 import { BookCopiesService } from './book-copies.service';
@@ -8,8 +9,11 @@ describe('BookCopiesController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BookCopiesController],
-      providers: [BookCopiesService],
-    }).compile();
+      providers: [{ provide: BookCopiesService, useValue: {} }],
+    })
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<BookCopiesController>(BookCopiesController);
   });

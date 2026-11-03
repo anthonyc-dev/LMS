@@ -30,7 +30,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -62,10 +66,14 @@ interface HistoryRow {
   status: string;
 }
 
-
 const ROWS_PER_PAGE = 6;
 
 const STATUS_CFG = {
+  "Pending approval": {
+    icon: Clock,
+    cls: "bg-yellow-100 text-yellow-700 border-yellow-200",
+  },
+  Rejected: { icon: X, cls: "bg-slate-100 text-slate-700 border-slate-200" },
   Returned: {
     icon: CheckCircle2,
     cls: "bg-success-bg text-success-text border-success-bg",
@@ -108,7 +116,9 @@ export function BorrowingHistoryPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return borrowingsData.map((b: any) => {
       let statusStr = "Returned";
-      if (b.status === "borrowed" || b.status === "pending") statusStr = "On Loan";
+      if (b.status === "borrowed") statusStr = "On Loan";
+      else if (b.status === "pending") statusStr = "Pending approval";
+      else if (b.status === "rejected") statusStr = "Rejected";
       else if (b.status === "overdue") statusStr = "Overdue";
 
       return {
@@ -121,7 +131,10 @@ export function BorrowingHistoryPage() {
         book: b.bookCopy?.book?.title || "Unknown Book",
         category: b.bookCopy?.book?.category?.name || "Uncategorized",
         borrowDate: format(new Date(b.borrowDate), "MMM dd, yyyy"),
-        dueDate: format(new Date(b.dueDate), "MMM dd, yyyy"),
+        dueDate:
+          b.status === "pending" || b.status === "rejected"
+            ? "—"
+            : format(new Date(b.dueDate), "MMM dd, yyyy"),
         status: statusStr,
       };
     });
@@ -145,7 +158,9 @@ export function BorrowingHistoryPage() {
   );
 
   const totalBorrowed = HISTORY_DATA.length;
-  const activeLoans = HISTORY_DATA.filter((r: HistoryRow) => r.status === "On Loan").length;
+  const activeLoans = HISTORY_DATA.filter(
+    (r: HistoryRow) => r.status === "On Loan",
+  ).length;
   const overdueCount = HISTORY_DATA.filter(
     (r: HistoryRow) => r.status === "Overdue",
   ).length;
@@ -201,7 +216,7 @@ export function BorrowingHistoryPage() {
               <div className="rounded-xl bg-slate-100 p-2.5 text-slate-600 transition-transform group-hover:scale-110">
                 <BookOpen className="size-5" />
               </div>
-              <span className="flex items-center gap-0.5 text-xs font-bold text-success-text">
+              <span className="text-success-text flex items-center gap-0.5 text-xs font-bold">
                 +12.5% <ArrowUpRight className="size-3" />
               </span>
             </div>
@@ -221,7 +236,7 @@ export function BorrowingHistoryPage() {
               <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 transition-transform group-hover:scale-110">
                 <Clock className="size-5" />
               </div>
-              <span className="flex items-center gap-0.5 text-xs font-bold text-success-text">
+              <span className="text-success-text flex items-center gap-0.5 text-xs font-bold">
                 +5.2% <ArrowUpRight className="size-3" />
               </span>
             </div>
@@ -235,33 +250,33 @@ export function BorrowingHistoryPage() {
         </Card>
 
         {/* Overdue */}
-        <Card className="group transition-all duration-300 hover:border-error-bg hover:shadow-md">
+        <Card className="group hover:border-error-bg transition-all duration-300 hover:shadow-md">
           <CardContent className="p-5">
             <div className="mb-3 flex items-start justify-between">
-              <div className="rounded-xl bg-error-bg p-2.5 text-error-text transition-transform group-hover:scale-110">
+              <div className="bg-error-bg text-error-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
                 <AlertCircle className="size-5" />
               </div>
-              <span className="flex items-center gap-0.5 text-xs font-bold text-error-bg0">
+              <span className="text-error-bg0 flex items-center gap-0.5 text-xs font-bold">
                 -2.4% <ArrowDownRight className="size-3" />
               </span>
             </div>
             <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
               Overdue Books
             </p>
-            <h3 className="text-2xl font-black text-error-text">
+            <h3 className="text-error-text text-2xl font-black">
               {overdueCount}
             </h3>
           </CardContent>
         </Card>
 
         {/* Returned */}
-        <Card className="group transition-all duration-300 hover:border-success-bg hover:shadow-md">
+        <Card className="group hover:border-success-bg transition-all duration-300 hover:shadow-md">
           <CardContent className="p-5">
             <div className="mb-3 flex items-start justify-between">
-              <div className="rounded-xl bg-success-bg p-2.5 text-success-text transition-transform group-hover:scale-110">
+              <div className="bg-success-bg text-success-text rounded-xl p-2.5 transition-transform group-hover:scale-110">
                 <CheckCircle2 className="size-5" />
               </div>
-              <span className="flex items-center gap-0.5 text-xs font-bold text-success-text">
+              <span className="text-success-text flex items-center gap-0.5 text-xs font-bold">
                 +15.8% <ArrowUpRight className="size-3" />
               </span>
             </div>
@@ -311,7 +326,14 @@ export function BorrowingHistoryPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                {["All", "On Loan", "Returned", "Overdue"].map((o) => (
+                {[
+                  "All",
+                  "Pending approval",
+                  "On Loan",
+                  "Returned",
+                  "Overdue",
+                  "Rejected",
+                ].map((o) => (
                   <SelectItem key={o} value={o}>
                     {o === "All" ? "All Transactions" : o}
                   </SelectItem>
@@ -376,7 +398,11 @@ export function BorrowingHistoryPage() {
                         <TableCell className="py-4 pl-5">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-9 w-9 shrink-0 rounded-xl shadow-sm transition-transform group-hover:scale-105">
-                              <AvatarImage src={row.avatarUrl || undefined} alt={row.user} className="rounded-xl" />
+                              <AvatarImage
+                                src={row.avatarUrl || undefined}
+                                alt={row.user}
+                                className="rounded-xl"
+                              />
                               <AvatarFallback
                                 className={`${avatarCls} rounded-xl text-xs font-black`}
                               >
@@ -402,7 +428,11 @@ export function BorrowingHistoryPage() {
                             {isMobile && (
                               <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6 shrink-0 rounded-md">
-                                  <AvatarImage src={row.avatarUrl || undefined} alt={row.user} className="rounded-md" />
+                                  <AvatarImage
+                                    src={row.avatarUrl || undefined}
+                                    alt={row.user}
+                                    className="rounded-md"
+                                  />
                                   <AvatarFallback
                                     className={`${avatarCls} rounded-md text-[9px] font-black`}
                                   >

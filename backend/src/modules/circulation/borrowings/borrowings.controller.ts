@@ -151,6 +151,24 @@ export class BorrowingsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
   @Throttle({ default: { limit: 30, ttl: 60000 } })
+  @Patch(':id/confirm')
+  confirmBorrowing(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.borrowingsService.confirmBorrowing(id);
+  }
+
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
+  @Patch(':id/reject')
+  rejectBorrowing(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.borrowingsService.rejectBorrowing(id);
+  }
+
+  @Roles(Role.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard, RolesGuard, ThrottlerGuard)
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
   @Patch(':id/return')
   returnBorrowing(
     @Param('id', new ParseUUIDPipe()) id: string,

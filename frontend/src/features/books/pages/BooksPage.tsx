@@ -1,3 +1,5 @@
+import { CatalogFormatFilter } from "../components/CatalogFormatFilter";
+import { EbookUploadDialog } from "../components/EbookUploadDialog";
 import { TablePageNumbers } from "@/shared/components/DataTable/TablePageNumbers";
 import { useState, useEffect, Fragment } from "react";
 import {
@@ -44,7 +46,11 @@ import {
   useDeleteBook,
   useUpdateBook,
 } from "@/features/books/hooks/useBooks";
-import type { Book, UpdateBookDto } from "@/features/books/types/book";
+import type {
+  Book,
+  UpdateBookDto,
+  CatalogFormat,
+} from "@/features/books/types/book";
 
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { EditBookModal } from "@/features/books/components/EditBookModal";
@@ -54,8 +60,14 @@ import { DeleteBookModal } from "@/features/books/components/DeleteBookModal";
 // Main Page
 // ---------------------------------------------------------------------------
 
-export function BooksPage() {
-  usePageTitle("Books Metadata");
+export function BooksPage({
+  view = "catalog",
+}: {
+  view?: "catalog" | "ebooks";
+}) {
+  const ebooks = view === "ebooks";
+  usePageTitle(ebooks ? "eBook Management" : "Library Catalog");
+  const [format, setFormat] = useState<CatalogFormat>("all");
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -75,10 +87,11 @@ export function BooksPage() {
   }, [search]);
 
   // Queries & Mutations
-  const { data, isLoading } = useBooks({
+  const { data, isLoading, isError, refetch } = useBooks({
     page,
     limit,
     search: debouncedSearch,
+    format: ebooks ? "ebook" : format,
   });
   const updateBookMutation = useUpdateBook();
   const deleteBookMutation = useDeleteBook();
@@ -88,6 +101,7 @@ export function BooksPage() {
   const totalPages = data?.totalPages || 1;
 
   // Modals state
+  const [ebookBook, setEbookBook] = useState<Book | null>(null);
   const [editBook, setEditBook] = useState<Book | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteBook, setDeleteBook] = useState<Book | null>(null);
@@ -139,10 +153,12 @@ export function BooksPage() {
               <div className="rounded-xl bg-blue-50 p-2">
                 <Library className="size-7" />
               </div>
-              Book Catalog Metadata
+              {ebooks ? "eBook Management" : "Library Catalog"}
             </h1>
             <p className="mt-1 ml-1 font-medium text-slate-500">
-              Manage your library's core metadata, ISBNs, and descriptions.
+              {ebooks
+                ? "Manage PDF uploads and digital reading access. Physical copies and loans stay separate."
+                : "Shared titles for physical books and eBooks. Manage copies and PDFs through their own workflows."}
             </p>
           </div>
         )}
@@ -150,15 +166,52 @@ export function BooksPage() {
           <Skeleton className="h-11 w-40 rounded-xl" />
         ) : (
           <Button
-            onClick={() => navigate("/admin/books/add")}
+            onClick={() =>
+              navigate(
+                ebooks ? "/admin/books/add?format=ebook" : "/admin/books/add",
+              )
+            }
             id="add-book-btn"
             className="h-11 gap-2 rounded-xl bg-slate-900 px-6 font-bold text-white shadow-lg shadow-blue-200 transition-all hover:scale-105 hover:bg-slate-800 active:scale-95"
           >
-            <Plus className="size-4" /> Register Title
+            <Plus className="size-4" />{" "}
+            {ebooks ? "Add eBook" : "Register Title"}
           </Button>
         )}
       </div>
 
+      <div className="flex flex-wrap items-center gap-3">
+        {!ebooks && (
+          <CatalogFormatFilter
+            value={format}
+            onChange={(value) => {
+              setFormat(value);
+              setPage(1);
+            }}
+          />
+        )}
+        <Button
+          variant="outline"
+          onClick={() =>
+            navigate(ebooks ? "/admin/books" : "/admin/book-copies")
+          }
+        >
+          {ebooks
+            ? "Attach PDF to an existing catalog title"
+            : "Manage physical copies"}
+        </Button>
+        {!ebooks && (
+          <Button variant="outline" onClick={() => navigate("/admin/ebooks")}>
+            Manage eBooks
+          </Button>
+        )}
+      </div>
+      {isError && (
+        <div role="alert" className="space-y-2 rounded-xl border p-4">
+          <p>Unable to load titles.</p>
+          <Button onClick={() => refetch()}>Try again</Button>
+        </div>
+      )}
       {/* ── KPI Cards ── */}
       {/* <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {isLoading ? (
@@ -231,7 +284,7 @@ export function BooksPage() {
             <TableHeader className="border-b border-slate-100 bg-slate-50">
               <TableRow className="hover:bg-transparent">
                 <TableHead className="w-[350px] py-4 pl-5 font-bold text-slate-500">
-                  Metadata Title
+                  Catalog Title
                 </TableHead>
                 {!isMobile && (
                   <>
@@ -245,7 +298,7 @@ export function BooksPage() {
                       Pages
                     </TableHead>
                     <TableHead className="py-4 font-bold text-slate-500">
-                      Available Copies
+                      {ebooks ? "PDF file" : "Physical copies available"}
                     </TableHead>
                   </>
                 )}
@@ -334,6 +387,18 @@ export function BooksPage() {
                               <p className="truncate text-xs font-medium text-slate-500">
                                 {book.author || "Unknown Author"}
                               </p>
+                              <Badge
+                                variant="outline"
+                                className="mt-1 text-[10px]"
+                              >
+                                {book.ebookFileName
+                                  ? (book.physicalCopies || 0) > 0
+                                    ? "Physical + eBook"
+                                    : "eBook"
+                                  : (book.physicalCopies || 0) > 0
+                                    ? "Physical"
+                                    : "Catalog title"}
+                              </Badge>
                               <p className="mt-0.5 font-mono text-[10px] text-slate-400">
                                 ISBN: {book.isbn}
                               </p>
@@ -368,7 +433,9 @@ export function BooksPage() {
                               {book.pages || "—"}
                             </TableCell>
                             <TableCell className="text-sm font-medium text-slate-700">
-                              {book.availableCopies}
+                              {ebooks
+                                ? book.ebookFileName
+                                : book.availableCopies}
                             </TableCell>
                           </>
                         )}
@@ -381,6 +448,7 @@ export function BooksPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
+                                  aria-label={"Actions for " + book.title}
                                   className={`h-8 w-8 rounded-lg text-slate-500 transition-opacity group-hover:opacity-100 hover:bg-slate-100 ${isMobile ? "opacity-100" : "opacity-0"}`}
                                   onClick={(e) => {
                                     if (isMobile) e.stopPropagation();
@@ -400,16 +468,25 @@ export function BooksPage() {
                               >
                                 <Edit className="size-3.5" /> Edit Details
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator className="my-1 bg-slate-100" />
                               <DropdownMenuItem
-                                onClick={() => {
-                                  setDeleteBook(book);
-                                  setDeleteOpen(true);
-                                }}
-                                className="text-error-text hover:bg-error-bg cursor-pointer gap-2 rounded-lg py-2 font-medium"
+                                onClick={() => setEbookBook(book)}
                               >
-                                <Trash2 className="size-3.5" /> Delete Entry
+                                <BookOpen className="mr-2 size-4" /> eBook PDF
                               </DropdownMenuItem>
+                              {!ebooks && (
+                                <>
+                                  <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setDeleteBook(book);
+                                      setDeleteOpen(true);
+                                    }}
+                                    className="text-error-text hover:bg-error-bg cursor-pointer gap-2 rounded-lg py-2 font-medium"
+                                  >
+                                    <Trash2 className="size-3.5" /> Delete Entry
+                                  </DropdownMenuItem>
+                                </>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
@@ -453,10 +530,14 @@ export function BooksPage() {
                               </div>
                               <div className="flex justify-between border-b border-slate-100 pb-2 last:border-0 last:pb-0">
                                 <span className="font-medium text-slate-500">
-                                  Available Copies
+                                  {ebooks
+                                    ? "PDF file"
+                                    : "Physical copies available"}
                                 </span>
                                 <span className="text-sm font-medium text-slate-700">
-                                  {book.availableCopies}
+                                  {ebooks
+                                    ? book.ebookFileName
+                                    : book.availableCopies}
                                 </span>
                               </div>
                             </div>
@@ -515,6 +596,12 @@ export function BooksPage() {
         </div>
       </div>
 
+      {ebookBook && (
+        <EbookUploadDialog
+          book={ebookBook}
+          onClose={() => setEbookBook(null)}
+        />
+      )}
       <EditBookModal
         book={editBook}
         open={editOpen}

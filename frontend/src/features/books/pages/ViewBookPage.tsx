@@ -1,3 +1,4 @@
+import { EbookReader } from "../components/EbookReader";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useBook } from "@/features/books/hooks/useBooks";
@@ -36,6 +37,7 @@ export function ViewBookPage() {
   const basePath = useRoleBasePath();
   const { data: book, isLoading, isError } = useBook(id || "");
   const selfBorrowMutation = useSelfBorrowBook();
+  const [reading, setReading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   usePageTitle(book ? `View Book: ${book.title}` : "View Book");
@@ -46,8 +48,9 @@ export function ViewBookPage() {
     selfBorrowMutation.mutate(id, {
       onSuccess: () => {
         setDialogOpen(false);
-        toast.success("Book borrowed successfully!", {
-          description: "You can view your borrowed books in My Books.",
+        toast.success("Borrow request submitted", {
+          description:
+            "Awaiting admin approval. Track your request in Borrowing History.",
         });
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -101,17 +104,8 @@ export function ViewBookPage() {
     );
   }
 
+  const hasPhysical = (book.physicalCopies ?? book.bookCopies?.length ?? 0) > 0;
   const isAvailable = (book.availableCopies ?? 0) > 0;
-
-  // Calculate the due date for display (14 days from now)
-  const dueDate = new Date();
-  dueDate.setDate(dueDate.getDate() + 14);
-  const dueDateFormatted = dueDate.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
 
   return (
     <div className="max-w-[1200px]">
@@ -141,12 +135,16 @@ export function ViewBookPage() {
               <div className="flex flex-wrap gap-2">
                 <Badge
                   className={`rounded-full border-none px-3.5 py-1 text-xs font-bold tracking-wide shadow-lg backdrop-blur-md ${
-                    isAvailable
+                    isAvailable || (!hasPhysical && !!book.ebookFileName)
                       ? "bg-success-bg0/90 text-white"
                       : "bg-error-bg0/90 text-white"
                   }`}
                 >
-                  {book?.availabilityLabel}
+                  {hasPhysical
+                    ? book.availabilityLabel
+                    : book.ebookFileName
+                      ? "eBook available"
+                      : "Catalog title"}
                 </Badge>
                 {book.category?.name && (
                   <Badge
@@ -160,53 +158,86 @@ export function ViewBookPage() {
             </div>
           </div>
 
-          <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <AlertDialogTrigger
-              render={
-                <Button
-                  className="mt-4 w-full"
-                  disabled={!isAvailable || selfBorrowMutation.isPending}
-                >
-                  {!isAvailable ? "Unavailable" : "Borrow Book"}
-                </Button>
-              }
+          {book.ebookFileName && (
+            <section
+              className="mt-4 space-y-2 rounded-xl border p-4"
+              aria-label="eBook access"
+            >
+              <h2 className="font-semibold">eBook</h2>
+              <p className="text-sm text-slate-500">
+                Read instantly after login. No physical borrowing or return
+                required.
+              </p>
+              <Button className="w-full" onClick={() => setReading(true)}>
+                Read eBook PDF
+              </Button>
+            </section>
+          )}
+          {reading && (
+            <EbookReader
+              bookId={book.id}
+              title={book.title}
+              onClose={() => setReading(false)}
             />
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-lg font-black">
-                  Confirm Borrow
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  You are about to borrow{" "}
-                  <span className="font-bold text-slate-900">{book.title}</span>
-                  . The due date will be{" "}
-                  <span className="font-bold text-slate-900">
-                    {dueDateFormatted}
-                  </span>
-                  . Please return it on time to avoid fines.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={selfBorrowMutation.isPending}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleBorrow}
-                  disabled={selfBorrowMutation.isPending}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {selfBorrowMutation.isPending ? (
-                    <Loader2 className="mr-1.5 size-4 animate-spin" />
-                  ) : (
-                    <CheckCircle2 className="mr-1.5 size-4" />
-                  )}
-                  {selfBorrowMutation.isPending
-                    ? "Borrowing..."
-                    : "Confirm Borrow"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          )}
+          {hasPhysical && (
+            <section
+              className="mt-4 space-y-2 rounded-xl border p-4"
+              aria-label="Physical borrowing"
+            >
+              <h2 className="font-semibold">Physical book</h2>
+              <p className="text-sm text-slate-500">
+                {book.availabilityLabel}. Admin approval required. Return by the
+                due date to avoid fines.
+              </p>
+              <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <AlertDialogTrigger
+                  render={
+                    <Button
+                      className="mt-4 w-full"
+                      disabled={!isAvailable || selfBorrowMutation.isPending}
+                    >
+                      {!isAvailable ? "Unavailable" : "Borrow physical copy"}
+                    </Button>
+                  }
+                />
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-lg font-black">
+                      Confirm request
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You are requesting to borrow{" "}
+                      <span className="font-bold text-slate-900">
+                        {book.title}
+                      </span>
+                      . Admin approval is required. Your 14-day loan starts when
+                      approved.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={selfBorrowMutation.isPending}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleBorrow}
+                      disabled={selfBorrowMutation.isPending}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {selfBorrowMutation.isPending ? (
+                        <Loader2 className="mr-1.5 size-4 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="mr-1.5 size-4" />
+                      )}
+                      {selfBorrowMutation.isPending
+                        ? "Submitting..."
+                        : "Confirm request"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </section>
+          )}
         </div>
 
         {/* Right Column: Structured details */}
@@ -297,28 +328,32 @@ export function ViewBookPage() {
           </div>
 
           {/* Locations Card */}
-          <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-100/50">
-            <h3 className="flex items-center gap-2 border-b border-slate-100 pb-2 text-base font-black text-slate-900">
-              <MapPin className="size-5 text-slate-600" /> Copies Location
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {book.locations && book.locations.length > 0 ? (
-                book.locations.map((loc, idx) => (
-                  <Badge
-                    key={idx}
-                    variant="secondary"
-                    className="rounded-full border border-slate-100 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-100/60"
-                  >
-                    {loc}
-                  </Badge>
-                ))
-              ) : (
-                <span className="text-sm font-semibold text-slate-400 italic">
-                  No copies available / Location unassigned
-                </span>
-              )}
-            </div>
-          </div>
+          {hasPhysical && (
+            <>
+              <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm shadow-slate-100/50">
+                <h3 className="flex items-center gap-2 border-b border-slate-100 pb-2 text-base font-black text-slate-900">
+                  <MapPin className="size-5 text-slate-600" /> Copies Location
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {book.locations && book.locations.length > 0 ? (
+                    book.locations.map((loc, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="secondary"
+                        className="rounded-full border border-slate-100 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-none hover:bg-slate-100/60"
+                      >
+                        {loc}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm font-semibold text-slate-400 italic">
+                      No copies available / Location unassigned
+                    </span>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

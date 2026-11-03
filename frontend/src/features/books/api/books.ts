@@ -59,6 +59,22 @@ export const booksApi = {
     return response.data;
   },
 
+  uploadEbook: async (id: string, file: File): Promise<Book> => {
+    const data = new FormData();
+    data.append("pdf", file);
+    const response = await api.post("/books/" + id + "/ebook", data, {
+      headers: { "Content-Type": undefined },
+    });
+    return response.data;
+  },
+  removeEbook: async (id: string): Promise<void> => {
+    await api.delete("/books/" + id + "/ebook");
+  },
+  readEbook: async (id: string): Promise<{ url: string }> => {
+    const response = await api.get("/books/" + id + "/ebook");
+    return response.data;
+  },
+
   deleteBook: async (id: string): Promise<void> => {
     await api.delete(`/books/${id}`);
   },

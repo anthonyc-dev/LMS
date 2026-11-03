@@ -301,7 +301,11 @@ function App() {
                 element={<Navigate to="/admin/dashboard" replace />}
               />
               <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="books" element={<AdminBooksPage />} />
+              <Route path="books" element={<AdminBooksPage key="catalog" />} />
+              <Route
+                path="ebooks"
+                element={<AdminBooksPage key="ebooks" view="ebooks" />}
+              />
               <Route path="books/add" element={<AdminAddBookPage />} />
               <Route path="inventory" element={<AdminInventoryPage />} />
               <Route path="categories" element={<AdminCategoryPage />} />

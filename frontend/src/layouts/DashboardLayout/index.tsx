@@ -31,13 +31,13 @@ const createMenuItems = (basePath: string) => [
   },
   {
     icon: LibraryIcon,
-    label: "Books",
+    label: "Library Catalog",
     path: `${basePath}/books`,
     roles: ["student", "faculty"],
     items: [
-      { label: "Browse Books", path: `${basePath}/books/browse` },
-      { label: "Borrow Books", path: `${basePath}/books/borrow` },
-      { label: "Borrowing History", path: `${basePath}/books/history` },
+      { label: "Library Catalog", path: `${basePath}/books/browse` },
+      { label: "Physical Loans", path: `${basePath}/books/borrow` },
+      { label: "Physical Loan History", path: `${basePath}/books/history` },
     ],
   },
   // {
@@ -72,8 +72,14 @@ const createMenuItems = (basePath: string) => [
   },
   {
     icon: Book,
-    label: "Books",
+    label: "Library Catalog",
     path: "/admin/books",
+    roles: ["admin"],
+  },
+  {
+    icon: BookOpen,
+    label: "eBooks",
+    path: "/admin/ebooks",
     roles: ["admin"],
   },
   {
@@ -84,7 +90,7 @@ const createMenuItems = (basePath: string) => [
   },
   {
     icon: Book, // Could use BookCopy but Book is used in the file
-    label: "Book Copies",
+    label: "Physical Books",
     path: "/admin/book-copies",
     roles: ["admin"],
   },
@@ -96,7 +102,7 @@ const createMenuItems = (basePath: string) => [
   // },
   {
     icon: RefreshCw,
-    label: "Circulation",
+    label: "Physical Circulation",
     path: "/admin/circulation",
     roles: ["admin"],
     items: [

@@ -4,10 +4,24 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import {
+  validatePdf,
+  uploadPdfToCloudinary,
+  deletePdfFromCloudinary,
+  pdfReadUrl,
+} from 'src/common/utils/cloudinaryPdf';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
-import { Repository, ILike, FindManyOptions } from 'typeorm';
+import { CatalogFormat } from './dto/list-books-query.dto';
+import {
+  Repository,
+  ILike,
+  FindManyOptions,
+  FindOptionsWhere,
+  Not,
+  IsNull,
+} from 'typeorm';
 import {
   deleteImageFromCloudinary,
   uploadImageToCloudinary,
@@ -67,13 +81,26 @@ export class BooksService {
     }
   }
 
-  async findAll(page = 1, limit = 10, search?: string) {
+  async findAll(
+    page = 1,
+    limit = 10,
+    search?: string,
+    format: CatalogFormat = CatalogFormat.ALL,
+    categoryId?: string,
+  ) {
     this.logger.log(
       `Finding all books (page: ${page}, limit: ${limit}, search: ${search})`,
     );
 
+    const filters: FindOptionsWhere<Book> = {};
+    if (format === CatalogFormat.EBOOK || format === CatalogFormat.BOTH)
+      filters.ebookFileName = Not(IsNull());
+    if (format === CatalogFormat.PHYSICAL || format === CatalogFormat.BOTH)
+      filters.bookCopies = { id: Not(IsNull()) };
+    if (categoryId) filters.categoryId = categoryId;
     const skip = (page - 1) * limit;
     const findOptions: FindManyOptions<Book> = {
+      where: filters,
       skip,
       take: limit,
       order: { createdAt: 'DESC' },
@@ -89,10 +116,11 @@ export class BooksService {
 
     if (search && search.trim() !== '') {
       findOptions.where = [
-        { title: ILike(`%${search}%`) },
-        { author: ILike(`%${search}%`) },
-        { isbn: ILike(`%${search}%`) },
+        { ...filters, title: ILike(`%${search}%`) },
+        { ...filters, author: ILike(`%${search}%`) },
+        { ...filters, isbn: ILike(`%${search}%`) },
         {
+          ...filters,
           category: {
             name: ILike(`%${search}%`),
           },
@@ -127,6 +155,7 @@ export class BooksService {
       ];
       return {
         ...book,
+        physicalCopies: book.bookCopies?.length || 0,
         availableCopies,
         availabilityLabel,
         status:
@@ -187,6 +216,7 @@ export class BooksService {
 
     return {
       ...book,
+      physicalCopies: book.bookCopies?.length || 0,
       availableCopies,
       availabilityLabel,
       status:
@@ -225,12 +255,77 @@ export class BooksService {
     return this.findOne(id);
   }
 
-  async remove(id: string) {
-    this.logger.log('Removing book with id', id);
-    const book = await this.findOne(id);
-    if (!book) {
-      throw new NotFoundException(`Book with ID ${id} not found`);
+  async uploadEbook(id: string, file?: Express.Multer.File) {
+    validatePdf(file);
+    await this.replaceEbook(id, file);
+    return this.findOne(id);
+  }
+
+  async removeEbook(id: string) {
+    await this.replaceEbook(id);
+    return { message: 'eBook removed' };
+  }
+
+  async readEbook(id: string) {
+    const book = await this.bookRepository.findOne({
+      where: { id },
+      select: { id: true, ebookPublicId: true },
+    });
+    if (!book?.ebookPublicId)
+      throw new NotFoundException('eBook PDF not found');
+    return { url: pdfReadUrl(book.ebookPublicId) };
+  }
+
+  private async cleanupEbook(publicId: string) {
+    try {
+      await deletePdfFromCloudinary(publicId);
+    } catch {
+      this.logger.error('Failed to remove Cloudinary eBook asset: ' + publicId);
     }
-    return this.bookRepository.delete(id);
+  }
+
+  private async replaceEbook(id: string, file?: Express.Multer.File) {
+    let uploaded: string | null = null;
+    let previous: string | null = null;
+    try {
+      await this.bookRepository.manager.transaction(async (manager) => {
+        const repository = manager.getRepository(Book);
+        const book = await repository.findOne({
+          where: { id },
+          select: { id: true, ebookPublicId: true },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!book) throw new NotFoundException('Book not found');
+        previous = book.ebookPublicId;
+        if (file) uploaded = await uploadPdfToCloudinary(file);
+        await repository.update(id, {
+          ebookPublicId: uploaded,
+          ebookFileName: file ? file.originalname.slice(0, 255) : null,
+        });
+      });
+    } catch (error) {
+      if (uploaded) await this.cleanupEbook(uploaded);
+      throw error;
+    }
+    if (previous) await this.cleanupEbook(previous);
+  }
+
+  async remove(id: string) {
+    let previous: string | null = null;
+    const result = await this.bookRepository.manager.transaction(
+      async (manager) => {
+        const repository = manager.getRepository(Book);
+        const book = await repository.findOne({
+          where: { id },
+          select: { id: true, ebookPublicId: true },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!book) throw new NotFoundException('Book not found');
+        previous = book.ebookPublicId;
+        return repository.delete(id);
+      },
+    );
+    if (previous) await this.cleanupEbook(previous);
+    return result;
   }
 }

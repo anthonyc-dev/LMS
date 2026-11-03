@@ -69,7 +69,7 @@ const statusCfg: Record<BookCopyStatus, { label: string; cls: string }> = {
 const ROWS_PER_PAGE = 8;
 
 export function BookCopiesPage() {
-  usePageTitle("Book Copies");
+  usePageTitle("Physical Books");
   const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -224,7 +224,7 @@ export function BookCopiesPage() {
           }
         }
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "An error occurred");
     }
@@ -236,7 +236,7 @@ export function BookCopiesPage() {
       await deleteMutation.mutateAsync(deleteTarget.id);
       toast.success("Book copy deleted");
       setDeleteOpen(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(
         error?.response?.data?.message || "Failed to delete book copy",
@@ -262,7 +262,7 @@ export function BookCopiesPage() {
               <div className="rounded-xl bg-slate-100 p-2">
                 <BookCopyIcon className="size-7 text-slate-700" />
               </div>
-              Book Copies
+              Physical Books
             </h1>
             <p className="mt-1 ml-1 font-medium text-slate-500">
               Manage physical copies and barcodes for your library catalog.

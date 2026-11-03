@@ -1,3 +1,5 @@
+import { EbookUploadDialog } from "../components/EbookUploadDialog";
+import type { Book } from "../types/book";
 import { useState, useRef } from "react";
 import { isAxiosError } from "axios";
 import {
@@ -44,7 +46,7 @@ import {
 } from "@/shared/components/ui/command";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { usePageTitle } from "@/shared/hooks/usePageTitle";
 import { useCreateBook } from "@/features/books/hooks/useBooks";
 import { useCategories } from "@/features/books/api/categories";
@@ -149,7 +151,11 @@ function StepDot({
 // ---------------------------------------------------------------------------
 
 export function AddBookPage() {
-  usePageTitle("Add Metadata");
+  const [searchParams] = useSearchParams();
+  const isEbook = searchParams.get("format") === "ebook";
+  const returnPath = isEbook ? "/admin/ebooks" : "/admin/books";
+  usePageTitle(isEbook ? "Register eBook" : "Register Catalog Title");
+  const [ebookBook, setEbookBook] = useState<Book | null>(null);
   const navigate = useNavigate();
   const createBookMutation = useCreateBook();
   const createCopyMutation = useCreateBookCopy();
@@ -233,6 +239,10 @@ export function AddBookPage() {
         onSuccess: (data) => {
           toast.success("Book metadata added to catalog successfully!");
           setCreatedBookId(data.id);
+          if (isEbook) {
+            setEbookBook(data);
+            return;
+          }
           setShowPromptModal(true);
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -266,22 +276,30 @@ export function AddBookPage() {
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[720px] space-y-6 pb-12 duration-700">
+      {ebookBook && (
+        <EbookUploadDialog
+          book={ebookBook}
+          onClose={() => navigate(returnPath)}
+        />
+      )}
       {/* ── Page Header ── */}
       <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
         <Button
           variant="ghost"
           size="icon"
           className="h-10 w-10 shrink-0 rounded-xl hover:bg-slate-100"
-          onClick={() => navigate("/admin/books")}
+          onClick={() => navigate(returnPath)}
         >
           <ArrowLeft className="size-5 text-slate-500" />
         </Button>
         <div className="flex-1">
           <h1 className="text-xl font-black tracking-tight text-slate-900 sm:text-2xl">
-            Register Metadata
+            {isEbook ? "Register eBook Title" : "Register Catalog Title"}
           </h1>
           <p className="mt-0.5 text-sm font-medium text-slate-500">
-            Define a new book entry in the logical catalog.
+            {isEbook
+              ? "Save title details, then upload the eBook PDF. No physical copies required."
+              : "Register shared title details, then add physical copies or an eBook PDF."}
           </p>
         </div>
         {/* Step indicator */}
@@ -742,7 +760,7 @@ export function AddBookPage() {
             <div className="flex gap-3">
               <Button
                 variant="outline"
-                onClick={() => navigate("/admin/books")}
+                onClick={() => navigate(returnPath)}
                 className="h-10 rounded-xl px-6 font-bold text-slate-600"
               >
                 Cancel
@@ -766,7 +784,7 @@ export function AddBookPage() {
         onOpenChange={(open) => {
           if (!open) {
             setShowPromptModal(false);
-            navigate("/admin/books");
+            navigate(returnPath);
           }
         }}
       >
@@ -783,7 +801,7 @@ export function AddBookPage() {
               variant="outline"
               onClick={() => {
                 setShowPromptModal(false);
-                navigate("/admin/books");
+                navigate(returnPath);
               }}
             >
               Later
@@ -812,7 +830,7 @@ export function AddBookPage() {
           }
           onClose={() => {
             setShowCopyModal(false);
-            navigate("/admin/books");
+            navigate(returnPath);
           }}
           onSave={async (copyData) => {
             try {
@@ -862,7 +880,7 @@ export function AddBookPage() {
         bookCopy={createdBookCopy}
         onClose={() => {
           setShowBarcodeModal(false);
-          navigate("/admin/books");
+          navigate(returnPath);
         }}
       />
 
@@ -871,7 +889,7 @@ export function AddBookPage() {
         bookCopies={multipleBarcodesTarget}
         onClose={() => {
           setMultipleBarcodesOpen(false);
-          navigate("/admin/books");
+          navigate(returnPath);
         }}
       />
     </div>

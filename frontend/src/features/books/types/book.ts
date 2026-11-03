@@ -1,3 +1,5 @@
+export type CatalogFormat = "all" | "physical" | "ebook" | "both";
+
 export interface Book {
   id: string;
   title: string;
@@ -20,7 +22,9 @@ export interface Book {
   pages?: number;
   language?: string;
   coverImage?: string;
+  ebookFileName?: string | null;
   edition?: string;
+  physicalCopies?: number;
   availableCopies?: number;
   availabilityLabel?: string;
   status?: string;
@@ -39,6 +43,8 @@ export interface PaginatedBooks {
 }
 
 export interface GetBooksParams {
+  format?: CatalogFormat;
+  categoryId?: string;
   page?: number;
   limit?: number;
   search?: string;

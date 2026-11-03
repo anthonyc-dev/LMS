@@ -53,7 +53,7 @@ export function ReturnBookPage() {
 
   type FineEntry = {
     id: string;
-    type: "OVERDUE" | "DAMAGED" | "LOST";
+    type: "OVERDUE" | "NO COVER" | "DAMAGED" | "LOST";
     amount: string;
     reason: string;
     status: "UNPAID" | "PAID" | "WAIVED";
@@ -98,7 +98,7 @@ export function ReturnBookPage() {
       toast.success("Book returned successfully!");
       setScannedBarcode(""); // Reset view
       setFines([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to process return");
     }
@@ -143,7 +143,7 @@ export function ReturnBookPage() {
             id: "auto-overdue",
             type: "OVERDUE",
             amount: String(penalty),
-            reason: `Overdue by ${days} days`,
+            reason: "Overdue by " + days + " days",
             status: "UNPAID",
           },
         ]);
@@ -357,7 +357,9 @@ export function ReturnBookPage() {
                   </span>
                   <Select
                     value={returnCondition}
-                    onValueChange={(val) => { if (val) setReturnCondition(val); }}
+                    onValueChange={(val) => {
+                      if (val) setReturnCondition(val);
+                    }}
                   >
                     <SelectTrigger className="h-8 w-32 bg-white text-xs font-bold text-slate-700">
                       <SelectValue />
@@ -388,7 +390,11 @@ export function ReturnBookPage() {
                     Calculated Penalty
                   </span>
                   <span
-                    className={`text-xl font-black ${penalty > 0 ? "text-error-text" : "text-success-text"}`}
+                    className={
+                      penalty > 0
+                        ? "text-error-text text-xl font-black"
+                        : "text-success-text text-xl font-black"
+                    }
                   >
                     ₱{penalty.toFixed(2)}
                   </span>
@@ -446,7 +452,7 @@ export function ReturnBookPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="OVERDUE">Overdue</SelectItem>
+                              <SelectItem value="NO COVER">No Cover</SelectItem>
                               <SelectItem value="DAMAGED">Damaged</SelectItem>
                               <SelectItem value="LOST">Lost</SelectItem>
                             </SelectContent>
