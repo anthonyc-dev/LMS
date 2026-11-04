@@ -211,8 +211,8 @@ export function ViewBookPage() {
                       <span className="font-bold text-slate-900">
                         {book.title}
                       </span>
-                      . Admin approval is required. Your 14-day loan starts when
-                      approved.
+                      . Admin approval is required. Student loans last 4 days;
+                      faculty loans last 7 days. Your loan starts when approved.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

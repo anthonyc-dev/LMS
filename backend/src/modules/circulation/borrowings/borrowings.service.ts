@@ -39,6 +39,10 @@ export class BorrowingsService {
     private readonly mailService: MailService,
   ) {}
 
+  private loanDays(role: Role): number {
+    return role === Role.STUDENT ? 4 : role === Role.FACULTY ? 7 : 14;
+  }
+
   private async withNotificationsTransaction<T>(
     action: (
       manager: EntityManager,
@@ -127,14 +131,15 @@ export class BorrowingsService {
           );
         }
 
-        // 5. Create borrowing (14-day default)
-        const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 14);
+        // 5. Create borrowing; approval resets the loan period.
+        const borrowDate = new Date();
+        const loanDays = this.loanDays(borrower.role);
+        const dueDate = new Date(borrowDate.getTime() + loanDays * 86400000);
 
         const borrowing = borrowingRepository.create({
           userId,
           bookCopyId: availableCopy.id,
-          borrowDate: new Date(),
+          borrowDate,
           dueDate,
           status: BorrowingStatus.PENDING,
         });
@@ -164,7 +169,7 @@ export class BorrowingsService {
           html:
             '<p>Your request to borrow &quot;' +
             escapeEmailHtml(bookTitle) +
-            '&quot; is awaiting admin approval. Your 14-day loan starts when approved.</p>',
+            `&quot; is awaiting admin approval. Your ${loanDays}-day loan starts when approved.</p>`,
         });
         await this.notificationsService.sendToUser(
           userId,
@@ -198,9 +203,15 @@ export class BorrowingsService {
         const borrowingRepository = manager.getRepository(Borrowing);
         const bookCopyRepository = manager.getRepository(BookCopy);
 
+        // Lock before loading joins: TypeORM's findOne pagination loses the lock alias.
+        const lockedBorrowing = await borrowingRepository.findOne({
+          where: { id },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!lockedBorrowing)
+          throw new NotFoundException('Borrowing record not found');
         const borrowing = await borrowingRepository.findOne({
           where: { id },
-          lock: { mode: 'pessimistic_write', tables: ['Borrowing'] },
           relations: { user: true, bookCopy: { book: true } },
         });
 
@@ -215,7 +226,8 @@ export class BorrowingsService {
         borrowing.status = BorrowingStatus.BORROWED;
         borrowing.borrowDate = new Date();
         borrowing.dueDate = new Date(
-          borrowing.borrowDate.getTime() + 14 * 86400000,
+          borrowing.borrowDate.getTime() +
+            this.loanDays(borrowing.user.role) * 86400000,
         );
 
         // Update book copy status
@@ -271,9 +283,15 @@ export class BorrowingsService {
         const borrowingRepository = manager.getRepository(Borrowing);
         const bookCopyRepository = manager.getRepository(BookCopy);
 
+        // Lock before loading joins: TypeORM's findOne pagination loses the lock alias.
+        const lockedBorrowing = await borrowingRepository.findOne({
+          where: { id },
+          lock: { mode: 'pessimistic_write' },
+        });
+        if (!lockedBorrowing)
+          throw new NotFoundException('Borrowing record not found');
         const borrowing = await borrowingRepository.findOne({
           where: { id },
-          lock: { mode: 'pessimistic_write', tables: ['Borrowing'] },
           relations: { user: true, bookCopy: { book: true } },
         });
 
@@ -449,11 +467,18 @@ export class BorrowingsService {
         );
         if (!claim.affected)
           throw new ConflictException('Book copy is no longer available');
+        const borrowDate = new Date();
         const borrowing = borrowingRepository.create({
           userId,
           bookCopyId,
-          borrowDate: new Date(),
-          dueDate: new Date(dueDate),
+          borrowDate,
+          dueDate:
+            borrower.role === Role.ADMIN
+              ? new Date(dueDate)
+              : new Date(
+                  borrowDate.getTime() +
+                    this.loanDays(borrower.role) * 86400000,
+                ),
           status: BorrowingStatus.BORROWED,
         });
 
@@ -606,12 +631,19 @@ export class BorrowingsService {
           );
 
         // 5. Create Borrowings
+        const borrowDate = new Date();
+        const loanDueDate =
+          borrower.role === Role.ADMIN
+            ? new Date(dueDate)
+            : new Date(
+                borrowDate.getTime() + this.loanDays(borrower.role) * 86400000,
+              );
         const newBorrowings = bookCopyIds.map((bookCopyId) => {
           return borrowingRepository.create({
             userId,
             bookCopyId,
-            borrowDate: new Date(),
-            dueDate: new Date(dueDate),
+            borrowDate,
+            dueDate: loanDueDate,
             status: BorrowingStatus.BORROWED,
           });
         });
@@ -637,7 +669,7 @@ export class BorrowingsService {
             '<p>You borrowed: ' +
             escapeEmailHtml(bookTitles) +
             '. Due date: ' +
-            escapeEmailHtml(new Date(dueDate).toISOString().slice(0, 10)) +
+            escapeEmailHtml(loanDueDate.toISOString().slice(0, 10)) +
             '.</p>',
         });
         await this.notificationsService.sendToUser(

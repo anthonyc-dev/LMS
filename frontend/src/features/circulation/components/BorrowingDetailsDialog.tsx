@@ -96,8 +96,8 @@ export function BorrowingDetailsDialog({
             >
               <h3 className="font-semibold">Borrowing Approval Form</h3>
               <p className="text-sm text-slate-500">
-                Approval starts a 14-day loan. Rejection releases the reserved
-                copy.
+                Approval starts a 4-day student loan or 7-day faculty loan.
+                Rejection releases the reserved copy.
               </p>
               <label className="block space-y-1 text-sm">
                 <span>Decision</span>
