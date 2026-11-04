@@ -35,6 +35,7 @@ describe('BorrowingsService', () => {
   };
 
   beforeEach(() => {
+    borrower.role = Role.STUDENT;
     const copy = {
       id: 'copy-id',
       bookId: 'book-id',
@@ -198,12 +199,16 @@ describe('BorrowingsService', () => {
     expect(mail.queue).not.toHaveBeenCalled();
   });
 
-  it('starts a fresh 14-day loan on approval', async () => {
+  it.each([
+    [Role.STUDENT, 4],
+    [Role.FACULTY, 7],
+  ])('starts a fresh %s loan for %i days on approval', async (role, days) => {
+    borrower.role = role;
     const before = Date.now();
     const result = await service.confirmBorrowing('loan-id');
     expect(result.borrowDate.getTime()).toBeGreaterThanOrEqual(before);
     expect(result.dueDate.getTime() - result.borrowDate.getTime()).toBe(
-      14 * 86400000,
+      days * 86400000,
     );
     expect(mail.queue).toHaveBeenCalledWith(
       manager,
@@ -215,6 +220,83 @@ describe('BorrowingsService', () => {
       }),
     );
   });
+
+  it.each([
+    [Role.STUDENT, 4],
+    [Role.FACULTY, 7],
+  ])(
+    'uses %s policy for requests and checkout (%i days)',
+    async (role, days) => {
+      borrower.role = role;
+      await service.selfBorrow('book-id', borrower.id);
+      const requested = (loans.create.mock.calls as [Borrowing][])[0][0];
+      expect(requested.dueDate.getTime() - requested.borrowDate.getTime()).toBe(
+        days * 86400000,
+      );
+      expect(mail.queue).toHaveBeenCalledWith(
+        manager,
+        expect.objectContaining({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          html: expect.stringContaining(`${days}-day loan`),
+        }),
+      );
+
+      copies.findOne.mockResolvedValue({
+        id: 'copy-id',
+        status: BookCopyStatus.AVAILABLE,
+        book: { title: 'Book' },
+      });
+      loans.findOne.mockResolvedValueOnce(null);
+      await service.create(
+        {
+          userId: borrower.id,
+          bookCopyId: 'copy-id',
+          borrowDate: new Date(),
+          dueDate: new Date('2099-01-01'),
+          status: BorrowingStatus.BORROWED,
+        },
+        'admin-id',
+      );
+      const checkout = (loans.create.mock.calls as [Borrowing][])[1][0];
+      expect(checkout.dueDate.getTime() - checkout.borrowDate.getTime()).toBe(
+        days * 86400000,
+      );
+
+      copies.find = jest.fn().mockResolvedValue([
+        {
+          id: 'copy-id',
+          status: BookCopyStatus.AVAILABLE,
+          book: { title: 'Book' },
+        },
+      ]);
+      loans.save.mockImplementation((value: Borrowing[]) =>
+        Promise.resolve(value),
+      );
+      await service.createBulk(
+        {
+          userId: borrower.id,
+          bookCopyIds: ['copy-id'],
+          borrowDate: new Date(),
+          dueDate: new Date('2099-01-01'),
+          status: BorrowingStatus.BORROWED,
+        },
+        'admin-id',
+      );
+      const bulk = (loans.create.mock.calls as [Borrowing][])[2][0];
+      expect(bulk.dueDate.getTime() - bulk.borrowDate.getTime()).toBe(
+        days * 86400000,
+      );
+      expect(mail.queue).toHaveBeenLastCalledWith(
+        manager,
+        expect.objectContaining({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          html: expect.stringContaining(
+            bulk.dueDate.toISOString().slice(0, 10),
+          ),
+        }),
+      );
+    },
+  );
 
   it('queues rejection and releases copy', async () => {
     await service.rejectBorrowing('loan-id');

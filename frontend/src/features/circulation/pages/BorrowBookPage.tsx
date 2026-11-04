@@ -155,7 +155,7 @@ export function BorrowBookPage() {
       setScannedBooks((prev) => [...prev, copy]);
 
       toast.success("Book added to queue");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to find book copy.");
     } finally {
@@ -187,8 +187,13 @@ export function BorrowBookPage() {
 
     const borrowDate = new Date();
     const dueDate = new Date();
-    // Default 14 days borrowing period
-    dueDate.setDate(dueDate.getDate() + 14);
+    const loanDays =
+      selectedUser.Role === "student"
+        ? 4
+        : selectedUser.Role === "faculty"
+          ? 7
+          : 14;
+    dueDate.setTime(borrowDate.getTime() + loanDays * 86400000);
 
     borrowBulkMutation.mutate(
       {
